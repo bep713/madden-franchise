@@ -10,7 +10,7 @@
     "madden",
     "franchise"
   ],
-  "author": "bep713",
+  "author": "matthewpanetta",
   "license": "MIT",
   "dependencies": {
     "xml-stream": "^0.4.5"

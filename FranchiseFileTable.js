@@ -1,5 +1,5 @@
 const EventEmitter = require('events').EventEmitter;
-const utilService = require('./services/utilService');
+const utilService = require('../services/utilService');
 const FranchiseFileRecord = require('./FranchiseFileRecord');
 
 class FranchiseFileTable extends EventEmitter {
@@ -176,6 +176,11 @@ function readTableHeader(data, isArray, gameYear) {
     const data2Id = readTableName(data.slice(headerOffset+32, headerOffset+36));
     const table1Length2 = utilService.byteArrayToLong(data.slice(headerOffset+36, headerOffset+40), true);
     const tableTotalLength = utilService.byteArrayToLong(data.slice(headerOffset+40, headerOffset+44), true);
+    const data2RecordWords = utilService.byteArrayToLong(data.slice(headerOffset+44, headerOffset+48), true);
+    const data2RecordCapacity = utilService.byteArrayToLong(data.slice(headerOffset+48, headerOffset+52), true);
+    const data2IndexEntries = utilService.byteArrayToLong(data.slice(headerOffset+52, headerOffset+56), true);
+    const unknown4 = utilService.byteArrayToLong(data.slice(headerOffset+56, headerOffset+60), true);
+    const data2RecordCount = utilService.byteArrayToLong(data.slice(headerOffset+60, headerOffset+64), true);
 
     let offsetStart = 0xE4 + tableStoreLength;
     const hasSecondTable = tableTotalLength > table1Length;
@@ -222,7 +227,11 @@ function readTableHeader(data, isArray, gameYear) {
       'tableTotalLength': tableTotalLength,
       'hasSecondTable': hasSecondTable,
       'table1StartIndex': tableStoreLength === 0 ? headerSize : headerSize - 4 + (data1RecordCount * 4),
-      'table2StartIndex': tableStoreLength === 0 ? headerSize + (data1RecordCount * records1Size) : (headerSize -4 + (data1RecordCount * 4)) + (data1RecordCount * records1Size)
+      'table2StartIndex': tableStoreLength === 0 ? headerSize + (data1RecordCount * records1Size) : (headerSize -4 + (data1RecordCount * 4)) + (data1RecordCount * records1Size),
+      'data2recordWords': data2RecordWords,
+      'data2RecordCapacity': data2RecordCapacity,
+      'data2IndexEntries': data2IndexEntries,
+      'data2RecordCount': data2RecordCount
     };
   };
 
@@ -263,6 +272,11 @@ function readTableHeader(data, isArray, gameYear) {
     const data2Id = readTableName(data.slice(headerOffset+32, headerOffset+36));
     const table1Length2 = utilService.byteArrayToLong(data.slice(headerOffset+36, headerOffset+40), true);
     const tableTotalLength = utilService.byteArrayToLong(data.slice(headerOffset+40, headerOffset+44), true);
+    const data2RecordWords = utilService.byteArrayToLong(data.slice(headerOffset+44, headerOffset+48), true);
+    const data2RecordCapacity = utilService.byteArrayToLong(data.slice(headerOffset+48, headerOffset+52), true);
+    const data2IndexEntries = utilService.byteArrayToLong(data.slice(headerOffset+52, headerOffset+56), true);
+    const unknown4 = utilService.byteArrayToLong(data.slice(headerOffset+56, headerOffset+60), true);
+    const data2RecordCount = utilService.byteArrayToLong(data.slice(headerOffset+60, headerOffset+64), true);
 
     let offsetStart = 0xE8 + tableStoreLength;
     const hasSecondTable = tableTotalLength > table1Length;
@@ -308,8 +322,12 @@ function readTableHeader(data, isArray, gameYear) {
       'table1Length2': table1Length2,
       'tableTotalLength': tableTotalLength,
       'hasSecondTable': hasSecondTable,
-      'table1StartIndex': tableStoreLength === 0 ? headerSize : headerSize - 4 + (data1RecordCount * 4),
-      'table2StartIndex': tableStoreLength === 0 ? headerSize + (data1RecordCount * records1Size) : (headerSize -4 + (data1RecordCount * 4)) + (data1RecordCount * records1Size)
+      'table1StartIndex': tableStoreLength === 0 ? headerSize : headerSize + (data1RecordCount * 4),
+      'table2StartIndex': tableStoreLength === 0 ? headerSize + (data1RecordCount * records1Size) : (headerSize -4 + (data1RecordCount * 4)) + (data1RecordCount * records1Size),
+      'data2recordWords': data2RecordWords,
+      'data2RecordCapacity': data2RecordCapacity,
+      'data2IndexEntries': data2IndexEntries,
+      'data2RecordCount': data2RecordCount
     };
   };
 };
@@ -461,23 +479,3 @@ function isLoadingNewOffsets(currentlyLoaded, attribsToLoad, offsetTable) {
     return currentlyLoaded.length !== offsetTable.length;
   }
 };
-
-// function getHeaderOffsetByGameYear(year) {
-//   switch(year) {
-//     case 20:
-//       return 0xE8;
-//     case 19:
-//     default:
-//       return 0xE4;
-//   };
-// };
-
-// function getRecordSizeOffsetLength(year) {
-//   switch(year) {
-//     case 20:
-//       return 10;
-//     case 19:
-//     default:
-//       return 9;
-//   }
-// };
