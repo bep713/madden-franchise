@@ -1,5 +1,5 @@
 const EventEmitter = require('events').EventEmitter;
-const utilService = require('../services/utilService');
+const utilService = require('./services/utilService');
 const FranchiseFileRecord = require('./FranchiseFileRecord');
 
 class FranchiseFileTable extends EventEmitter {
