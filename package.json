@@ -1,0 +1,18 @@
+{
+  "name": "madden-franchise",
+  "version": "1.0.0",
+  "description": "Tools to read a madden franchise file and get data from it",
+  "main": "FranchiseFile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "madden",
+    "franchise"
+  ],
+  "author": "bep713",
+  "license": "MIT",
+  "dependencies": {
+    "xml-stream": "^0.4.5"
+  }
+}
