@@ -13,6 +13,7 @@ class FranchiseFileTable extends EventEmitter {
     this._gameYear = gameYear;
     this.header = readTableHeader(this.data, this.isArray, gameYear);
     this.loadedOffsets = [];
+    this.isChanged = false;
   };
 
   set schema (schema) {

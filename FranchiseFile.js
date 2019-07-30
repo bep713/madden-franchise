@@ -11,7 +11,7 @@ const COMPRESSED_DATA_OFFSET = 0x52;
 class FranchiseFile extends EventEmitter {
   constructor(filePath, settings) {
     super();
-    this.settings = new FranchiseFileSettings(settings);
+    this._settings = new FranchiseFileSettings(settings);
     this.isLoaded = false;
 
     if (Array.isArray(filePath)) {
@@ -106,15 +106,16 @@ class FranchiseFile extends EventEmitter {
         this.tables.push(newFranchiseTable);
 
         newFranchiseTable.on('change', function () {
-          const header = that.unpackedFileContents.slice(0, this.offset);
-          const trailer = that.unpackedFileContents.slice(this.offset + this.data.length);
-
-          that.unpackedFileContents = Buffer.concat([header, this.data, trailer]);
-
           if (that.settings.saveOnChange) {
+            const header = that.unpackedFileContents.slice(0, this.offset);
+            const trailer = that.unpackedFileContents.slice(this.offset + this.data.length);
+
+            that.unpackedFileContents = Buffer.concat([header, this.data, trailer]);
+
             that.packFile();
           }
 
+          this.isChanged = true;
           that.emit('change', newFranchiseTable);
         });
       }
@@ -142,19 +143,37 @@ class FranchiseFile extends EventEmitter {
   };
 
   packFile(outputFilePath) {
+    const that = this;
     this.emit('saving');
-    let destination = outputFilePath ? outputFilePath : this.filePath;
 
-    if (this.openedFranchiseFile) {
-      const that = this;
-      _packFile(this.packedFileContents, this.unpackedFileContents).then((data) => { 
-        _save(destination, data);
-        that.emit('saved');
-      });
-    }
-    else {
-      // ask where to save file
-    }
+    return new Promise((resolve, reject) => {
+      if (!this.settings.saveOnChange) {
+        const changedTables = this.tables.filter((table) => { return table.isChanged; });
+  
+        changedTables.forEach((table) => {
+          const header = that.unpackedFileContents.slice(0, table.offset);
+          const trailer = that.unpackedFileContents.slice(table.offset + table.data.length);
+          that.unpackedFileContents = Buffer.concat([header, table.data, trailer]);
+
+          table.isChanged = false;
+        });
+      }
+  
+      let destination = outputFilePath ? outputFilePath : this.filePath;
+  
+      if (this.openedFranchiseFile) {
+        _packFile(this.packedFileContents, this.unpackedFileContents).then((data) => { 
+          _save(destination, data, () => {
+            resolve('saved');
+            that.emit('saved');
+          });
+        });
+      }
+      else {
+        reject('no file path')
+        // ask where to save file
+      }
+    });
   };
 
   get rawContents () {
@@ -171,6 +190,14 @@ class FranchiseFile extends EventEmitter {
 
   get schema () {
     return this.schemaList;
+  };
+
+  get settings () {
+    return this._settings;
+  };
+
+  set settings (settings) {
+    this._settings = new FranchiseFileSettings(settings);
   };
 
   getTableByName (name) {
@@ -225,10 +252,8 @@ function _packFile (originalData, data) {
   });
 };
 
-function _save (destination, packedContents) {
-  fs.writeFile(destination, packedContents, (err) => {
-    if (err) throw err;
-  });
+function _save (destination, packedContents, callback) {
+  fs.writeFile(destination, packedContents, callback);
 };
 
 function getMaddenYear(compressedData) {

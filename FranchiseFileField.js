@@ -39,7 +39,7 @@ class FranchiseFileField extends EventEmitter {
     if (this.offset.type === 'string') {
       this.secondTableField.value = value.toString();
     } else {
-      this._value = value.toString();
+      this._value = setFormattedValue(value, this._offset);
       this._unformattedValue = parseFormattedValue(value, this._offset);
       this.emit('change');
     }
@@ -57,6 +57,24 @@ class FranchiseFileField extends EventEmitter {
 };
 
 module.exports = FranchiseFileField;
+
+function setFormattedValue(value, offset) {
+  if (offset.enum) {
+    return value.toString();
+  }
+
+  switch (offset.type) {
+    case 's_int':
+    case 'int':
+      return parseInt(value);
+    case 'bool':
+      return myValue == 1 || (myValue.toString().toLowerCase() == 'true');
+    case 'float':
+      return parseFloat(value);
+    default:
+      return value.toString();
+  }
+};
 
 function parseFieldValue(unformatted, offset) {
   if (offset.enum) {
