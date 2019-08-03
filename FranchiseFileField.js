@@ -68,7 +68,7 @@ function setFormattedValue(value, offset) {
     case 'int':
       return parseInt(value);
     case 'bool':
-      return myValue == 1 || (myValue.toString().toLowerCase() == 'true');
+      return value == 1 || (value.toString().toLowerCase() == 'true');
     case 'float':
       return parseFloat(value);
     default:
