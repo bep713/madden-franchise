@@ -12,6 +12,7 @@ class FranchiseFileField extends EventEmitter {
 
     if (offset.valueInSecondTable) {
       this.secondTableField = new FranchiseFileTable2Field(value, offset.maxLength);
+
       this.secondTableField.on('change', function () {
         this._value = this.secondTableField.value;
         this.emit('table2-change');
@@ -50,9 +51,13 @@ class FranchiseFileField extends EventEmitter {
   };
 
   set unformattedValue (unformattedValue) {
-    this._unformattedValue = unformattedValue;
-    this._value = parseFieldValue(unformattedValue, this._offset);
-    this.emit('change');
+    if (!utilService.isString(unformattedValue)) { throw new Error(`Argument must be of type string. You passed in a ${typeof unformattedValue}.`); }
+    else if (!utilService.stringOnlyContainsBinaryDigits(unformattedValue)) { throw new Error(`Argument must only contain binary digits 1 and 0. If you would like to set the value, please set the 'value' attribute instead.`)}
+    else {
+      this._unformattedValue = unformattedValue;
+      this._value = parseFieldValue(unformattedValue, this._offset);
+      this.emit('change');
+    }
   };
 };
 
@@ -60,7 +65,19 @@ module.exports = FranchiseFileField;
 
 function setFormattedValue(value, offset) {
   if (offset.enum) {
-    return value.toString();
+    const theEnum = offset.enum.getMemberByName(value);
+    if (!theEnum) {
+      const theEnumByValue = offset.enum.getMemberByValue(value);
+
+      if (!theEnumByValue) {
+        return offset.enum.members[0].name;
+      }
+      else {
+        return theEnumByValue.name;
+      }
+    } else {
+      return theEnum.name;
+    }
   }
 
   switch (offset.type) {
@@ -108,17 +125,20 @@ function parseFormattedValue(formatted, offset) {
 
     if (enumName) {
       return enumName.unformattedValue;
-    } else {
+    } 
+    else {
       const formattedEnum = offset.enum.getMemberByValue(formatted)
 
       if (formattedEnum) {
         return formattedEnum.unformattedValue;
-      } else {
+      } 
+      else {
         const unformattedEnum = offset.enum.getMemberByUnformattedValue(formatted);
 
         if (unformattedEnum) {
           return unformattedEnum.unformattedValue;
-        } else {
+        } 
+        else {
           return offset.enum.members[0].unformattedValue;
         }
       }
@@ -132,7 +152,7 @@ function parseFormattedValue(formatted, offset) {
       case 'int':
         return utilService.dec2bin(formatted, offset.length);
       case 'bool':
-        return (formatted == 'true') ? '1' : '0';
+        return (formatted == 1 || (formatted.toString().toLowerCase() == 'true')) ? '1' : '0';
       case 'float':
         return utilService.float2Bin(formatted);
       default:

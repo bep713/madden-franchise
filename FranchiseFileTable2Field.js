@@ -9,6 +9,7 @@ class FranchiseFileTable2Field extends EventEmitter {
     this.maxLength = maxLength;
     this._unformattedValue = null;
     this._value = '';
+    this.isChanged = false;
   };
 
   get unformattedValue () {

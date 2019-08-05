@@ -110,12 +110,14 @@ class FranchiseFile extends EventEmitter {
             const header = that.unpackedFileContents.slice(0, this.offset);
             const trailer = that.unpackedFileContents.slice(this.offset + this.data.length);
 
-            that.unpackedFileContents = Buffer.concat([header, this.data, trailer]);
+            that.unpackedFileContents = Buffer.concat([header, this.hexData, trailer]);
+            this.isChanged = false;
 
             that.packFile();
+          } else {
+            this.isChanged = true;
           }
-
-          this.isChanged = true;
+          
           that.emit('change', newFranchiseTable);
         });
       }
@@ -150,13 +152,14 @@ class FranchiseFile extends EventEmitter {
       if (!this.settings.saveOnChange) {
         const changedTables = this.tables.filter((table) => { return table.isChanged; });
   
-        changedTables.forEach((table) => {
+        for (let i = 0; i < changedTables.length; i++) {
+          let table = changedTables[i];
           const header = that.unpackedFileContents.slice(0, table.offset);
           const trailer = that.unpackedFileContents.slice(table.offset + table.data.length);
-          that.unpackedFileContents = Buffer.concat([header, table.data, trailer]);
+          that.unpackedFileContents = Buffer.concat([header, table.hexData, trailer]);
 
           table.isChanged = false;
-        });
+        }
       }
   
       let destination = outputFilePath ? outputFilePath : this.filePath;

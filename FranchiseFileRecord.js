@@ -3,11 +3,13 @@ const utilService = require('./services/utilService');
 const FranchiseFileField = require('./FranchiseFileField');
 
 class FranchiseFileRecord extends EventEmitter {
-  constructor(data, offsetTable) {
+  constructor(data, index, offsetTable) {
     super();
     this._data = data;
     this._offsetTable = offsetTable;
+    this.index = index;
     this._fields = parseRecordFields(data, offsetTable);
+    this.isChanged = false;
 
     const that = this;
     this._fields.forEach((field) => {

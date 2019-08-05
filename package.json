@@ -1,6 +1,6 @@
 {
   "name": "madden-franchise",
-  "version": "1.0.6",
+  "version": "1.0.8",
   "description": "Tools to read a madden franchise file and get data from it",
   "main": "FranchiseFile.js",
   "scripts": {
@@ -18,5 +18,12 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/bep713/madden-franchise.git"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-eventemitter": "^1.1.1",
+    "mocha": "^6.2.0",
+    "proxyquire": "^2.1.1",
+    "sinon": "^7.4.0"
   }
 }

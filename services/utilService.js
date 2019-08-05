@@ -18,10 +18,15 @@ utilService.dec2bin = function (dec, len) {
 };
 
 utilService.bin2dec = function (binary) {
+  if (!utilService.isString(binary)) { throw new Error(`Argument invalid - must be of type string. You passed in a ${typeof binary}.`)}
+  else if (!utilService.stringOnlyContainsBinaryDigits(binary)) { throw new Error(`Argument invalid - string must only contain binary digits.`)}
   return parseInt(binary, 2);
 };
 
 utilService.bin2Float = function (binary) {
+  if (!utilService.isString(binary)) { throw new Error(`Argument invalid - must be of type string. You passed in a ${typeof binary}.`)}
+  else if (!utilService.stringOnlyContainsBinaryDigits(binary)) { throw new Error(`Argument invalid - string must only contain binary digits.`)}
+  
   const buffer = Buffer.from(utilService.bin2hex(binary), 'hex');
 
   if (buffer.length >= 4) {
@@ -125,6 +130,7 @@ utilService.getBitArray = function (data) {
 };
 
 utilService.replaceAt = function (oldValue, index, value) {
+  if (index < 0) { throw new Error('Index must be a positive number.'); }
   return oldValue.substr(0, index) + value + oldValue.substr(index + value.length);
 };
 
@@ -172,6 +178,14 @@ utilService.removeChildNodes = function (node) {
   while (node.firstChild) {
       node.removeChild(node.firstChild);
   }
+};
+
+utilService.isString = function (str) {
+  return (typeof str === 'string' || str instanceof String);
+};
+
+utilService.stringOnlyContainsBinaryDigits = function (str) {
+  return /[a-zA-Z2-9]/.test(str) === false;
 };
 
 module.exports = utilService;

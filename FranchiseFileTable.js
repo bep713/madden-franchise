@@ -1,3 +1,4 @@
+const assert = require('assert');
 const EventEmitter = require('events').EventEmitter;
 const utilService = require('./services/utilService');
 const FranchiseFileRecord = require('./FranchiseFileRecord');
@@ -14,6 +15,92 @@ class FranchiseFileTable extends EventEmitter {
     this.header = readTableHeader(this.data, this.isArray, gameYear);
     this.loadedOffsets = [];
     this.isChanged = false;
+    this.records = [];
+    this.table2Records = [];
+  };
+
+  get hexData () {
+    const changedRecords = this.records.filter((record) => { return record.isChanged; });
+    let currentOffset = 0;
+    let bufferArrays = [];
+
+    for (let i = 0; i < changedRecords.length; i++) {
+      let record = changedRecords[i];
+      const recordOffset = this.header.table1StartIndex + (record.index * this.header.record1Size);
+      
+      bufferArrays.push(this.data.slice(currentOffset, recordOffset));
+      const recordHexData = record.hexData;
+      bufferArrays.push(recordHexData);
+      currentOffset = recordOffset + recordHexData.length;
+    }
+
+    bufferArrays.push(this.data.slice(currentOffset, this.header.table2StartIndex));
+
+    const changedTable2Records = this.table2Records.filter((record) => { return record.isChanged; });
+    currentOffset = this.header.table2StartIndex;
+
+    for (let i = 0; i < changedTable2Records.length; i++) {
+      let record = changedTable2Records[i];
+      const recordOffset = this.header.table2StartIndex + record.index;
+
+      if (recordOffset < currentOffset) {
+        // this case is true for the last few rows with no data in them. They reference the first table2 value.
+        break;
+      }
+
+      bufferArrays.push(this.data.slice(currentOffset, recordOffset));
+      const recordHexData = record.hexData;
+      bufferArrays.push(recordHexData);
+
+      currentOffset = recordOffset + recordHexData.length;
+    }
+
+    bufferArrays.push(this.data.slice(currentOffset));
+    this.data = Buffer.concat(bufferArrays);
+    return this.data;
+
+    // console.time('method 1a');
+  
+    // for (let i = 0; i < changedRecords.length; i++) {
+    //   let record = changedRecords[i];
+    //   const recordOffset = this.header.table1StartIndex + (record.index * this.header.record1Size);
+    //   const header = this.data.slice(0, recordOffset);
+    //   const trailer = this.data.slice(recordOffset + record.hexData.length);
+    //   this.data = Buffer.concat([header, record.hexData, trailer]);
+
+    //   record.isChanged = false;
+    // }
+
+    // console.timeEnd('method 1a');
+
+    // console.time('method 1b');
+  
+    // for (let i = 0; i < changedTable2Records.length; i++) {
+    //   let record = changedTable2Records[i];
+    //   const recordOffset = this.header.table2StartIndex + record.index;
+
+    //   if (record.index === 0 && i > 0) {
+    //     continue;
+    //   }
+
+    //   // if (recordOffset > 0 && i > 0) {
+    //     const header = this.data.slice(0, recordOffset);
+    //     const trailer = this.data.slice(recordOffset + record.hexData.length);
+    //     this.data = Buffer.concat([header, record.hexData, trailer]);
+    //   // }
+
+    //   record.isChanged = false;
+    // }
+
+    // console.timeEnd('method 1b');
+
+    // console.time('method 2b');
+
+    
+    // console.timeEnd('method 2b');
+
+    // console.log(this.data.length, testData.length);
+    // assert.deepEqual(testData, this.data);
   };
 
   set schema (schema) {
@@ -83,26 +170,32 @@ class FranchiseFileTable extends EventEmitter {
         this.records = readRecords(this.data, this.header, offsetTableToUse);
 
         if (this.header.hasSecondTable) {
-          parseTable2Values(this.data, this.header, this.records);
+          this._parseTable2Values(this.data, this.header, this.records);
         }
 
         this.records.forEach((record, index) => {
           const that = this;
           record.on('change', function () {
-            const recordOffset = that.header.headerSize + (index * that.header.record1Size);
+            this.isChanged = true;
+            // const recordOffset = that.header.table1StartIndex + (index * that.header.record1Size);
 
-            const header = that.data.slice(0, recordOffset);
-            const trailer = that.data.slice(recordOffset + that.header.record1Size);
+            // const header = that.data.slice(0, recordOffset);
+            // const trailer = that.data.slice(recordOffset + that.header.record1Size);
 
-            that.data = Buffer.concat([header, this.hexData, trailer]);
+            // that.data = Buffer.concat([header, this.hexData, trailer]);
             that.emit('change');
           });
+        });
 
-          record.on('table2-change', function (secondTableField) {
-            const header = that.data.slice(0, that.header.table2StartIndex + secondTableField.index);
-            const trailer = that.data.slice(that.header.table2StartIndex + secondTableField.index + secondTableField.maxLength);
+        this.table2Records.forEach((record, index) => {
+          const that = this;
 
-            that.data = Buffer.concat([header, secondTableField.hexData, trailer]);
+          record.on('change', function (secondTableField) {
+            this.isChanged = true;
+            // const header = that.data.slice(0, that.header.table2StartIndex + secondTableField.index);
+            // const trailer = that.data.slice(that.header.table2StartIndex + secondTableField.index + secondTableField.maxLength);
+
+            // that.data = Buffer.concat([header, secondTableField.hexData, trailer]);
             that.emit('change');
           });
         });
@@ -112,6 +205,22 @@ class FranchiseFileTable extends EventEmitter {
       } else {
         resolve(this);
       }
+    });
+  };
+
+  _parseTable2Values(data, header, records) {
+    const that = this;
+    const secondTableBinaryData = utilService.getBitArray(data.slice(header.table2StartIndex));
+  
+    records.forEach((record) => {
+      const fieldsReferencingSecondTable = record._fields.filter((field) => { return field.secondTableField; });
+  
+      fieldsReferencingSecondTable.forEach((field) => {
+        const stringStartBinaryIndex = field.secondTableField.index * 8;
+        const stringEndBinaryIndex = stringStartBinaryIndex + (field.offset.maxLength * 8);
+        field.secondTableField.unformattedValue = secondTableBinaryData.slice(stringStartBinaryIndex, stringEndBinaryIndex);
+        that.table2Records.push(field.secondTableField);
+      });
     });
   };
 };
@@ -404,6 +513,10 @@ function readOffsetTable(data, schema, header) {
 
   offsetTable = offsetTable.filter((offset) => { return !offset.final; });
   offsetTable.sort((a,b) => { return a.offset - b.offset; });
+  
+  for (let i = 0; i < offsetTable.length; i++) {
+    schema.attributes[offsetTable[i].index].offsetIndex = i;
+  }
 
   return offsetTable;
 
@@ -414,12 +527,13 @@ function readOffsetTable(data, schema, header) {
   function parseOffsetTableFromData() {
     let table = [];
 
-    schema.attributes.forEach((attribute) => {
+    schema.attributes.forEach((attribute, index) => {
       const minValue = parseInt(attribute.minValue);
       const maxValue = parseInt(attribute.maxValue);
 
       table.push({
-        'index': parseInt(attribute.index),
+        'index': index,
+        'originalIndex': parseInt(attribute.index),
         'name': attribute.name,
         'type': (minValue < 0 || maxValue < 0) ? 's_' + attribute.type : attribute.type,
         'isReference': !attribute.enum && (attribute.type[0] == attribute.type[0].toUpperCase()) ? true : false,
@@ -447,25 +561,11 @@ function readRecords(data, header, offsetTable) {
   if (binaryData) {
     for (let i = 0; i < binaryData.length; i += (header.record1Size * 8)) {
       const recordBinary = binaryData.slice(i, i + (header.record1Size * 8));
-      records.push(new FranchiseFileRecord(recordBinary, offsetTable));
+      records.push(new FranchiseFileRecord(recordBinary, (i / (header.record1Size * 8)), offsetTable));
     }
   }
 
   return records;
-};
-
-function parseTable2Values(data, header, records) {
-  const secondTableBinaryData = utilService.getBitArray(data.slice(header.table2StartIndex));
-
-  records.forEach((record) => {
-    const fieldsReferencingSecondTable = record._fields.filter((field) => { return field.secondTableField; });
-
-    fieldsReferencingSecondTable.forEach((field) => {
-      const stringStartBinaryIndex = field.secondTableField.index * 8;
-      const stringEndBinaryIndex = stringStartBinaryIndex + (field.offset.maxLength * 8);
-      field.secondTableField.unformattedValue = secondTableBinaryData.slice(stringStartBinaryIndex, stringEndBinaryIndex);
-    });
-  });
 };
 
 function isLoadingNewOffsets(currentlyLoaded, attribsToLoad, offsetTable) {
