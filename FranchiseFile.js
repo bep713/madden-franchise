@@ -199,6 +199,10 @@ class FranchiseFile extends EventEmitter {
     return this._settings;
   };
 
+  get gameYear () {
+    return this._gameYear;
+  };
+
   set settings (settings) {
     this._settings = new FranchiseFileSettings(settings);
   };
