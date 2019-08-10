@@ -42,7 +42,8 @@ class FranchiseFileRecord extends EventEmitter {
   };
 
   getValueByKey(key) {
-    return this._fields.find((field) => { return field.key === key; }).value;
+    let field = this.getFieldByKey(key);
+    return field ? field.value : null;
   };
 
   get fields () {

@@ -84,15 +84,16 @@ describe('FranchiseFileRecord unit tests', () => {
 
   describe('constructor', () => {
     it('sets default values', () => {
-      record = new FranchiseFileRecord(data, offsetTable);
+      record = new FranchiseFileRecord(data, 0, offsetTable);
       expect(record._data).to.equal(data);
       expect(record._offsetTable).to.eql(offsetTable);
       expect(record.isChanged).to.be.false;
       expect(record.fields).to.not.be.undefined;
+      expect(record.index).to.equal(0);
     });
 
     it('parses the fields', () => {
-      record = new FranchiseFileRecord(data, offsetTable);
+      record = new FranchiseFileRecord(data, 0, offsetTable);
       expect(record.fields.length).to.equal(offsetTable.length);
 
       const record1 = record.fields[0];
@@ -107,20 +108,20 @@ describe('FranchiseFileRecord unit tests', () => {
     });
 
     it('dynamically adds the fields as methods on the object', () => {
-      record = new FranchiseFileRecord(data, offsetTable);
+      record = new FranchiseFileRecord(data, 0, offsetTable);
       expect(record.PercentageSpline).to.equal('00111000010011100000000000000000');
       expect(record.PlayerPosition).to.equal('00000000000000000000000000010000');
     });
 
     it('allows setting the field value from the object methods', () => {
-      record = new FranchiseFileRecord(data, offsetTable);
+      record = new FranchiseFileRecord(data, 0, offsetTable);
       record.PercentageSpline = 'test';
 
       expect(record.fields[0].value).to.equal('test');
     });
 
     it('sets listener for field change', () => {
-      record = new FranchiseFileRecord(data, offsetTable);
+      record = new FranchiseFileRecord(data, 0, offsetTable);
 
       expect(() => {
         record.fields[0].emit('change');
@@ -131,7 +132,7 @@ describe('FranchiseFileRecord unit tests', () => {
     });
 
     it('sets listener for table2-change', () => {
-      record = new FranchiseFileRecord(data, offsetTable);
+      record = new FranchiseFileRecord(data, 0, offsetTable);
 
       expect(() => {
         record.fields[0].emit('table2-change');
@@ -141,7 +142,7 @@ describe('FranchiseFileRecord unit tests', () => {
 
   describe('hexData', () => {
     it('returns a Buffer representation of the data', () => {
-      record = new FranchiseFileRecord(data, offsetTable);
+      record = new FranchiseFileRecord(data, 0, offsetTable);
       const result = record.hexData;
 
       expect(utilService.binaryBlockToDecimalBlock.firstCall.args).to.eql([data]);
@@ -151,14 +152,14 @@ describe('FranchiseFileRecord unit tests', () => {
 
   describe('getFieldByKey', () => {
     it('returns the field that matches the passed in key', () => {
-      record = new FranchiseFileRecord(data, offsetTable);
+      record = new FranchiseFileRecord(data, 0, offsetTable);
       const percentageSpline = record.getFieldByKey('PercentageSpline');
       expect(percentageSpline).to.not.be.undefined;
       expect(percentageSpline.key).to.equal('PercentageSpline');
     });
 
     it('returns undefined if field doesnt exist', () => {
-      record = new FranchiseFileRecord(data, offsetTable);
+      record = new FranchiseFileRecord(data, 0, offsetTable);
       const shouldBeNull = record.getFieldByKey('Test');
       expect(shouldBeNull).to.be.undefined;
     });
@@ -166,13 +167,13 @@ describe('FranchiseFileRecord unit tests', () => {
 
   describe('getValueByKey', () => {
     it('returns the matching fields value', () => {
-      record = new FranchiseFileRecord(data, offsetTable);
+      record = new FranchiseFileRecord(data, 0, offsetTable);
       const percentageSpline = record.getValueByKey('PercentageSpline');
       expect(percentageSpline).to.equal('00111000010011100000000000000000');
     });
 
     it('returns undefined if the field wasnt matched', () => {
-      record = new FranchiseFileRecord(data, offsetTable);
+      record = new FranchiseFileRecord(data, 0, offsetTable);
       const percentageSpline = record.getValueByKey('Test');
       expect(percentageSpline).to.be.null;
     });
