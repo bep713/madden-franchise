@@ -15,40 +15,40 @@ let file;
 describe('Madden 19 end to end tests', function () {
   this.timeout(7000);
 
-  describe('open files', () => {
-    it('can open a M19 compressed file', () => {
-      file = new FranchiseFile(filePaths.compressed.m19);
-    });
+  // describe('open files', () => {
+  //   it('can open a M19 compressed file', () => {
+  //     file = new FranchiseFile(filePaths.compressed.m19);
+  //   });
 
-    it('can open a M19 uncompressed file', () => {
-      file = new FranchiseFile(filePaths.uncompressed.m19);
-    });
+  //   it('can open a M19 uncompressed file', () => {
+  //     file = new FranchiseFile(filePaths.uncompressed.m19);
+  //   });
 
-    it('fires the `ready` event when the file is done processing', (done) => {
-      file = new FranchiseFile(filePaths.compressed.m19);
+  //   it('fires the `ready` event when the file is done processing', (done) => {
+  //     file = new FranchiseFile(filePaths.compressed.m19);
 
-      expect(file.isLoaded).to.be.false;
+  //     expect(file.isLoaded).to.be.false;
 
-      file.on('ready', () => {
-        expect(file.settings).to.eql({
-          'saveOnChange': false
-        });
+  //     file.on('ready', () => {
+  //       expect(file.settings).to.eql({
+  //         'saveOnChange': false
+  //       });
 
-        expect(file.isLoaded).to.be.true;
-        expect(file.filePath).to.eql(filePaths.compressed.m19);
-        expect(file.gameYear).to.equal(19);
-        expect(file.openedFranchiseFile).to.be.true;
-        expect(file.rawContents).to.not.be.undefined;
-        expect(file.packedFileContents).to.not.be.undefined;
-        expect(file.unpackedFileContents).to.not.be.undefined;
+  //       expect(file.isLoaded).to.be.true;
+  //       expect(file.filePath).to.eql(filePaths.compressed.m19);
+  //       expect(file.gameYear).to.equal(19);
+  //       expect(file.openedFranchiseFile).to.be.true;
+  //       expect(file.rawContents).to.not.be.undefined;
+  //       expect(file.packedFileContents).to.not.be.undefined;
+  //       expect(file.unpackedFileContents).to.not.be.undefined;
 
-        expect(file.tables).to.not.be.undefined;
-        expect(file.schemaList).to.not.be.undefined;
+  //       expect(file.tables).to.not.be.undefined;
+  //       expect(file.schemaList).to.not.be.undefined;
 
-        done();
-      });
-    });
-  });
+  //       done();
+  //     });
+  //   });
+  // });
 
   describe('post-open tests', () => {
     before((done) => {
@@ -440,6 +440,144 @@ describe('Madden 19 end to end tests', function () {
             expect(record.TRAIT_BIGHITTER).to.equal(false);
           });
         });
+      });
+    });
+
+    describe('EndofSeasonResigningStartReaction', () => {
+      beforeEach(() => {
+        table = file.getTableByIndex(431);
+      });
+
+      it('table exists', () => {
+        expect(table).to.not.be.undefined;
+        expect(table).to.be.instanceOf(FranchiseFileTable);
+        expect(table.name).to.equal('EndofSeasonReSigningStartReaction')
+      });
+
+      it('parses expected attribute values', () => {
+        expect(table.isArray).to.be.false;
+        expect(table.isChanged).to.be.false;
+        expect(table.recordsRead).to.be.false;
+        expect(table.data).to.not.be.undefined;
+        expect(table.hexData).to.not.be.undefined;
+        expect(table.readRecords).to.exist;
+        expect(table.offset).to.equal(6114273);
+      });
+
+      it('parsed expected header', () => {
+        expect(table.header).to.not.be.undefined;
+        expect(table.header.tableId).to.equal(4527);
+        expect(table.header.data1RecordCount).to.equal(1);
+        expect(table.header.record1Size).to.equal(32);
+        expect(table.header.headerSize).to.equal(260);
+        expect(table.header.hasSecondTable).to.be.false;
+        expect(table.header.table1StartIndex).to.equal(260);
+        expect(table.header.table1Length).to.equal(96);
+      });
+
+      it('has correct schema', () => {
+        expect(table.schema).to.not.be.undefined;
+        expect(table.schema.attributes.length).to.equal(8);
+        expect(table.schema.attributes[0].name).to.equal('EventRecord');
+        expect(table.schema.attributes[1].name).to.equal('Handle');
+        expect(table.schema.attributes[2].name).to.equal('Franchise');
+        expect(table.schema.attributes[3].name).to.equal('PlayerSigningEval');
+      });
+
+      describe('reads records that are passed in', () => {
+        before((done) => {
+          table.readRecords().then(() => {
+            done();
+          });
+        });
+
+        it('has expected offset table', () => {
+          expect(table.loadedOffsets.length).to.equal(7);
+          expect(table.offsetTable.length).to.equal(7);
+
+          let offset0 = table.offsetTable[0];
+          expect(offset0.name).to.equal('TeamRequestManager');
+          expect(offset0.isReference).to.be.true;
+          expect(offset0.originalIndex).to.equal(7);
+          expect(offset0.index).to.equal(7);
+          expect(offset0.offset).to.equal(0);
+          expect(offset0.indexOffset).to.equal(0);
+          expect(offset0.length).to.equal(32);
+
+          let offset5 = table.offsetTable[5];
+          expect(offset5.name).to.equal('Franchise');
+
+          let offset6 = table.offsetTable[6];
+          expect(offset6.name).to.equal('EventRecord');
+
+          // let offset7 = table.offsetTable[7];
+          // expect(offset7.name).to.equal('Handle');
+        });
+
+        // describe('records have expected values', () => {
+        //   it('first record', () => {
+        //     let record = table.records[0];
+        //     expect(record.GameStats).to.be.undefined;
+        //     expect(record.SeasonStats).to.equal('00000000000000000000000000000000');
+        //     expect(record.FirstName).to.equal('');
+        //     expect(record.LastName).to.equal('C');
+        //     expect(record.MetaMorph_GutBase).to.equal(0.9020000100135803);
+        //     expect(record.Position).to.equal('C');
+        //     expect(record.TRAIT_BIGHITTER).to.equal(false);
+        //   });
+
+        //   it('Marcus Maye', () => {
+        //     let record = table.records[1700];
+        //     expect(record.GameStats).to.be.undefined;
+        //     expect(record.SeasonStats).to.equal('00101110100000000000010000101010');
+        //     expect(record.FirstName).to.equal('Marcus');
+        //     expect(record.LastName).to.equal('Maye');
+        //     expect(record.MetaMorph_GutBase).to.equal(0.9010000228881836);
+        //     expect(record.Position).to.equal('FS');
+        //     expect(record.TRAIT_BIGHITTER).to.equal(true);
+        //   });
+
+        //   it('Baker Mayfield', () => {
+        //     let record = table.records[1701];
+        //     expect(record.GameStats).to.be.undefined;
+        //     expect(record.SeasonStats).to.equal('00000000000000000000000000000000');
+        //     expect(record.FirstName).to.equal('Baker');
+        //     expect(record.LastName).to.equal('Mayfield');
+        //     expect(record.MetaMorph_GutBase).to.equal(0.6000000238418579);
+        //     expect(record.Position).to.equal('FirstKeyOffense_'); // probably should be QB!
+        //     expect(record.TRAIT_BIGHITTER).to.equal(false);
+        //   });
+        // });
+      });
+    });
+
+    describe('AnnualAwardsAvailablePeriodEndReaction', () => {
+      before((done) => {
+        table = file.getTableById(4262);
+        table.readRecords().then(() => {
+          done();
+        })
+      });
+
+      it('reads offset table correctly', () => {
+        expect(table.offsetTable[0].name).to.equal('SeasonInfo');
+        expect(table.offsetTable[1].name).to.equal('AwardsEvalRef');
+        expect(table.offsetTable[2].name).to.equal('EventRecord');
+      });
+    });
+
+    describe('Resign_TeamRequest', () => {
+      before((done) => {
+        table = file.getTableById(4105);
+        table.readRecords().then(() => {
+          done();
+        })
+      });
+
+      it('reads offset table correctly', () => {
+        expect(table.offsetTable[0].name).to.equal('SeasonInfo');
+        expect(table.offsetTable[1].name).to.equal('AwardsEvalRef');
+        expect(table.offsetTable[2].name).to.equal('EventRecord');
       });
     });
   });

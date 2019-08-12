@@ -454,7 +454,7 @@ function readOffsetTable(data, schema, header) {
 
     if (nextOffset) {
       let curIndex = i+2;
-      while(nextOffset && nextOffset.final) {
+      while(nextOffset && (nextOffset.final || nextOffset.type.indexOf('()') >= 0)) {
         nextOffset = offsetTable[curIndex];
         curIndex += 1;
       }
@@ -467,6 +467,10 @@ function readOffsetTable(data, schema, header) {
     }
     else {
       curOffset.length = (header.record1Size * 8) - curOffset.indexOffset;
+    }
+
+    if (curOffset.length > 32) {
+      curOffset.length = 32;
     }
   }
 
@@ -481,7 +485,7 @@ function readOffsetTable(data, schema, header) {
       const currentOffset = offsetTable[currentOffsetIndex];
 
       if (currentOffset) {
-        if (currentOffset.final) {
+        if (currentOffset.final || currentOffset.type.indexOf('()') >= 0) {
           currentOffsetIndex += 1;
           continue;
         }
@@ -497,6 +501,10 @@ function readOffsetTable(data, schema, header) {
 
     chunked32bit.push(chunkedOffsets);
   }
+  
+  // chunked32bit.forEach((offsetArray) => {
+  //   console.log(offsetArray);
+  // });
 
   chunked32bit.forEach((offsetArray) => {
     if (offsetArray.length > 0) {
@@ -511,7 +519,7 @@ function readOffsetTable(data, schema, header) {
     }
   });
 
-  offsetTable = offsetTable.filter((offset) => { return !offset.final; });
+  offsetTable = offsetTable.filter((offset) => { return !offset.final && offset.type.indexOf('()') === -1; });
   offsetTable.sort((a,b) => { return a.offset - b.offset; });
   
   for (let i = 0; i < offsetTable.length; i++) {
