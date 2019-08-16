@@ -1,10 +1,10 @@
-const fs = require('fs');
-const path = require('path');
-const XmlStream = require('xml-stream');
+// const fs = require('fs');
+// const path = require('path');
+// const XmlStream = require('xml-stream');
 const FranchiseEnum = require('./FranchiseEnum');
 const EventEmitter = require('events').EventEmitter;
-const utilService = require('./services/utilService');
-const FranchiseEnumValue = require('./FranchiseEnumValue');
+// const utilService = require('./services/utilService');
+// const FranchiseEnumValue = require('./FranchiseEnumValue');
 
 let schemaFilePath;
 const schemaXmlPaths = {
