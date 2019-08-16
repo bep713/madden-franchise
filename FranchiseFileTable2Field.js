@@ -37,11 +37,11 @@ class FranchiseFileTable2Field extends EventEmitter {
     if (value.length > this.maxLength) {
       value = value.substring(0, this.maxLength);
     }
-
+    
     this._value = value;
-
+    
     let valuePadded = value;
-
+    
     if (value.length < this.maxLength) {
       const numberOfNullCharactersToAdd = this.maxLength - value.length;
       
@@ -49,11 +49,11 @@ class FranchiseFileTable2Field extends EventEmitter {
         valuePadded += String.fromCharCode(0);
       }
     }
-
+    
     this._unformattedValue = valuePadded.split('').map((char) => {
       return char.charCodeAt(0).toString(2).padStart(8, '0');
     }).join('');
-
+    
     this.emit('change');
   };
 

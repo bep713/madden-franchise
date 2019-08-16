@@ -8218,6 +8218,10 @@
             <attribute name="Handle" idx="1" type="bool()" />
             <attribute name="Module" idx="2" type="AdvanceSeasonWeekTransaction" />
         </schema>
+        <schema name="Request" numMembers="" isRecordPersistent="true">
+            <attribute name="RequestData" idx="0" />
+            <attribute name="TargetUser" idx="1" />
+        </schema>
         <schema name="UIRequestForm" numMembers="29" base="Request" assetId="5807" isRecordPersistent="true">
             <attribute name="CanUpdateResponse" idx="0" type="bool" default="False" />
             <attribute name="ClearResponse" idx="1" type="none()" final="true" />

@@ -192,10 +192,6 @@ class FranchiseFileTable extends EventEmitter {
 
           record.on('change', function (secondTableField) {
             this.isChanged = true;
-            // const header = that.data.slice(0, that.header.table2StartIndex + secondTableField.index);
-            // const trailer = that.data.slice(that.header.table2StartIndex + secondTableField.index + secondTableField.maxLength);
-
-            // that.data = Buffer.concat([header, secondTableField.hexData, trailer]);
             that.emit('change');
           });
         });
@@ -454,7 +450,7 @@ function readOffsetTable(data, schema, header) {
 
     if (nextOffset) {
       let curIndex = i+2;
-      while(nextOffset && (nextOffset.final || nextOffset.type.indexOf('()') >= 0)) {
+      while(nextOffset && (nextOffset.final || nextOffset.const || nextOffset.type.indexOf('()') >= 0)) {
         nextOffset = offsetTable[curIndex];
         curIndex += 1;
       }
@@ -485,7 +481,7 @@ function readOffsetTable(data, schema, header) {
       const currentOffset = offsetTable[currentOffsetIndex];
 
       if (currentOffset) {
-        if (currentOffset.final || currentOffset.type.indexOf('()') >= 0) {
+        if (currentOffset.final || currentOffset.const || currentOffset.type.indexOf('()') >= 0) {
           currentOffsetIndex += 1;
           continue;
         }
@@ -519,7 +515,7 @@ function readOffsetTable(data, schema, header) {
     }
   });
 
-  offsetTable = offsetTable.filter((offset) => { return !offset.final && offset.type.indexOf('()') === -1; });
+  offsetTable = offsetTable.filter((offset) => { return !offset.final && !offset.const && offset.type.indexOf('()') === -1; });
   offsetTable.sort((a,b) => { return a.offset - b.offset; });
   
   for (let i = 0; i < offsetTable.length; i++) {
@@ -552,7 +548,8 @@ function readOffsetTable(data, schema, header) {
         'maxLength': attribute.maxLength ? parseInt(attribute.maxLength) : null,
         'final': attribute.final === 'true' ? true : false,
         'indexOffset': utilService.byteArrayToLong(data.slice(currentIndex, currentIndex + 4), true),
-        'enum': attribute.enum
+        'enum': attribute.enum,
+        'const': attribute.const
       });
       currentIndex += 4;
     });

@@ -19,7 +19,7 @@ JS API for reading and writing Madden franchise files
       });
     });
 
-    franchise.on('change', function () {
+    franchise.on('change', function (table) {
       console.log(table.name, 'changed');
     });
     

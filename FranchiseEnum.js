@@ -2,10 +2,23 @@ const FranchiseEnumValue = require('./FranchiseEnumValue');
 
 class FranchiseEnum {
   constructor(name, assetId, isRecordPersistent) {
-    this._name = name;
-    this._assetId = assetId;
-    this._isRecordPersistent = isRecordPersistent
-    this._members = [];
+    if (typeof name === 'object') {
+      const theEnum = name;
+      this._name = theEnum._name;
+      this._assetId = theEnum._assetId;
+      this._isRecordPersistent = theEnum._isRecordPersistent;
+      this._members = [];
+
+      for (let i = 0; i < theEnum._members.length; i++) {
+        const member = theEnum._members[i];
+        this.addMember(member._name, member._index, member._value, member._unformattedValue);
+      }
+    } else {
+      this._name = name;
+      this._assetId = assetId;
+      this._isRecordPersistent = isRecordPersistent
+      this._members = [];
+    }
   };
 
   get name () {
@@ -24,8 +37,8 @@ class FranchiseEnum {
     return this._members;
   }
 
-  addMember(name, index, value) {
-    this._members.push(new FranchiseEnumValue(name, index, value));
+  addMember(name, index, value, unformattedValue) {
+    this._members.push(new FranchiseEnumValue(name, index, value, unformattedValue));
   };
 
   getMemberByValue(value) {

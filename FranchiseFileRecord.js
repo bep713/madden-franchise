@@ -27,9 +27,9 @@ class FranchiseFileRecord extends EventEmitter {
         that.emit('change');
       });
 
-      field.on('table2-change', function () {
-        that.emit('table2-change', this.secondTableField);
-      });
+      // field.on('table2-change', function () {
+      //   that.emit('table2-change', this.secondTableField);
+      // });
     });
   };
 

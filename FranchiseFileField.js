@@ -15,7 +15,6 @@ class FranchiseFileField extends EventEmitter {
 
       this.secondTableField.on('change', function () {
         this._value = this.secondTableField.value;
-        this.emit('table2-change');
       }.bind(this));
     }
   };

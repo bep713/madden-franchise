@@ -62,9 +62,9 @@ class FranchiseFile extends EventEmitter {
 
     let schemaPromise = new Promise((resolve, reject) => {
       this.schemaList = new FranchiseSchema(this._gameYear);
-      this.schemaList.on('schemas:done', function () {
+      // this.schemaList.on('schemas:done', function () {
         resolve();
-      });
+      // });
     });
 
     let tablePromise = new Promise((resolve, reject) => {
@@ -166,7 +166,11 @@ class FranchiseFile extends EventEmitter {
   
       if (this.openedFranchiseFile) {
         _packFile(this.packedFileContents, this.unpackedFileContents).then((data) => { 
-          _save(destination, data, () => {
+          _save(destination, data, (err) => {
+            if (err) {
+              reject(err);
+              that.emit('save-error');
+            }
             resolve('saved');
             that.emit('saved');
           });

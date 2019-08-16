@@ -1,11 +1,11 @@
 const utilService = require('./services/utilService');
 
 class FranchiseEnumValue {
-  constructor(name, index, value) {
+  constructor(name, index, value, unformattedValue) {
     this._name = name;
     this._index = parseInt(index);
     this._value = parseInt(value);
-    this._unformattedValue = parseFormattedValue(parseInt(value));
+    this._unformattedValue = unformattedValue ? unformattedValue : parseFormattedValue(parseInt(value));
   };
 
   get name () {
