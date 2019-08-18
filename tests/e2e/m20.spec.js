@@ -665,11 +665,26 @@ describe('Madden 20 end to end tests', function () {
         expect(first.unformattedValue).to.equal('00000000000000000000000000000011');
       });
 
-      it('sets to first enum value if incorrect unformatted value is passed in', () => {
+      it('throws an error if unformatted enum value is set to an invalid value', () => {
         let first = table.records[0].getFieldByKey('PlayerPosition');
-        first.unformattedValue = '1000000';
-        expect(first.value).to.equal('QB');
-        expect(first.unformattedValue).to.equal('00000000000000000000000000000000');
+
+        expect(() => {
+          first.unformattedValue = '1000000';
+        }).to.throw(Error);
+
+        expect(first.value).to.equal('WR');
+        expect(first.unformattedValue).to.equal('00000000000000000000000000000011');
+      });
+
+      it('throws an error if enum value is set to an invalid value', () => {
+        let first = table.records[0].getFieldByKey('PlayerPosition');
+
+        expect(() => {
+          first.value = 'Coach';
+        }).to.throw(Error);
+
+        expect(first.value).to.equal('WR');
+        expect(first.unformattedValue).to.equal('00000000000000000000000000000011');
       });
 
       it('sets enum values as values without an underscore if possible', () => {

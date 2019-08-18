@@ -74,7 +74,7 @@ function setFormattedValue(value, offset) {
       const theEnumByValue = offset.enum.getMemberByValue(value);
 
       if (!theEnumByValue) {
-        return offset.enum.members[0].name;
+        throw new Error(`Argument is not a valid enum value for this field. You passed in ${value}.`);
       }
       else {
         return theEnumByValue.name;

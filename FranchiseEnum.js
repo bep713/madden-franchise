@@ -49,9 +49,22 @@ class FranchiseEnum {
   };
 
   getMemberByUnformattedValue(value) {
-    const matches = this._members.filter((member) => { return member.name !== 'First_' && member.name !== 'Last_' && member.unformattedValue === value.substring(value.length - this._maxLength); });
-    const matchesNoUnderscore = matches.find((member) => { return member.name[member.name.length - 1] !== '_'});
-    
+    if (value.length > this._maxLength) {
+      const valueToCutOff = value.substring(0, value.length - this._maxLength);
+
+      // if the user passes in 100000, but the enum's max value is only 5 digits...we need to throw an error.
+      const cutOffContainsData = /[a-zA-Z1-9]/.test(valueToCutOff);
+      if(cutOffContainsData) {
+        throw new Error(`Argument is not a valid enum value for this field. You passed in ${value}.`);
+      } 
+
+      value = value.substring(value.length - this._maxLength)
+    }
+
+    const matches = this._members.filter((member) => { return member.name !== 'First_' && member.name !== 'Last_' && member.unformattedValue === value; });
+    if (matches.length === 0) { throw new Error(`Argument is not a valid enum value for this field. You passed in ${value}.`); }
+
+    const matchesNoUnderscore = matches.find((member) => { return member.name[member.name.length - 1] !== '_'});    
     return matchesNoUnderscore ? matchesNoUnderscore : matches[0];
   };
   
