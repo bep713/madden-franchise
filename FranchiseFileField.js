@@ -53,8 +53,8 @@ class FranchiseFileField extends EventEmitter {
     if (!utilService.isString(unformattedValue)) { throw new Error(`Argument must be of type string. You passed in a ${typeof unformattedValue}.`); }
     else if (!utilService.stringOnlyContainsBinaryDigits(unformattedValue)) { throw new Error(`Argument must only contain binary digits 1 and 0. If you would like to set the value, please set the 'value' attribute instead.`)}
     else {
-      this._unformattedValue = unformattedValue;
-      this._value = parseFieldValue(unformattedValue, this._offset);
+      this._value = parseFieldValue(unformattedValue.padStart(this._offset.length, '0'), this._offset);
+      this._unformattedValue = this._offset.enum.getMemberByName(this._value).unformattedValue.padStart(this._offset.length, '0');
       this.emit('change');
     }
   };

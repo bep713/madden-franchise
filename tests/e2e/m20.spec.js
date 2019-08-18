@@ -600,7 +600,28 @@ describe('Madden 20 end to end tests', function () {
         let first = table.records[0].getFieldByKey('PlayerPosition');
         first.value = 'WR';
         expect(first.value).to.equal('WR');
-        expect(first.unformattedValue).to.equal('00000000000000000000000000000011')
+        expect(first.unformattedValue).to.equal('00000000000000000000000000000011');
+      });
+
+      it('sets unformatted value correctly if the length is correctly passed in', () => {
+        let first = table.records[0].getFieldByKey('PlayerPosition');
+        first.unformattedValue = '00000000000000000000000000000011';
+        expect(first.value).to.equal('WR');
+        expect(first.unformattedValue).to.equal('00000000000000000000000000000011');
+      });
+
+      it('sets unformatted value correctly if the length isnt correctly passed in', () => {
+        let first = table.records[0].getFieldByKey('PlayerPosition');
+        first.unformattedValue = '11';
+        expect(first.value).to.equal('WR');
+        expect(first.unformattedValue).to.equal('00000000000000000000000000000011');
+      });
+
+      it('sets to first enum value if incorrect unformatted value is passed in', () => {
+        let first = table.records[0].getFieldByKey('PlayerPosition');
+        first.unformattedValue = '1000000';
+        expect(first.value).to.equal('FirstKeyOffense_');
+        expect(first.unformattedValue).to.equal('00000000000000000000000000000000');
       });
     });
 
