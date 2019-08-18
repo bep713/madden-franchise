@@ -581,6 +581,29 @@ describe('Madden 20 end to end tests', function () {
       });
     });
 
+    describe('OverallPercentage', () => {
+      before((done) => {
+        table = file.getTableByName('OverallPercentage');
+        table.readRecords().then(() => {
+          done();
+        });
+      });
+
+      it('reads enum correctly if it has leading zeroes', () => {
+        let first = table.records[0].getFieldByKey('PlayerPosition');
+        expect(first.offset.enum).to.not.be.undefined;
+        expect(first.unformattedValue).to.equal('00000000000000000000000000010000');
+        expect(first.value).to.equal('CB');
+      });
+
+      it('sets enum correctly if it has leading zeroes', () => {
+        let first = table.records[0].getFieldByKey('PlayerPosition');
+        first.value = 'WR';
+        expect(first.value).to.equal('WR');
+        expect(first.unformattedValue).to.equal('00000000000000000000000000000011')
+      });
+    });
+
     /* DISABLED TEST BECAUSE THE TABLE ISNT CONFIGURED CORRECTLY */
     // describe('Resign_TeamRequest', () => {
     //   before((done) => {

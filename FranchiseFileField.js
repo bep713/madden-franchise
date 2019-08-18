@@ -123,22 +123,22 @@ function parseFormattedValue(formatted, offset) {
     const enumName = offset.enum.getMemberByName(formatted);
 
     if (enumName) {
-      return enumName.unformattedValue;
+      return enumName.unformattedValue.padStart(offset.length, '0');
     } 
     else {
       const formattedEnum = offset.enum.getMemberByValue(formatted)
 
       if (formattedEnum) {
-        return formattedEnum.unformattedValue;
+        return formattedEnum.unformattedValue.padStart(offset.length, '0');
       } 
       else {
         const unformattedEnum = offset.enum.getMemberByUnformattedValue(formatted);
 
         if (unformattedEnum) {
-          return unformattedEnum.unformattedValue;
+          return unformattedEnum.unformattedValue.padStart(offset.length, '0');
         } 
         else {
-          return offset.enum.members[0].unformattedValue;
+          return offset.enum.members[0].unformattedValue.padStart(offset.length, '0');
         }
       }
     }

@@ -13,11 +13,14 @@ class FranchiseEnum {
         const member = theEnum._members[i];
         this.addMember(member._name, member._index, member._value, member._unformattedValue);
       }
+
+      this._maxLength = this._members[0].unformattedValue.length;
     } else {
       this._name = name;
       this._assetId = assetId;
       this._isRecordPersistent = isRecordPersistent
       this._members = [];
+      this._maxLength = -1;
     }
   };
 
@@ -46,7 +49,7 @@ class FranchiseEnum {
   };
 
   getMemberByUnformattedValue(value) {
-    return this._members.find((member) => { return member.name !== 'First_' && member.name !== 'Last_' && member.unformattedValue === value; });
+    return this._members.find((member) => { return member.name !== 'First_' && member.name !== 'Last_' && member.unformattedValue === value.substring(value.length - this._maxLength); });
   };
   
   getMemberByName(name) {
@@ -58,8 +61,10 @@ class FranchiseEnum {
       return (accum.value > currentVal.value ? accum : currentVal);
     });
 
+    this._maxLength = maxValue.unformattedValue.length;
+
     this._members.forEach((member) => {
-      member.setMemberLength(maxValue.unformattedValue.length);
+      member.setMemberLength(this._maxLength);
     });
   };
 };
