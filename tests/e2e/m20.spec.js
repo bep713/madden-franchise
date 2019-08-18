@@ -407,13 +407,13 @@ describe('Madden 20 end to end tests', function () {
 
       describe('reads records that are passed in', () => {
         before((done) => {
-          table.readRecords(['FirstName', 'LastName', 'Position', 'TRAIT_BIGHITTER', 'MetaMorph_GutBase', 'SeasonStats']).then(() => {
+          table.readRecords(['FirstName', 'LastName', 'Position', 'TRAIT_BIGHITTER', 'MetaMorph_GutBase', 'SeasonStats', 'InjuryType']).then(() => {
             done();
           });
         });
 
         it('has expected offset table', () => {
-          expect(table.loadedOffsets.length).to.equal(6);
+          expect(table.loadedOffsets.length).to.equal(7);
           expect(table.offsetTable.length).to.equal(311);
 
           let offset0 = table.offsetTable[0];
@@ -469,6 +469,7 @@ describe('Madden 20 end to end tests', function () {
             expect(record.MetaMorph_GutBase).to.equal(1);
             expect(record.Position).to.equal('HB');
             expect(record.TRAIT_BIGHITTER).to.equal(false);
+            expect(record.InjuryType).to.equal('Invalid_');
           });
 
           it('Marcus Maye', () => {
@@ -489,7 +490,7 @@ describe('Madden 20 end to end tests', function () {
             expect(record.FirstName).to.equal('Baker');
             expect(record.LastName).to.equal('Mayfield');
             expect(record.MetaMorph_GutBase).to.equal(0.6000000238418579);
-            expect(record.Position).to.equal('FirstKeyOffense_'); // probably should be QB!
+            expect(record.Position).to.equal('QB');
             expect(record.TRAIT_BIGHITTER).to.equal(false);
           });
         });
@@ -620,8 +621,13 @@ describe('Madden 20 end to end tests', function () {
       it('sets to first enum value if incorrect unformatted value is passed in', () => {
         let first = table.records[0].getFieldByKey('PlayerPosition');
         first.unformattedValue = '1000000';
-        expect(first.value).to.equal('FirstKeyOffense_');
+        expect(first.value).to.equal('QB');
         expect(first.unformattedValue).to.equal('00000000000000000000000000000000');
+      });
+
+      it('sets enum values as values without an underscore if possible', () => {
+        let seventh = table.records[6].getFieldByKey('PlayerPosition');
+        expect(seventh.value).to.equal('K');
       });
     });
 

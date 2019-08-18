@@ -408,13 +408,13 @@ describe('Madden 19 end to end tests', function () {
 
       describe('reads records that are passed in', () => {
         before((done) => {
-          table.readRecords(['FirstName', 'LastName', 'Position', 'TRAIT_BIGHITTER', 'MetaMorph_GutBase', 'SeasonStats']).then(() => {
+          table.readRecords(['FirstName', 'LastName', 'Position', 'TRAIT_BIGHITTER', 'MetaMorph_GutBase', 'SeasonStats', 'InjuryType']).then(() => {
             done();
           });
         });
 
         it('has expected offset table', () => {
-          expect(table.loadedOffsets.length).to.equal(6);
+          expect(table.loadedOffsets.length).to.equal(7);
           expect(table.offsetTable.length).to.equal(307);
 
           let offset0 = table.offsetTable[0];
@@ -470,6 +470,7 @@ describe('Madden 19 end to end tests', function () {
             expect(record.MetaMorph_GutBase).to.equal(0.9020000100135803);
             expect(record.Position).to.equal('C');
             expect(record.TRAIT_BIGHITTER).to.equal(false);
+            expect(record.InjuryType).to.equal('Invalid_');
           });
 
           it('Marcus Maye', () => {
@@ -490,7 +491,7 @@ describe('Madden 19 end to end tests', function () {
             expect(record.FirstName).to.equal('Baker');
             expect(record.LastName).to.equal('Mayfield');
             expect(record.MetaMorph_GutBase).to.equal(0.6000000238418579);
-            expect(record.Position).to.equal('FirstKeyOffense_'); // probably should be QB!
+            expect(record.Position).to.equal('QB');
             expect(record.TRAIT_BIGHITTER).to.equal(false);
           });
         });
@@ -606,6 +607,55 @@ describe('Madden 19 end to end tests', function () {
         expect(table.offsetTable[0].name).to.equal('SeasonInfo');
         expect(table.offsetTable[1].name).to.equal('AwardsEvalRef');
         expect(table.offsetTable[2].name).to.equal('EventRecord');
+      });
+    });
+
+    describe('OverallPercentage', () => {
+      before((done) => {
+        table = file.getTableByName('OverallPercentage');
+        table.readRecords().then(() => {
+          done();
+        });
+      });
+
+      it('reads enum correctly if it has leading zeroes', () => {
+        let first = table.records[0].getFieldByKey('PlayerPosition');
+        expect(first.offset.enum).to.not.be.undefined;
+        expect(first.unformattedValue).to.equal('00000000000000000000000000010000');
+        expect(first.value).to.equal('CB');
+      });
+
+      it('sets enum correctly if it has leading zeroes', () => {
+        let first = table.records[0].getFieldByKey('PlayerPosition');
+        first.value = 'WR';
+        expect(first.value).to.equal('WR');
+        expect(first.unformattedValue).to.equal('00000000000000000000000000000011');
+      });
+
+      it('sets unformatted value correctly if the length is correctly passed in', () => {
+        let first = table.records[0].getFieldByKey('PlayerPosition');
+        first.unformattedValue = '00000000000000000000000000000011';
+        expect(first.value).to.equal('WR');
+        expect(first.unformattedValue).to.equal('00000000000000000000000000000011');
+      });
+
+      it('sets unformatted value correctly if the length isnt correctly passed in', () => {
+        let first = table.records[0].getFieldByKey('PlayerPosition');
+        first.unformattedValue = '11';
+        expect(first.value).to.equal('WR');
+        expect(first.unformattedValue).to.equal('00000000000000000000000000000011');
+      });
+
+      it('sets to first enum value if incorrect unformatted value is passed in', () => {
+        let first = table.records[0].getFieldByKey('PlayerPosition');
+        first.unformattedValue = '1000000';
+        expect(first.value).to.equal('QB');
+        expect(first.unformattedValue).to.equal('00000000000000000000000000000000');
+      });
+
+      it('sets enum values as values without an underscore if possible', () => {
+        let seventh = table.records[6].getFieldByKey('PlayerPosition');
+        expect(seventh.value).to.equal('K');
       });
     });
 

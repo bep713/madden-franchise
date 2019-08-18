@@ -49,7 +49,10 @@ class FranchiseEnum {
   };
 
   getMemberByUnformattedValue(value) {
-    return this._members.find((member) => { return member.name !== 'First_' && member.name !== 'Last_' && member.unformattedValue === value.substring(value.length - this._maxLength); });
+    const matches = this._members.filter((member) => { return member.name !== 'First_' && member.name !== 'Last_' && member.unformattedValue === value.substring(value.length - this._maxLength); });
+    const matchesNoUnderscore = matches.find((member) => { return member.name[member.name.length - 1] !== '_'});
+    
+    return matchesNoUnderscore ? matchesNoUnderscore : matches[0];
   };
   
   getMemberByName(name) {
