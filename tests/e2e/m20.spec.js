@@ -693,6 +693,25 @@ describe('Madden 20 end to end tests', function () {
       });
     });
 
+    describe('Stadium', () => {
+      before((done) => {
+        table = file.getTableByName('Stadium');
+        table.readRecords(['STADIUM_FLAGBASEBALL']).then(() => {
+          done();
+        });
+      });
+
+      it('can set a boolean attribute', () => {
+        let record = table.records[0];
+
+        record.STADIUM_FLAGBASEBALL = true;
+        expect(record.STADIUM_FLAGBASEBALL).to.be.true;
+
+        record.STADIUM_FLAGBASEBALL = false;
+        expect(record.STADIUM_FLAGBASEBALL).to.be.false;
+      });
+    });
+
     /* DISABLED TEST BECAUSE THE TABLE ISNT CONFIGURED CORRECTLY */
     // describe('Resign_TeamRequest', () => {
     //   before((done) => {
