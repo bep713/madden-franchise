@@ -39,6 +39,11 @@ class FranchiseFileField extends EventEmitter {
     if (this.offset.type === 'string') {
       this.secondTableField.value = value.toString();
     } else {
+      if (this.offset.isReference) {
+        if (!utilService.isString(value)) { throw new Error(`Argument must be of type string. You passed in a ${typeof unformattedValue}.`); }
+        else if (!utilService.stringOnlyContainsBinaryDigits(value)) { throw new Error(`Argument must only contain binary digits 1 and 0. If you would like to set the value, please set the 'value' attribute instead.`)}
+      }
+
       this._value = setFormattedValue(value, this._offset);
       this._unformattedValue = parseFormattedValue(value, this._offset);
       this.emit('change');

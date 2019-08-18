@@ -365,7 +365,7 @@ describe('Madden 19 end to end tests', function () {
     });
 
     describe('Player table', () => {
-      beforeEach(() => {
+      before(() => {
         table = file.getTableById(4155);
       });
 
@@ -497,9 +497,21 @@ describe('Madden 19 end to end tests', function () {
         });
       });
 
+      describe('can reload the table if new attributes to load are passed', () => {
+        it('will re-read records if new attributes are passed in', (done) => {
+          table.readRecords(['GameStats']).then(() => {
+            expect(table.records[0].GameStats).to.not.be.undefined;
+            expect(table.loadedOffsets.length).to.equal(8)
+            done();
+          }).catch((err) => {
+            done(err);
+          });
+        });
+      });
+
       describe('can set values', () => {
         before((done) => {
-          table.readRecords(['FirstName', 'LastName', 'MetaMorph_GutBase']).then(() => {
+          table.readRecords(['GameStats', 'FirstName', 'LastName', 'MetaMorph_GutBase']).then(() => {
             done();
           });
         });
@@ -520,6 +532,14 @@ describe('Madden 19 end to end tests', function () {
 
           expect(() => {
             record.getFieldByKey('FirstName').unformattedValue = '30101010101';
+          }).to.throw(Error);
+        });
+
+        it('wont allow invalid reference values if setting value either', () => {
+          let record = table.records[1701];
+          
+          expect(() => {
+            record.GameStats = '222010101';
           }).to.throw(Error);
         });
       });

@@ -163,7 +163,8 @@ class FranchiseFileTable extends EventEmitter {
         let offsetTableToUse = this.offsetTable;
 
         if (attribsToLoad) {
-          offsetTableToUse = offsetTableToUse.filter((attrib) => { return attribsToLoad.includes(attrib.name); });
+          // get any new attributes to load plus the existing loaded offsets
+          offsetTableToUse = offsetTableToUse.filter((attrib) => { return attribsToLoad.includes(attrib.name) || this.loadedOffsets.find((offset) => { return offset.name === attrib.name; }); });
         }
 
         this.loadedOffsets = offsetTableToUse;
@@ -574,9 +575,11 @@ function readRecords(data, header, offsetTable) {
 };
 
 function isLoadingNewOffsets(currentlyLoaded, attribsToLoad, offsetTable) {
+  const names = currentlyLoaded.map((currentlyLoadedOffset) => { return currentlyLoadedOffset.name; });
+
   if (attribsToLoad) {
     let newAttribs = attribsToLoad.filter((attrib) => {
-      return currentlyLoaded.includes(attrib);
+      return !names.includes(attrib);
     });
   
     return newAttribs.length > 0;
