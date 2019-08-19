@@ -99,13 +99,18 @@ function setFormattedValue(value, offset) {
 
 function parseFieldValue(unformatted, offset) {
   if (offset.enum) {
-    const theEnum = offset.enum.getMemberByUnformattedValue(unformatted);
+    try {
+      const theEnum = offset.enum.getMemberByUnformattedValue(unformatted);
 
-    if (theEnum) {
-      return theEnum.name;
-    } else {
-      return unformatted;
+      if (theEnum) {
+        return theEnum.name;
+      }
     }
+    catch (err) {
+      console.log(err);
+    }
+    
+    return unformatted;
   }
   else {
     switch (offset.type) {

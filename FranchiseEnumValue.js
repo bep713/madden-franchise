@@ -25,12 +25,21 @@ class FranchiseEnumValue {
   };
 
   setMemberLength(length) {
-    this._unformattedValue = this._unformattedValue.padStart(length, '0');
+    if (this.value < 0) {
+      this._unformattedValue = '1' + this._unformattedValue.padStart(length - 1, '0');
+    }
+    else {
+      this._unformattedValue = this._unformattedValue.padStart(length, '0');
+    }
   };
 };
 
 module.exports = FranchiseEnumValue;
 
 function parseFormattedValue(value) {
+  if (value < 0) {
+    return utilService.dec2bin((value*-1) - 1);
+  }
+  
   return utilService.dec2bin(value);
 };

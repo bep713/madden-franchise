@@ -55,21 +55,21 @@ class FranchiseEnum {
       // if the user passes in 100000, but the enum's max value is only 5 digits...we need to throw an error.
       const cutOffContainsData = /[a-zA-Z1-9]/.test(valueToCutOff);
       if(cutOffContainsData) {
-        throw new Error(`Argument is not a valid enum value for this field. You passed in ${value}.`);
+        throw new Error(`Argument is not a valid enum value for this field. You passed in ${value}. Field name: ${this.name}`);
       } 
 
       value = value.substring(value.length - this._maxLength)
     }
 
     const matches = this._members.filter((member) => { return member.name !== 'First_' && member.name !== 'Last_' && member.unformattedValue === value; });
-    if (matches.length === 0) { throw new Error(`Argument is not a valid enum value for this field. You passed in ${value}.`); }
+    if (matches.length === 0) { throw new Error(`Argument is not a valid enum value for this field. You passed in ${value}. Field name: ${this.name}`); }
 
     const matchesNoUnderscore = matches.find((member) => { return member.name[member.name.length - 1] !== '_'});    
     return matchesNoUnderscore ? matchesNoUnderscore : matches[0];
   };
   
   getMemberByName(name) {
-    return this._members.find((member) => { return member.name === name; });
+    return this._members.find((member) => { return member.name.toLowerCase() === name.toLowerCase(); });
   };
 
   setMemberLength() {
@@ -77,7 +77,9 @@ class FranchiseEnum {
       return (accum.value > currentVal.value ? accum : currentVal);
     });
 
-    this._maxLength = maxValue.unformattedValue.length;
+    const hasNegativeNumbers = this._members.find((member) => { return member.value < 0; });
+
+    this._maxLength = hasNegativeNumbers ? maxValue.unformattedValue.length + 1 : maxValue.unformattedValue.length;
 
     this._members.forEach((member) => {
       member.setMemberLength(this._maxLength);

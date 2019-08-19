@@ -730,6 +730,7 @@
             <attribute name="Touchdown" idx="2" value="2" />
         </enum>
         <enum name="CoverBallLevel" numMembers="8" assetId="67582" isRecordPersistent="true">
+            <attribute name="Invalid" idx="0" value="0" />
             <attribute name="First_" idx="0" value="1" />
             <attribute name="Never" idx="1" value="1" />
             <attribute name="OnBigHits" idx="2" value="2" />
@@ -1600,7 +1601,7 @@
             <attribute name="WinBy" idx="1" value="1" />
         </enum>
         <enum name="GameSkillLevelSetting" numMembers="6" assetId="6203" isRecordPersistent="true">
-            <attribute name="INVALID_" idx="0" value="-1" />
+            <!-- <attribute name="INVALID_" idx="0" value="-1" /> -->
             <attribute name="ROOKIE" idx="1" value="0" />
             <attribute name="PRO" idx="2" value="1" />
             <attribute name="ALL_PRO" idx="3" value="2" />
@@ -2188,6 +2189,7 @@
             <attribute name="SeasonEnding" idx="8" value="5" />
             <attribute name="CareerEnding" idx="9" value="6" />
             <attribute name="Max_" idx="10" value="7" />
+            <attribute name="None" idx="11" value="8" />
             <attribute name="Invalid_" idx="11" value="255" />
         </enum>
         <enum name="InjuryStatus" numMembers="4" assetId="68119" isRecordPersistent="true">

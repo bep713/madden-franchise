@@ -712,6 +712,41 @@ describe('Madden 20 end to end tests', function () {
       });
     });
 
+    describe('Team', () => {
+      before((done) => {
+        table = file.getTableByIndex(3609);
+        table.readRecords(['WeeklyDefenseMedal']).then(() => {
+          done();
+        });
+      });
+
+      it('can set a negative enum attribute', () => {
+        let record = table.records[0];
+
+        record.WeeklyDefenseMedal = 'MedalNone';
+        expect(record.WeeklyDefenseMedal).to.equal('MedalNone');
+        expect(record.getFieldByKey('WeeklyDefenseMedal').unformattedValue).to.equal('1000');
+      });
+      
+    });
+
+    // describe('LeagueSetting', () => {
+    //   before((done) => {
+    //     table = file.getTableByName('LeagueSetting');
+    //     table.readRecords(['SkillLevel']).then(() => {
+    //       done();
+    //     });
+    //   });
+
+    //   it('can set a negative enum attribute', () => {
+    //     let record = table.records[0];
+
+    //     record.SkillLevel = 'Invalid_';
+    //     expect(record.SkillLevel).to.equal('INVALID_');
+    //     expect(record.getFieldByKey('SkillLevel').unformattedValue).to.equal('1001');
+    //   });
+    // });
+
     /* DISABLED TEST BECAUSE THE TABLE ISNT CONFIGURED CORRECTLY */
     // describe('Resign_TeamRequest', () => {
     //   before((done) => {
