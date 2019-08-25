@@ -208,7 +208,7 @@ class FranchiseFile extends EventEmitter {
   };
 
   set filePath (path) {
-    this._filePath = filePath;
+    this._filePath = path;
   };
 
   set settings (settings) {
