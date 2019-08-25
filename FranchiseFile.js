@@ -207,6 +207,10 @@ class FranchiseFile extends EventEmitter {
     return this._gameYear;
   };
 
+  set filePath (path) {
+    this._filePath = filePath;
+  };
+
   set settings (settings) {
     this._settings = new FranchiseFileSettings(settings);
   };
@@ -275,6 +279,10 @@ function getMaddenYear(compressedData) {
 
   // Madden 20 saves will have 'M20' at this location in the compressed file
   if (compressedData[0x22] === 77 && compressedData[0x23] === 50 && compressedData[0x24] === 48) {
+    return 20;
+  }
+
+  if (compressedData[0x0B]) {
     return 20;
   }
 
