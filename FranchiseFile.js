@@ -293,7 +293,7 @@ function getMaddenYear(compressedData) {
 
 function getSchemaMetadata(compressedData) {
   return {
-    'major': utilService.readDWordAt(0x3E, compressedData),
-    'minor': utilService.readDWordAt(0x42, compressedData)
+    'major': utilService.readDWordAt(0x41, compressedData, true),
+    'minor': utilService.readDWordAt(0x45, compressedData, true)
   };
 }
