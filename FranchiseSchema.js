@@ -120,16 +120,16 @@ module.exports = FranchiseSchema;
 function readSchemaDirectory(dirpath) {
   let schemaMeta = {};
 
-  const dirs = fs.readdirSync(dirpath).filter(f => fs.statSync(path.join(dirpath, f)).isDirectory());
+  const dirs = fs.readdirSync(path.join(__dirname, dirpath)).filter(f => fs.statSync(path.join(__dirname, dirpath, f)).isDirectory());
 
   dirs.forEach((dir) => {
-    const files = fs.readdirSync(path.join(dirpath, dir));
+    const files = fs.readdirSync(path.join(__dirname, dirpath, dir));
     const fileMeta = files.map((file) => {
       let regex = /(\d+)_(\d+)/.exec(file);
       return {
         'major': regex[1],
         'minor': regex[2],
-        'path': path.join(dirpath, dir, file)
+        'path': path.join(__dirname, dirpath, dir, file)
       }
     });
 
