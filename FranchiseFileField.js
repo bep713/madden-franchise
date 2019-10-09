@@ -58,8 +58,22 @@ class FranchiseFileField extends EventEmitter {
     if (!utilService.isString(unformattedValue)) { throw new Error(`Argument must be of type string. You passed in a ${typeof unformattedValue}.`); }
     else if (!utilService.stringOnlyContainsBinaryDigits(unformattedValue)) { throw new Error(`Argument must only contain binary digits 1 and 0. If you would like to set the value, please set the 'value' attribute instead.`)}
     else {
-      this._value = parseFieldValue(unformattedValue.padStart(this._offset.length, '0'), this._offset);
-      this._unformattedValue = this._offset.enum.getMemberByName(this._value).unformattedValue.padStart(this._offset.length, '0');
+      const value = parseFieldValue(unformattedValue.padStart(this._offset.length, '0'), this._offset);
+
+      // check for 'allowed' error - this will be true if the unformatted value is invalid.
+      if (this._offset.enum && value === unformattedValue.padStart(this._offset.length, '0')) {
+        throw new Error(`Argument is not a valid unformatted value for this field. You passed in ${value}.`)
+      }
+
+      this._value = value;
+
+      if (this._offset.enum) {
+        this._unformattedValue = this._offset.enum.getMemberByName(this._value).unformattedValue.padStart(this._offset.length, '0');
+      } 
+      else {
+        this._unformattedValue = unformattedValue;
+      }
+
       this.emit('change');
     }
   };
@@ -107,7 +121,7 @@ function parseFieldValue(unformatted, offset) {
       }
     }
     catch (err) {
-      console.log(err);
+      // console.log(err);
     }
     
     return unformatted;

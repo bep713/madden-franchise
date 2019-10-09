@@ -2,6 +2,7 @@ const fs = require('fs');
 const zlib = require('zlib');
 const EventEmitter = require('events').EventEmitter;
 const FranchiseSchema = require('./FranchiseSchema');
+const utilService = require('./services/utilService');
 const FranchiseFileTable = require('./FranchiseFileTable');
 const FranchiseFileSettings = require('./FranchiseFileSettings');
 
@@ -61,7 +62,8 @@ class FranchiseFile extends EventEmitter {
     // }
 
     let schemaPromise = new Promise((resolve, reject) => {
-      this.schemaList = new FranchiseSchema(this._gameYear);
+      const schemaMeta = getSchemaMetadata(this.packedFileContents);
+      this.schemaList = new FranchiseSchema(this._gameYear, schemaMeta.major, schemaMeta.minor);
       // this.schemaList.on('schemas:done', function () {
         resolve();
       // });
@@ -288,3 +290,10 @@ function getMaddenYear(compressedData) {
 
   return 19;
 };
+
+function getSchemaMetadata(compressedData) {
+  return {
+    'major': utilService.readDWordAt(0x3E, compressedData),
+    'minor': utilService.readDWordAt(0x42, compressedData)
+  };
+}

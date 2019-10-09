@@ -1,8 +1,9 @@
 // USAGE:
-//  node schema-generator.js [input file path] [output file path]
+//  node schema-generator.js [input file path] [output file folder]
 
 const fs = require('fs');
 const path = require('path');
+const zlib = require('zlib');
 const XmlStream = require('xml-stream');
 const FranchiseEnum = require('./FranchiseEnum');
 const EventEmitter = require('events').EventEmitter;
@@ -20,6 +21,18 @@ class FranchiseSchema extends EventEmitter {
     this.xml.collect('attribute');
 
     const that = this;
+    this.xml.on('endElement: FranTkData', function (data) {
+      const majorVersion = data.$.dataMajorVersion;
+      const minorVersion = data.$.dataMinorVersion;
+
+      calculateInheritedSchemas();
+        // fs.writeFileSync(outputFile, JSON.stringify(that.schemas));
+        zlib.gzip(JSON.stringify(that.schemas), function (_, data) {
+          fs.writeFileSync(`${outputFile}/${majorVersion}_${minorVersion}.gz`, data);
+        });
+        that.emit('schemas:done', that.schemas);
+    });
+
     this.xml.on('endElement: enum', function (theEnum) {
       console.log(`Adding enum ${theEnum.$.name}`);
       let newEnum = new FranchiseEnum(theEnum.$.name, theEnum.$.assetId, theEnum.$.isRecordPersistent);
@@ -67,9 +80,12 @@ class FranchiseSchema extends EventEmitter {
       that.schemas.push(element);
 
       if (element.name === 'WinLossStreakPlayerGoal') {
-        calculateInheritedSchemas();
-        fs.writeFileSync(outputFile, JSON.stringify(that.schemas));
-        that.emit('schemas:done', that.schemas);
+        // calculateInheritedSchemas();
+        // // fs.writeFileSync(outputFile, JSON.stringify(that.schemas));
+        // zlib.gzip(JSON.stringify(that.schemas), function (_, data) {
+        //   fs.writeFileSync(outputFile, data);
+        // });
+        // that.emit('schemas:done', that.schemas);
       }
     });
 

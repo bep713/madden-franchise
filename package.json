@@ -12,7 +12,8 @@
   ],
   "files": [
     "**/*.js",
-    "data/**/*.json"
+    "data/**/*.json",
+    "data/**/*.gz"
   ],
   "author": "matthewpanetta",
   "license": "MIT",

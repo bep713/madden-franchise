@@ -1,26 +1,16 @@
-// const fs = require('fs');
-// const path = require('path');
-// const XmlStream = require('xml-stream');
+const fs = require('fs');
+const path = require('path');
+const zlib = require('zlib');
 const FranchiseEnum = require('./FranchiseEnum');
 const EventEmitter = require('events').EventEmitter;
-// const utilService = require('./services/utilService');
-// const FranchiseEnumValue = require('./FranchiseEnumValue');
-
-let schemaFilePath;
-const schemaXmlPaths = {
-  19: './data/schemas/schema-19.xml',
-  20: './data/schemas/schema-20.xml'
-};
-
-const schemaJsonPaths = {
-  19: './data/schemas/schema-19.json',
-  20: './data/schemas/schema-20.json'
-};
 
 class FranchiseSchema extends EventEmitter {
-  constructor (gameYear) {
+  constructor (gameYear, major, minor) {
     super();
-    this.schemas = require(schemaJsonPaths[gameYear]);
+    this.schemasMeta = readSchemaDirectory('./data/schemas');
+    this.schemaMeta = findApplicableSchema(this.schemasMeta, gameYear, major, minor);
+    const schemaGzip = fs.readFileSync(this.schemaMeta.path);
+    this.schemas = JSON.parse(zlib.gunzipSync(schemaGzip).toString());
 
     for (let i = 0; i < this.schemas.length; i++) {
       const schema = this.schemas[i];
@@ -126,3 +116,65 @@ class FranchiseSchema extends EventEmitter {
 };
 
 module.exports = FranchiseSchema;
+
+function readSchemaDirectory(dirpath) {
+  let schemaMeta = {};
+
+  const dirs = fs.readdirSync(dirpath).filter(f => fs.statSync(path.join(dirpath, f)).isDirectory());
+
+  dirs.forEach((dir) => {
+    const files = fs.readdirSync(path.join(dirpath, dir));
+    const fileMeta = files.map((file) => {
+      let regex = /(\d+)_(\d+)/.exec(file);
+      return {
+        'major': regex[1],
+        'minor': regex[2],
+        'path': path.join(dirpath, dir, file)
+      }
+    });
+
+    schemaMeta[dir] = fileMeta;
+  });
+
+  return schemaMeta;
+};
+
+function findApplicableSchema(schemaMeta, gameYear, major, minor) {
+  // check if game year exists
+  if (schemaMeta && schemaMeta[gameYear]) {
+    // check if exact major exists
+    const exactMajor = schemaMeta[gameYear].filter((schema) => { return schema.major == major });
+
+    if (exactMajor.length > 0) {
+      return getClosestMinor(exactMajor);
+    }
+    else {
+      const majors = schemaMeta[gameYear].map((schema) => {
+        return schema.major;
+      });
+
+      const closest = getClosestValue(majors, major);
+      const majorMatches = schemaMeta[gameYear].filter((schema) => { return schema.major === closest; });
+
+      if (majorMatches.length > 0) {
+        return getClosestMinor(majorMatches); 
+      }
+    }
+
+    return null;
+  }
+
+  function getClosestMinor(arr, goal) {
+    const minors = arr.map((schema) => {
+      return schema.minor;
+    });
+    const closest = getClosestValue(minors, goal);
+    return arr.find((schema) => { return schema.minor === closest; });
+  };
+
+  function getClosestValue(arr, goal) {
+    return arr.reduce(function (prev, curr) {
+      return (Math.abs(curr - goal) < Math.abs(prev - goal) ? curr : prev);
+    });
+  };
+};

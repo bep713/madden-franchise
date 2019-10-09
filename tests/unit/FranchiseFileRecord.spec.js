@@ -131,13 +131,13 @@ describe('FranchiseFileRecord unit tests', () => {
       expect(utilService.replaceAt.firstCall.args).to.eql([data, offsetTable[0].offset, '101010101']);
     });
 
-    it('sets listener for table2-change', () => {
-      record = new FranchiseFileRecord(data, 0, offsetTable);
+    // it('sets listener for table2-change', () => {
+    //   record = new FranchiseFileRecord(data, 0, offsetTable);
 
-      expect(() => {
-        record.fields[0].emit('table2-change');
-      }).to.emitFrom(record, 'table2-change');
-    });
+    //   expect(() => {
+    //     record.fields[0].emit('table2-change');
+    //   }).to.emitFrom(record, 'table2-change');
+    // });
   });
 
   describe('hexData', () => {

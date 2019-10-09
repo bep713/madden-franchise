@@ -188,4 +188,28 @@ utilService.stringOnlyContainsBinaryDigits = function (str) {
   return /[a-zA-Z2-9]/.test(str) === false;
 };
 
+utilService.readDWordAt = function (index, data) {
+  if (index < 3) {
+    throw new Error('Error: index must be equal to or greater than 3.')
+  }
+  else if (index >= data.length) {
+    throw new Error('Error: index must not be greater than the passed in data array length.');
+  }
+
+  return utilService.toUint32(data[index] | data[index - 1] << 8 | data[index - 2] << 16 | data[index - 3] << 24);
+};
+
+utilService.toUint32 = function (x) {
+  return utilService.modulo(utilService.toInteger(x), Math.pow(2, 32));
+};
+
+utilService.modulo = function (a, b) {
+  return a - Math.floor(a/b)*b;
+};
+
+utilService.toInteger = function (x) {
+  x = Number(x);
+  return x < 0 ? Math.ceil(x) : Math.floor(x);
+};
+
 module.exports = utilService;
