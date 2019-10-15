@@ -12,6 +12,7 @@ const utilService = require('./services/utilService');
 class FranchiseSchema extends EventEmitter {
   constructor (inputFile, outputFile) {
     super();
+    this.root = {}
     this.schemas = [];
     this.enums = [];
 
@@ -24,13 +25,24 @@ class FranchiseSchema extends EventEmitter {
     this.xml.on('endElement: FranTkData', function (data) {
       const majorVersion = data.$.dataMajorVersion;
       const minorVersion = data.$.dataMinorVersion;
+      const databaseName = data.$.databaseName;
+      const gameYear = /Madden(\d{2})/.exec(databaseName)[1];
 
       calculateInheritedSchemas();
-        // fs.writeFileSync(outputFile, JSON.stringify(that.schemas));
-        zlib.gzip(JSON.stringify(that.schemas), function (_, data) {
-          fs.writeFileSync(`${outputFile}/${majorVersion}_${minorVersion}.gz`, data);
-        });
-        that.emit('schemas:done', that.schemas);
+
+      that.root = {
+        'meta': {
+          'major': parseInt(majorVersion),
+          'minor': parseInt(minorVersion),
+          'gameYear': parseInt(gameYear)
+        },
+        'schemas': that.schemas
+      };
+
+      zlib.gzip(JSON.stringify(that.root), function (_, data) {
+        fs.writeFileSync(`${outputFile}/${majorVersion}_${minorVersion}.gz`, data);
+      });
+      that.emit('schemas:done', that.schemas);
     });
 
     this.xml.on('endElement: enum', function (theEnum) {

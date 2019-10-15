@@ -5,23 +5,30 @@ const FranchiseEnum = require('./FranchiseEnum');
 const EventEmitter = require('events').EventEmitter;
 
 class FranchiseSchema extends EventEmitter {
-  constructor (gameYear, major, minor) {
+  constructor (path) {
     super();
-    this.schemasMeta = readSchemaDirectory('./data/schemas');
-    this.schemaMeta = findApplicableSchema(this.schemasMeta, gameYear, major, minor);
-    const schemaGzip = fs.readFileSync(this.schemaMeta.path);
-    this.schemas = JSON.parse(zlib.gunzipSync(schemaGzip).toString());
+    this.path = path;
+    const schemaGzip = fs.readFileSync(path);
 
-    for (let i = 0; i < this.schemas.length; i++) {
-      const schema = this.schemas[i];
+    try {
+      this.schema = JSON.parse(zlib.gunzipSync(schemaGzip).toString());
+      this.meta = this.schema.meta;
+      this.schemas = this.schema.schemas;
 
-      for (let j = 0; j < schema.attributes.length; j++) {
-        const attribute = schema.attributes[j];
+      for (let i = 0; i < this.schemas.length; i++) {
+        const schema = this.schemas[i];
 
-        if (attribute.enum) {
-          attribute.enum = new FranchiseEnum(attribute.enum);
-        } 
+        for (let j = 0; j < schema.attributes.length; j++) {
+          const attribute = schema.attributes[j];
+
+          if (attribute.enum) {
+            attribute.enum = new FranchiseEnum(attribute.enum);
+          } 
+        }
       }
+    }
+    catch (err) {
+      throw new Error('Invalid schema. Please make sure your schema file is of GZIP format (ends in .gz).');
     }
 
     // UNCOMMENT BELOW CODE FOR NEW MADDEN VERSION TO CREATE SCHEMA JSON. UNCOMMENT PART IN FRANCHISEFILE TO WAIT FOR PROMISE. COMMENT ANYTHING AFTER THE SUPER() CALL ABOVE AS WELL!
@@ -116,65 +123,3 @@ class FranchiseSchema extends EventEmitter {
 };
 
 module.exports = FranchiseSchema;
-
-function readSchemaDirectory(dirpath) {
-  let schemaMeta = {};
-
-  const dirs = fs.readdirSync(path.join(__dirname, dirpath)).filter(f => fs.statSync(path.join(__dirname, dirpath, f)).isDirectory());
-
-  dirs.forEach((dir) => {
-    const files = fs.readdirSync(path.join(__dirname, dirpath, dir));
-    const fileMeta = files.map((file) => {
-      let regex = /(\d+)_(\d+)/.exec(file);
-      return {
-        'major': regex[1],
-        'minor': regex[2],
-        'path': path.join(__dirname, dirpath, dir, file)
-      }
-    });
-
-    schemaMeta[dir] = fileMeta;
-  });
-
-  return schemaMeta;
-};
-
-function findApplicableSchema(schemaMeta, gameYear, major, minor) {
-  // check if game year exists
-  if (schemaMeta && schemaMeta[gameYear]) {
-    // check if exact major exists
-    const exactMajor = schemaMeta[gameYear].filter((schema) => { return schema.major == major });
-
-    if (exactMajor.length > 0) {
-      return getClosestMinor(exactMajor);
-    }
-    else {
-      const majors = schemaMeta[gameYear].map((schema) => {
-        return schema.major;
-      });
-
-      const closest = getClosestValue(majors, major);
-      const majorMatches = schemaMeta[gameYear].filter((schema) => { return schema.major === closest; });
-
-      if (majorMatches.length > 0) {
-        return getClosestMinor(majorMatches); 
-      }
-    }
-
-    return null;
-  }
-
-  function getClosestMinor(arr, goal) {
-    const minors = arr.map((schema) => {
-      return schema.minor;
-    });
-    const closest = getClosestValue(minors, goal);
-    return arr.find((schema) => { return schema.minor === closest; });
-  };
-
-  function getClosestValue(arr, goal) {
-    return arr.reduce(function (prev, curr) {
-      return (Math.abs(curr - goal) < Math.abs(prev - goal) ? curr : prev);
-    });
-  };
-};

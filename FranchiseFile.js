@@ -5,6 +5,7 @@ const FranchiseSchema = require('./FranchiseSchema');
 const utilService = require('./services/utilService');
 const FranchiseFileTable = require('./FranchiseFileTable');
 const FranchiseFileSettings = require('./FranchiseFileSettings');
+const schemaPickerService = require('./services/schemaPicker');
 
 const COMPRESSED_FILE_LENGTH = 2936094;
 const COMPRESSED_DATA_OFFSET = 0x52;
@@ -41,32 +42,21 @@ class FranchiseFile extends EventEmitter {
   parse() {
     const that = this;
 
-    // if (this._gameYear === 19) {
-    //   this.schedule = new FranchiseSchedule(this.unpackedFileContents);
-
-    //   this.schedule.on('change', function (game) {
-    //     const header = that.unpackedFileContents.slice(0, game.offset);
-    //     const trailer = that.unpackedFileContents.slice(game.offset + game.hexData.length);
-
-    //     that.unpackedFileContents = Buffer.concat([header, game.hexData, trailer]);
-    //     that.packFile();
-    //   });
-
-    //   this.schedule.on('change-all', function (offsets) {
-    //     const header = that.unpackedFileContents.slice(0, offsets.startingOffset);
-    //     const trailer = that.unpackedFileContents.slice(offsets.endingOffset);
-
-    //     that.unpackedFileContents = Buffer.concat([header, offsets.hexData, trailer]);
-    //     that.packFile();
-    //   });
-    // }
-
     let schemaPromise = new Promise((resolve, reject) => {
-      const schemaMeta = getSchemaMetadata(this.packedFileContents);
-      this.schemaList = new FranchiseSchema(this._gameYear, schemaMeta.major, schemaMeta.minor);
-      // this.schemaList.on('schemas:done', function () {
-        resolve();
-      // });
+      const schemaMeta = this.settings.schemaOverride ? 
+        this.settings.schemaOverride : getSchemaMetadata(this.openedFranchiseFile, this._gameYear, this.rawContents);
+
+      const schemaPath = this.settings.schemaOverride && this.settings.schemaOverride.path ? 
+        this.settings.schemaOverride.path : schemaPickerService.pick(this._gameYear, schemaMeta.major, schemaMeta.minor).path;
+
+      try {
+        this.schemaList = new FranchiseSchema(schemaPath);
+      }
+      catch (err) {
+        reject(err);
+      }
+      
+      resolve();
     });
 
     let tablePromise = new Promise((resolve, reject) => {
@@ -139,6 +129,8 @@ class FranchiseFile extends EventEmitter {
 
       that.isLoaded = true;
       that.emit('ready');
+    }).catch((err) => {
+      throw err;
     });
   };
 
@@ -291,9 +283,25 @@ function getMaddenYear(compressedData) {
   return 19;
 };
 
-function getSchemaMetadata(compressedData) {
-  return {
-    'major': utilService.readDWordAt(0x41, compressedData, true),
-    'minor': utilService.readDWordAt(0x45, compressedData, true)
-  };
+function getSchemaMetadata(isCompressed, gameYear, data) {
+  if (isCompressed) {
+    return {
+      'major': utilService.readDWordAt(0x41, data, true),
+      'minor': utilService.readDWordAt(0x45, data, true)
+    };
+  }
+  else {
+    if (gameYear === 20) {
+      return {
+        'major': utilService.readDWordAt(0x2F, data, false),
+        'minor': 0
+      }
+    }
+    else {
+      return {
+        'major': 0,
+        'minor': 0
+      }
+    }
+  }
 }
