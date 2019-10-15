@@ -28,6 +28,7 @@ schemaGenerator.generate = (inputFile, showOutput, outputFile) => {
     const databaseName = data.$.databaseName;
     const gameYear = /Madden(\d{2})/.exec(databaseName)[1];
 
+    addExtraSchemas();
     calculateInheritedSchemas();
 
     schemaGenerator.root = {
@@ -104,6 +105,88 @@ schemaGenerator.generate = (inputFile, showOutput, outputFile) => {
       // schemaGenerator.emit('schemas:done', schemaGenerator.schemas);
     }
   });
+
+  function addExtraSchemas() {
+    if (!(schemaGenerator.schemas.find((schema) => { return schema.name === 'UserEntity'; }))) {
+      if (showOutput) console.log('ADDING USER ENTITY EXTRA SCHEMA');
+      addUserEntity();
+    }
+
+    if (!(schemaGenerator.schemas.find((schema) => { return schema.name === 'Reaction'; }))) {
+      if (showOutput) console.log('ADDING REACTION EXTRA SCHEMA');
+      addReaction();
+    }
+
+    function addUserEntity() {
+      const element = {
+        'numMembers': '1',
+        'assetId': '28862',
+        'name': 'UserEntity',
+        'base': null,
+        'attributes': [
+          {
+            'index': '0',
+            'name': 'IsUserControlled',
+            'type': 'bool',
+            'minValue': null,
+            'maxValue': null,
+            'maxLength': null,
+            'default': 'False',
+            'final': null,
+            'enum': getEnum(null),
+            'const': null
+          }
+        ]
+      };
+
+      schemaGenerator.schemas.unshift(element);
+    };
+
+    function addReaction() {
+      const element = {
+        'numMembers': '2',
+        'assetId': null,
+        'name': 'Reaction',
+        'base': 'none()',
+        'attributes': [
+          {
+            'index': '1',
+            'name': 'EventRecord',
+            'type': 'record',
+            'minValue': null,
+            'maxValue': null,
+            'maxLength': null,
+            'default': null,
+            'final': null,
+            'enum': getEnum(null),
+            'const': null
+          },
+          {
+            'index': '0',
+            'name': 'Handle',
+            'type': 'bool()',
+            'minValue': null,
+            'maxValue': null,
+            'maxLength': null,
+            'default': null,
+            'final': null,
+            'enum': getEnum(null),
+            'const': null
+          }
+        ]
+      };
+
+      schemaGenerator.schemas.unshift(element);
+    };
+    /* <schema name="UserEntity" numMembers="1" assetId="28862" isRecordPersistent="true">
+            <attribute name="IsUserControlled" idx="0" type="bool" default="False" />
+        </schema> */
+
+    /* <schema name="Reaction" numMembers="1" base="none()">
+            <attribute name="EventRecord" idx="1" type="record" />
+            <attribute name="Handle" idx="0" type="bool()" />
+        </schema> */
+  };
 
   function calculateInheritedSchemas() {
     const schemasWithBase = schemaGenerator.schemas.filter((schema) => { return schema.base && schema.base.indexOf("()") === -1; });

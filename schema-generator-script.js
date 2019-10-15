@@ -7,7 +7,7 @@ schemaGenerator.eventEmitter.on('schemas:done', () => {
   done = true;
 });
 
-schemaGenerator.generate(path.join('../', process.argv[2]), true, path.join('../', process.argv[3]));
+schemaGenerator.generate(process.argv[2], true, process.argv[3]);
 
 let done = false;
 
