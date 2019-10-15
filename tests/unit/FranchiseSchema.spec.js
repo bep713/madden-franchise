@@ -1,41 +1,43 @@
 const expect = require('chai').expect;
 const FranchiseSchema = require('../../FranchiseSchema');
-const schemaPicker = require('../../services/schemaPicker');
 
-describe('FranchiseSchemaChooser unit tests', () => {
-  describe('retrieves the expected schema', () => {
-    it('retrieves the exact schema match if exists', () => {
-      const schema = new FranchiseSchema('data/schemas/19/95_7.gz');
-      expect(schema.meta.major).to.equal(95);
-      expect(schema.meta.minor).to.equal(7);
-    });
+describe('FranchiseSchema unit tests', () => {
+  it('can load a gzip file', (done) => {
+    const schema = new FranchiseSchema('data/schemas/20/360_1.gz')
+      .once('schemas:done', () => {
+        expect(schema.meta.major).to.equal(360);
+        expect(schema.meta.minor).to.equal(1);
+        expect(schema.meta.gameYear).to.equal(20);
+        expect(schema.schemas.length).to.equal(2624);
+        done();
+      });
 
-    it('retrieves the exact schema match if exists', () => {
-      const schema = schemaPicker.pick(19, 95, 7);
-      expect(schema.major).to.equal(95);
-      expect(schema.minor).to.equal(7);
-      expect(schema.path).to.equal('c:\\Projects\\madden-franchise\\data\\schemas\\19\\95_7.gz')
-    });
+    schema.evaluate();
+  });
 
-    it('retrieves the closest schema without going over if exact match doesnt exist', () => {
-      const schema = schemaPicker.pick(20, 350, 1);
-      expect(schema.major).to.equal(342);
-      expect(schema.minor).to.equal(1);
-      expect(schema.path).to.equal('c:\\Projects\\madden-franchise\\data\\schemas\\20\\342_1.gz')
-    });
+  it('can load a xml file', (done) => {
+    const schema = new FranchiseSchema('data/schemas/schema-19.xml')
+      .once('schemas:done', () => {
+        expect(schema.meta.major).to.equal(95);
+        expect(schema.meta.minor).to.equal(7);
+        expect(schema.meta.gameYear).to.equal(19);
+        expect(schema.schemas.length).to.equal(2399);
+        done();
+      });
 
-    it('retrieves the closest one after if no earlier file exists', () => {
-      const schema = schemaPicker.pick(20, 330, 1);
-      expect(schema.major).to.equal(342);
-      expect(schema.minor).to.equal(1);
-      expect(schema.path).to.equal('c:\\Projects\\madden-franchise\\data\\schemas\\20\\342_1.gz')
-    });
+    schema.evaluate();
+  });
 
-    it('retrieves the closest one before if no higher one exists', () => {
-      const schema = schemaPicker.pick(20, 370, 1);
-      expect(schema.major).to.equal(360);
-      expect(schema.minor).to.equal(1);
-      expect(schema.path).to.equal('c:\\Projects\\madden-franchise\\data\\schemas\\20\\360_1.gz')
-    });
+  it('can load a ftx file', (done) => {
+    const schema = new FranchiseSchema('data/schemas/schema-20_360_1.ftx')
+      .once('schemas:done', () => {
+        expect(schema.meta.major).to.equal(360);
+        expect(schema.meta.minor).to.equal(1);
+        expect(schema.meta.gameYear).to.equal(20);
+        expect(schema.schemas.length).to.equal(2624);
+        done();
+      });
+
+    schema.evaluate();
   });
 });

@@ -51,12 +51,15 @@ class FranchiseFile extends EventEmitter {
 
       try {
         this.schemaList = new FranchiseSchema(schemaPath);
+        this.schemaList.on('schemas:done', () => {
+          resolve();
+        });
+
+        this.schemaList.evaluate();
       }
       catch (err) {
         reject(err);
       }
-      
-      resolve();
     });
 
     let tablePromise = new Promise((resolve, reject) => {
