@@ -17,7 +17,7 @@ schemaGenerator.generate = (inputFile, showOutput, outputFile) => {
   schemaGenerator.schemas = [];
   schemaGenerator.enums = [];
 
-  const stream = fs.createReadStream(path.join(__dirname, inputFile));
+  const stream = fs.createReadStream(inputFile);
   schemaGenerator.xml = new XmlStream(stream);
 
   schemaGenerator.xml.collect('attribute');
@@ -41,7 +41,7 @@ schemaGenerator.generate = (inputFile, showOutput, outputFile) => {
 
     if (outputFile) {
       zlib.gzip(JSON.stringify(schemaGenerator.root), function (_, data) {
-        fs.writeFileSync(path.join(__dirname,`${outputFile}\\${majorVersion}_${minorVersion}.gz`), data);
+        fs.writeFileSync(`${outputFile}\\${majorVersion}_${minorVersion}.gz`, data);
       });
     }
 

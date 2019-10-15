@@ -1,5 +1,5 @@
 // USAGE:
-//  node schema-generator.js [input file path] [output file folder]
+//  node schema-generator-script.js [input file path] [output file folder]
 const path = require('path');
 const schemaGenerator = require('./services/schema-generator');
 

@@ -64,7 +64,7 @@ class FranchiseSchema extends EventEmitter {
       this.emit('schemas:done');
     });
 
-    schemaGenerator.generate(path.join('..', this.path));
+    schemaGenerator.generate(this.path);
   };
 };
 
