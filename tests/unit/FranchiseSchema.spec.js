@@ -8,7 +8,7 @@ describe('FranchiseSchema unit tests', () => {
         expect(schema.meta.major).to.equal(360);
         expect(schema.meta.minor).to.equal(1);
         expect(schema.meta.gameYear).to.equal(20);
-        expect(schema.schemas.length).to.equal(2624);
+        expect(schema.schemas.length).to.equal(2626);
         done();
       });
 
@@ -34,7 +34,7 @@ describe('FranchiseSchema unit tests', () => {
         expect(schema.meta.major).to.equal(360);
         expect(schema.meta.minor).to.equal(1);
         expect(schema.meta.gameYear).to.equal(20);
-        expect(schema.schemas.length).to.equal(2624);
+        expect(schema.schemas.length).to.equal(2626);
         done();
       });
 

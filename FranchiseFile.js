@@ -43,8 +43,9 @@ class FranchiseFile extends EventEmitter {
     const that = this;
 
     let schemaPromise = new Promise((resolve, reject) => {
-      const schemaMeta = this.settings.schemaOverride ? 
-        this.settings.schemaOverride : getSchemaMetadata(this.openedFranchiseFile, this._gameYear, this.rawContents);
+      this.expectedSchemaVersion = getSchemaMetadata(this.openedFranchiseFile, this._gameYear, this.rawContents);
+
+      const schemaMeta = this.settings.schemaOverride ? this.settings.schemaOverride : this.expectedSchemaVersion;
 
       const schemaPath = this.settings.schemaOverride && this.settings.schemaOverride.path ? 
         this.settings.schemaOverride.path : schemaPickerService.pick(this._gameYear, schemaMeta.major, schemaMeta.minor).path;
@@ -290,20 +291,23 @@ function getSchemaMetadata(isCompressed, gameYear, data) {
   if (isCompressed) {
     return {
       'major': utilService.readDWordAt(0x41, data, true),
-      'minor': utilService.readDWordAt(0x45, data, true)
+      'minor': utilService.readDWordAt(0x45, data, true),
+      'gameYear': gameYear
     };
   }
   else {
     if (gameYear === 20) {
       return {
         'major': utilService.readDWordAt(0x2F, data, false),
-        'minor': 0
+        'minor': 0,
+        'gameYear': gameYear
       }
     }
     else {
       return {
         'major': 0,
-        'minor': 0
+        'minor': 0,
+        'gameYear': gameYear
       }
     }
   }
