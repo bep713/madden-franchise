@@ -12,7 +12,7 @@ class FranchiseSchema extends EventEmitter {
   };
 
   evaluate () {
-    const fileExtension = path.extname(this.path);
+    const fileExtension = path.extname(this.path).toLowerCase();
 
     switch (fileExtension) {
       case '.gz':
