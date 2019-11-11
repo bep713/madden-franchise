@@ -16,8 +16,14 @@ schemaPicker.pick = (gameYear, major, minor, settings) => {
   return findApplicableSchema(schemasMeta, gameYear, major, minor);
 };
 
-schemaPicker.retrieveSchemas = () => {
-  return readSchemaDirectories([SCHEMA_DIRECTORY]).filter((schema) => { return schema.major !== null && schema.minor !== null; });
+schemaPicker.retrieveSchemas = (customDirectory) => {
+  let dirsToRead = [SCHEMA_DIRECTORY];
+
+  if (customDirectory) {
+    dirsToRead.push(customDirectory);
+  }
+
+  return readSchemaDirectories(dirsToRead).filter((schema) => { return schema.major !== null && schema.minor !== null; });
 };
 
 module.exports = schemaPicker;
