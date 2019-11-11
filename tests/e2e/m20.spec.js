@@ -36,7 +36,8 @@ describe('Madden 20 end to end tests', function () {
       file.on('ready', () => {
         expect(file.settings).to.eql({
           'saveOnChange': false,
-          'schemaOverride': false
+          'schemaOverride': false,
+          'schemaDirectory': false
         });
 
         expect(file.isLoaded).to.be.true;
@@ -51,7 +52,7 @@ describe('Madden 20 end to end tests', function () {
         expect(file.schemaList).to.not.be.undefined;
         expect(file.schemaList.meta.major).to.equal(342);
         expect(file.schemaList.meta.minor).to.equal(1);
-        expect(file.schemaList.path).to.contain('20\\342_1.gz')
+        expect(file.schemaList.path).to.contain('20\\M20_342_1.gz')
 
         done();
       });
@@ -67,7 +68,7 @@ describe('Madden 20 end to end tests', function () {
       file.on('ready', () => {
         expect(file.schemaList.meta.major).to.equal(360);
         expect(file.schemaList.meta.minor).to.equal(1);
-        expect(file.schemaList.path).to.contain('20\\360_1.gz')
+        expect(file.schemaList.path).to.contain('20\\M20_360_1.gz')
       });
     });
 
@@ -76,13 +77,13 @@ describe('Madden 20 end to end tests', function () {
         'schemaOverride': {
           'major': 95,
           'minor': 7,
-          'path': path.join(__dirname, '../../data/schemas/19/95_7.gz')
+          'path': path.join(__dirname, '../../data/schemas/19/M19_95_7.gz')
         }
       });
       file.on('ready', () => {
         expect(file.schemaList.meta.major).to.equal(95);
         expect(file.schemaList.meta.minor).to.equal(7);
-        expect(file.schemaList.path).to.contain('19\\95_7.gz')
+        expect(file.schemaList.path).to.contain('19\\M19_95_7.gz')
       });
     });
 

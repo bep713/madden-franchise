@@ -48,7 +48,7 @@ class FranchiseFile extends EventEmitter {
       const schemaMeta = this.settings.schemaOverride ? this.settings.schemaOverride : this.expectedSchemaVersion;
 
       const schemaPath = this.settings.schemaOverride && this.settings.schemaOverride.path ? 
-        this.settings.schemaOverride.path : schemaPickerService.pick(this._gameYear, schemaMeta.major, schemaMeta.minor).path;
+        this.settings.schemaOverride.path : schemaPickerService.pick(this._gameYear, schemaMeta.major, schemaMeta.minor, this.settings).path;
 
       try {
         this.schemaList = new FranchiseSchema(schemaPath);

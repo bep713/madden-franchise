@@ -3,7 +3,7 @@ const FranchiseSchema = require('../../FranchiseSchema');
 
 describe('FranchiseSchema unit tests', () => {
   it('can load a gzip file', (done) => {
-    const schema = new FranchiseSchema('data/schemas/20/360_1.gz')
+    const schema = new FranchiseSchema('data/schemas/20/M20_360_1.gz')
       .once('schemas:done', () => {
         expect(schema.meta.major).to.equal(360);
         expect(schema.meta.minor).to.equal(1);
