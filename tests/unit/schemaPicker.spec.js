@@ -41,4 +41,11 @@ describe('schema picker service unit tests', () => {
       expect(schema.path).to.equal('c:\\Projects\\madden-franchise\\tests\\data\\test-schemas\\367_1.FTX')
     });
   });
+
+  it('returns a list of saved schemas', () => {
+    const schemas = schemaPicker.retrieveSchemas();
+    expect(schemas.length).to.equal(3);
+    expect(schemas[0].major).to.equal(95);
+    expect(schemas[1].major).to.equal(342);
+  }); 
 });

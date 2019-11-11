@@ -3,7 +3,7 @@ const path = require('path');
 const zlib = require('zlib');
 const FranchiseEnum = require('./FranchiseEnum');
 const EventEmitter = require('events').EventEmitter;
-const schemaGenerator = require('./services/schema-generator');
+const schemaGenerator = require('./services/schemaGenerator');
 
 class FranchiseSchema extends EventEmitter {
   constructor (filePath) {

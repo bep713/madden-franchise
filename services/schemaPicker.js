@@ -1,10 +1,12 @@
 const fs = require('fs');
 const path = require('path');
 
+const SCHEMA_DIRECTORY = path.join(__dirname, '../data/schemas');
+
 let schemaPicker = {};
 
 schemaPicker.pick = (gameYear, major, minor, settings) => {
-  let schemaDirectories = [path.join(__dirname, '../data/schemas')];
+  let schemaDirectories = [SCHEMA_DIRECTORY];
 
   if (settings && settings.schemaDirectory) {
     schemaDirectories.push(settings.schemaDirectory);
@@ -12,7 +14,11 @@ schemaPicker.pick = (gameYear, major, minor, settings) => {
 
   const schemasMeta = readSchemaDirectories(schemaDirectories);
   return findApplicableSchema(schemasMeta, gameYear, major, minor);
-}
+};
+
+schemaPicker.retrieveSchemas = () => {
+  return readSchemaDirectories([SCHEMA_DIRECTORY]).filter((schema) => { return schema.major !== null && schema.minor !== null; });
+};
 
 module.exports = schemaPicker;
 
