@@ -134,7 +134,7 @@ class FranchiseFile extends EventEmitter {
       that.isLoaded = true;
       that.emit('ready');
     }).catch((err) => {
-      throw err;
+      that.emit('error', err);
     });
   };
 
