@@ -68,6 +68,16 @@ describe('util service unit tests', () => {
       expect(errorFn).to.throw(Error);
     });
   });
+
+  describe('parse reference information', () => {
+    it ('returns expected result', () => {
+      let result = utilService.getReferenceData('00111101110001000000000000001011');
+      expect(result).to.eql({
+        'tableId': 7906,
+        'rowNumber': 11
+      });
+    });
+  });
 });
 
 function checkArgumentType(fn) {

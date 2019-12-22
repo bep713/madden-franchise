@@ -228,6 +228,11 @@ class FranchiseFile extends EventEmitter {
   getTableByIndex (index) {
     return this.tables[index];
   };
+
+  getReferencedRecord (referenceValue) {
+    const reference = utilService.getReferenceData(referenceValue);
+    return this.getTableById(reference.tableId).records[reference.rowNumber];
+  };
 };
 
 module.exports = FranchiseFile;

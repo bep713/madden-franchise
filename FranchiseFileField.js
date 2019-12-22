@@ -35,6 +35,14 @@ class FranchiseFileField extends EventEmitter {
     return this._offset.isReference;
   };
 
+  get referenceData () {
+    if (this.isReference) {
+      return utilService.getReferenceData(this.value);
+    }
+    
+    return null;
+  };
+
   set value (value) {
     if (this.offset.type === 'string') {
       this.secondTableField.value = value.toString();

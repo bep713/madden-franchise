@@ -216,4 +216,11 @@ utilService.toInteger = function (x) {
   return x < 0 ? Math.ceil(x) : Math.floor(x);
 };
 
+utilService.getReferenceData = function (value) {
+  return {
+    'tableId': utilService.bin2dec(value.substring(0, 15)),
+    'rowNumber': utilService.bin2dec(value.substring(16))
+  }
+};
+
 module.exports = utilService;

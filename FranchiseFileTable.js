@@ -58,49 +58,6 @@ class FranchiseFileTable extends EventEmitter {
     bufferArrays.push(this.data.slice(currentOffset));
     this.data = Buffer.concat(bufferArrays);
     return this.data;
-
-    // console.time('method 1a');
-  
-    // for (let i = 0; i < changedRecords.length; i++) {
-    //   let record = changedRecords[i];
-    //   const recordOffset = this.header.table1StartIndex + (record.index * this.header.record1Size);
-    //   const header = this.data.slice(0, recordOffset);
-    //   const trailer = this.data.slice(recordOffset + record.hexData.length);
-    //   this.data = Buffer.concat([header, record.hexData, trailer]);
-
-    //   record.isChanged = false;
-    // }
-
-    // console.timeEnd('method 1a');
-
-    // console.time('method 1b');
-  
-    // for (let i = 0; i < changedTable2Records.length; i++) {
-    //   let record = changedTable2Records[i];
-    //   const recordOffset = this.header.table2StartIndex + record.index;
-
-    //   if (record.index === 0 && i > 0) {
-    //     continue;
-    //   }
-
-    //   // if (recordOffset > 0 && i > 0) {
-    //     const header = this.data.slice(0, recordOffset);
-    //     const trailer = this.data.slice(recordOffset + record.hexData.length);
-    //     this.data = Buffer.concat([header, record.hexData, trailer]);
-    //   // }
-
-    //   record.isChanged = false;
-    // }
-
-    // console.timeEnd('method 1b');
-
-    // console.time('method 2b');
-
-    
-    // console.timeEnd('method 2b');
-
-    // console.log(this.data.length, testData.length);
-    // assert.deepEqual(testData, this.data);
   };
 
   set schema (schema) {

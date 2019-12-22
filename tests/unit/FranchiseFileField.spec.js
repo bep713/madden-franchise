@@ -620,4 +620,27 @@ describe('FranchiseFileField unit tests', () => {
       expect(field.secondTableField.value).to.equal('test');
     })
   });
+
+  describe('get reference information', () => {
+    let field;
+
+    beforeEach(() => {
+      let offset = {
+        'isReference': true
+      };
+
+      field = new FranchiseFileField('TestReference', '00111001101010000000000000000000', offset);
+    });
+
+    it('should return true when calling isReference', () => {
+      expect(field.isReference).to.be.true;
+    });
+
+    it('can parse the reference information', () => {
+      expect(field.referenceData).to.eql({
+        'tableId': 7380,
+        'rowNumber': 0
+      });
+    });
+  });
 });
