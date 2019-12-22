@@ -62,3 +62,7 @@ typings/
 
 # Dont include tests in the npm package
 tests/
+
+# Dont include test schemas or preloaded frt files
+data/preloaded-tables/
+data/schemas/*.xml
