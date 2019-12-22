@@ -19,90 +19,95 @@ let file;
 describe('Madden 20 end to end tests', function () {
   this.timeout(7000);
 
-  // describe('open files', () => {
-  //   it('can open a M20 compressed file', () => {
-  //     file = new FranchiseFile(filePaths.compressed.m20);
-  //   });
+  describe('open files', () => {
+    it('can open a M20 compressed file', () => {
+      file = new FranchiseFile(filePaths.compressed.m20);
+    });
 
-  //   it('can open a M20 uncompressed file', () => {
-  //     file = new FranchiseFile(filePaths.uncompressed.m20);
-  //   });
+    it('can open a M20 uncompressed file', () => {
+      file = new FranchiseFile(filePaths.uncompressed.m20);
+    });
 
-  //   it('fires the `ready` event when the file is done processing', (done) => {
-  //     file = new FranchiseFile(filePaths.compressed.m20);
+    it('fires the `ready` event when the file is done processing', (done) => {
+      file = new FranchiseFile(filePaths.compressed.m20, {
+        'schemaDirectory': path.join(__dirname, '../data/test-schemas')
+      });
 
-  //     expect(file.isLoaded).to.be.false;
+      expect(file.isLoaded).to.be.false;
 
-  //     file.on('ready', () => {
-  //       expect(file.settings).to.eql({
-  //         'saveOnChange': false,
-  //         'schemaOverride': false,
-  //         'schemaDirectory': false
-  //       });
+      file.on('ready', () => {
+        expect(file.settings).to.eql({
+          'saveOnChange': false,
+          'schemaOverride': false,
+          'schemaDirectory': path.join(__dirname, '../data/test-schemas')
+        });
 
-  //       expect(file.isLoaded).to.be.true;
-  //       expect(file.filePath).to.eql(filePaths.compressed.m20);
-  //       expect(file.gameYear).to.equal(20);
-  //       expect(file.openedFranchiseFile).to.be.true;
-  //       expect(file.rawContents).to.not.be.undefined;
-  //       expect(file.packedFileContents).to.not.be.undefined;
-  //       expect(file.unpackedFileContents).to.not.be.undefined;
+        expect(file.isLoaded).to.be.true;
+        expect(file.filePath).to.eql(filePaths.compressed.m20);
+        expect(file.gameYear).to.equal(20);
+        expect(file.openedFranchiseFile).to.be.true;
+        expect(file.rawContents).to.not.be.undefined;
+        expect(file.packedFileContents).to.not.be.undefined;
+        expect(file.unpackedFileContents).to.not.be.undefined;
 
-  //       expect(file.tables).to.not.be.undefined;
-  //       expect(file.schemaList).to.not.be.undefined;
-  //       expect(file.schemaList.meta.major).to.equal(342);
-  //       expect(file.schemaList.meta.minor).to.equal(1);
-  //       expect(file.schemaList.path).to.contain('20\\M20_342_1.gz')
+        expect(file.tables).to.not.be.undefined;
+        expect(file.schemaList).to.not.be.undefined;
+        expect(file.schemaList.meta.major).to.equal(342);
+        expect(file.schemaList.meta.minor).to.equal(1);
+        expect(file.schemaList.path).to.contain('M20_342_1.gz')
 
-  //       done();
-  //     });
-  //   });
+        done();
+      });
+    });
 
-  //   it('can override the schema through a setting', () => {
-  //     file = new FranchiseFile(filePaths.compressed.m20, {
-  //       'schemaOverride': {
-  //         'major': 360,
-  //         'minor': 1
-  //       }
-  //     });
-  //     file.on('ready', () => {
-  //       expect(file.schemaList.meta.major).to.equal(360);
-  //       expect(file.schemaList.meta.minor).to.equal(1);
-  //       expect(file.schemaList.path).to.contain('20\\M20_360_1.gz')
-  //     });
-  //   });
+    it('can override the schema through a setting', () => {
+      file = new FranchiseFile(filePaths.compressed.m20, {
+        'schemaOverride': {
+          'major': 360,
+          'minor': 1
+        },
+        'schemaDirectory': path.join(__dirname, '../data/test-schemas')
+      });
+      file.on('ready', () => {
+        expect(file.schemaList.meta.major).to.equal(360);
+        expect(file.schemaList.meta.minor).to.equal(1);
+        expect(file.schemaList.path).to.contain('M20_360_1.gz')
+      });
+    });
 
-  //   it('can override the schema path through a setting', () => {
-  //     file = new FranchiseFile(filePaths.compressed.m20, {
-  //       'schemaOverride': {
-  //         'major': 95,
-  //         'minor': 7,
-  //         'path': path.join(__dirname, '../../data/schemas/19/M19_95_7.gz')
-  //       }
-  //     });
-  //     file.on('ready', () => {
-  //       expect(file.schemaList.meta.major).to.equal(95);
-  //       expect(file.schemaList.meta.minor).to.equal(7);
-  //       expect(file.schemaList.path).to.contain('19\\M19_95_7.gz')
-  //     });
-  //   });
+    it('can override the schema path through a setting', () => {
+      file = new FranchiseFile(filePaths.compressed.m20, {
+        'schemaOverride': {
+          'major': 95,
+          'minor': 7,
+          'path': path.join(__dirname, '../../data/schemas/19/M19_95_7.gz')
+        }
+      });
+      file.on('ready', () => {
+        expect(file.schemaList.meta.major).to.equal(95);
+        expect(file.schemaList.meta.minor).to.equal(7);
+        expect(file.schemaList.path).to.contain('19\\M19_95_7.gz')
+      });
+    });
 
-  //   // it('throws an error if using an invalid schema', () => {
-  //   //   expect(() => {
-  //   //     file = new FranchiseFile(filePaths.compressed.m20, {
-  //   //       'schemaOverride': {
-  //   //         'major': 95,
-  //   //         'minor': 7,
-  //   //         'path': path.join(__dirname, '../../data/schemas/schema-19.xml')
-  //   //       }
-  //   //     });
-  //   //   }).to.throw(Error);
-  //   // });
-  // });
+    // it('throws an error if using an invalid schema', () => {
+    //   expect(() => {
+    //     file = new FranchiseFile(filePaths.compressed.m20, {
+    //       'schemaOverride': {
+    //         'major': 95,
+    //         'minor': 7,
+    //         'path': path.join(__dirname, '../../data/schemas/schema-19.xml')
+    //       }
+    //     });
+    //   }).to.throw(Error);
+    // });
+  });
 
   describe('post-open tests', () => {
     before((done) => {
-      file = new FranchiseFile(filePaths.compressed.m20);
+      file = new FranchiseFile(filePaths.compressed.m20, {
+        'schemaDirectory': path.join(__dirname, '../data/test-schemas')
+      });
 
       file.on('ready', () => {
         done();
