@@ -4,15 +4,18 @@ const utilService = require('./services/utilService');
 const FranchiseFileRecord = require('./FranchiseFileRecord');
 
 class FranchiseFileTable extends EventEmitter {
-  constructor(data, offset, gameYear) {
+  constructor(data, offset, gameYear, strategy) {
     super();
     this.data = data;
+    this.lengthAtLastSave = data.length;
     this.offset = offset;
-    this.name = readTableName(data, gameYear);
+    this.strategyBase = strategy;
+    this.strategy = this.strategyBase.table;
     this.recordsRead = false;
-    this.isArray = this.name.indexOf('[]') >= 0;
     this._gameYear = gameYear;
-    this.header = readTableHeader(this.data, this.isArray, gameYear);
+    this.header = this.strategy.parseHeader(this.data);
+    this.name = this.header.name;
+    this.isArray = this.header.isArray;
     this.loadedOffsets = [];
     this.isChanged = false;
     this.records = [];
@@ -26,6 +29,7 @@ class FranchiseFileTable extends EventEmitter {
 
     for (let i = 0; i < changedRecords.length; i++) {
       let record = changedRecords[i];
+      record.isChanged = false;
       const recordOffset = this.header.table1StartIndex + (record.index * this.header.record1Size);
       
       bufferArrays.push(this.data.slice(currentOffset, recordOffset));
@@ -36,46 +40,42 @@ class FranchiseFileTable extends EventEmitter {
 
     bufferArrays.push(this.data.slice(currentOffset, this.header.table2StartIndex));
 
-    const changedTable2Records = this.table2Records.filter((record) => { return record.isChanged; });
-    currentOffset = this.header.table2StartIndex;
+    const table2Data = this.strategy.getTable2BinaryData(this.table2Records, this.data.slice(this.header.table2StartIndex));
+    bufferArrays = bufferArrays.concat(table2Data);
 
-    for (let i = 0; i < changedTable2Records.length; i++) {
-      let record = changedTable2Records[i];
-      const recordOffset = this.header.table2StartIndex + record.index;
+    // const changedTable2Records = this.table2Records.filter((record) => { return record.isChanged; });
+    // currentOffset = this.header.table2StartIndex;
 
-      if (recordOffset < currentOffset) {
-        // this case is true for the last few rows with no data in them. They reference the first table2 value.
-        break;
-      }
+    // for (let i = 0; i < changedTable2Records.length; i++) {
+    //   let record = changedTable2Records[i];
+    //   const recordOffset = this.header.table2StartIndex + record.index;
 
-      bufferArrays.push(this.data.slice(currentOffset, recordOffset));
-      const recordHexData = record.hexData;
-      bufferArrays.push(recordHexData);
+    //   if (recordOffset < currentOffset) {
+    //     // this case is true for the last few rows with no data in them. They reference the first table2 value.
+    //     break;
+    //   }
 
-      currentOffset = recordOffset + recordHexData.length;
-    }
+    //   bufferArrays.push(this.data.slice(currentOffset, recordOffset));
+    //   const recordHexData = record.hexData;
+    //   bufferArrays.push(recordHexData);
 
-    bufferArrays.push(this.data.slice(currentOffset));
+    //   currentOffset = recordOffset + recordHexData.length;
+    // }
+
+    // bufferArrays.push(this.data.slice(currentOffset));
+
     this.data = Buffer.concat(bufferArrays);
     return this.data;
   };
 
   set schema (schema) {
     this._schema = schema;
+    const modifiedHeaderAttributes = this.strategy.parseHeaderAttributesFromSchema(schema, this.data, this.header);
 
-    let headerSize = 0;
-    let records1Size = 0;
-
-    if (schema) {
-      headerSize = this.header.headerOffset + (schema.numMembers * 4) + this.header.tableStoreLength;
-      const binaryData = utilService.getBitArray(this.data.slice(0, headerSize));
-      records1Size = utilService.bin2dec(binaryData.slice(this.header.record1SizeOffset, this.header.record1SizeOffset + this.header.record1SizeLength));
-    }
-
-    this.header.headerSize = headerSize;
-    this.header.record1Size = records1Size;
-    this.header.table1StartIndex = headerSize,
-    this.header.table2StartIndex = headerSize + (this.header.data1RecordCount * records1Size);
+    this.header.headerSize = modifiedHeaderAttributes.headerSize;
+    this.header.record1Size = modifiedHeaderAttributes.record1Size;
+    this.header.table1StartIndex = modifiedHeaderAttributes.table1StartIndex;
+    this.header.table2StartIndex = modifiedHeaderAttributes.table2StartIndex;
   };
 
   get schema () {
@@ -119,6 +119,7 @@ class FranchiseFileTable extends EventEmitter {
 
         let offsetTableToUse = this.offsetTable;
 
+        
         if (attribsToLoad) {
           // get any new attributes to load plus the existing loaded offsets
           offsetTableToUse = offsetTableToUse.filter((attrib) => { return attribsToLoad.includes(attrib.name) || this.loadedOffsets.find((offset) => { return offset.name === attrib.name; }); });
@@ -135,12 +136,6 @@ class FranchiseFileTable extends EventEmitter {
           const that = this;
           record.on('change', function () {
             this.isChanged = true;
-            // const recordOffset = that.header.table1StartIndex + (index * that.header.record1Size);
-
-            // const header = that.data.slice(0, recordOffset);
-            // const trailer = that.data.slice(recordOffset + that.header.record1Size);
-
-            // that.data = Buffer.concat([header, this.hexData, trailer]);
             that.emit('change');
           });
         });
@@ -172,6 +167,7 @@ class FranchiseFileTable extends EventEmitter {
       fieldsReferencingSecondTable.forEach((field) => {
         const stringStartBinaryIndex = field.secondTableField.index * 8;
         const stringEndBinaryIndex = stringStartBinaryIndex + (field.offset.maxLength * 8);
+        field.secondTableField.strategy = that.strategyBase.table2Field;
         field.secondTableField.unformattedValue = secondTableBinaryData.slice(stringStartBinaryIndex, stringEndBinaryIndex);
         that.table2Records.push(field.secondTableField);
       });
@@ -180,221 +176,6 @@ class FranchiseFileTable extends EventEmitter {
 };
 
 module.exports = FranchiseFileTable;
-
-function readTableName (data) {
-  let name = '';
-
-  let i = 0;
-
-  do {
-    name += String.fromCharCode(data[i]);
-    i += 1;
-  }
-  while (i < data.length && data[i] !== 0);
-
-  return name;
-};
-
-function readTableHeader(data, isArray, gameYear) {
-  switch (gameYear) {
-    default:
-    case 19:
-      return readTableHeader19(data, isArray);
-    case 20:
-      return readTableHeader20(data, isArray);
-  }
-
-  function readTableHeader19 (data, isArray) {
-    const headerStart = 0x80;
-    const tableId = utilService.byteArrayToLong(data.slice(headerStart, headerStart+4), true);
-    const tablePad1 = utilService.byteArrayToLong(data.slice(headerStart+4, headerStart+8), true);
-    const tableUnknown1 = utilService.byteArrayToLong(data.slice(headerStart+8, headerStart+12), true);
-    const tableUnknown2 = utilService.byteArrayToLong(data.slice(headerStart+12, headerStart+16), true);
-    const data1Id = readTableName(data.slice(headerStart+16, headerStart+20));
-    const data1Type = utilService.byteArrayToLong(data.slice(headerStart+20, headerStart+24), true);
-    const data1Unknown1 = utilService.byteArrayToLong(data.slice(headerStart+24, headerStart+28), true);
-    const data1Flag1 = data[headerStart+28];
-    const data1Flag2 = data[headerStart+29];
-    const data1Flag3 = data[headerStart+30];
-    const data1Flag4 = data[headerStart+31];
-    const tableStoreLength = utilService.byteArrayToLong(data.slice(headerStart+32, headerStart+36), true);
-
-    let headerOffset = headerStart+36;
-    let records1SizeOffset = 1689;
-    let tableStoreName = null;
-
-    if (tableStoreLength > 0) {
-      headerOffset += tableStoreLength;
-      records1SizeOffset += tableStoreLength * 8;
-      tableStoreName = readTableName(data.slice(headerStart+36, headerStart+36+tableStoreLength));
-    }
-
-    const data1Offset = utilService.byteArrayToLong(data.slice(headerOffset, headerOffset+4), true);
-    const data1TableId = utilService.byteArrayToLong(data.slice(headerOffset+4, headerOffset+8), true);
-    const data1RecordCount = utilService.byteArrayToLong(data.slice(headerOffset+8, headerOffset+12), true);
-    const data1Pad2 = utilService.byteArrayToLong(data.slice(headerOffset+12, headerOffset+16), true);
-    const table1Length = utilService.byteArrayToLong(data.slice(headerOffset+16, headerOffset+20), true);
-    const table2Length = utilService.byteArrayToLong(data.slice(headerOffset+20, headerOffset+24), true);
-    const data1Pad3 = utilService.byteArrayToLong(data.slice(headerOffset+24, headerOffset+28), true);
-    const data1Pad4 = utilService.byteArrayToLong(data.slice(headerOffset+28, headerOffset+32), true);
-    const data2Id = readTableName(data.slice(headerOffset+32, headerOffset+36));
-    const table1Length2 = utilService.byteArrayToLong(data.slice(headerOffset+36, headerOffset+40), true);
-    const tableTotalLength = utilService.byteArrayToLong(data.slice(headerOffset+40, headerOffset+44), true);
-    const data2RecordWords = utilService.byteArrayToLong(data.slice(headerOffset+44, headerOffset+48), true);
-    const data2RecordCapacity = utilService.byteArrayToLong(data.slice(headerOffset+48, headerOffset+52), true);
-    const data2IndexEntries = utilService.byteArrayToLong(data.slice(headerOffset+52, headerOffset+56), true);
-    const unknown4 = utilService.byteArrayToLong(data.slice(headerOffset+56, headerOffset+60), true);
-    const data2RecordCount = utilService.byteArrayToLong(data.slice(headerOffset+60, headerOffset+64), true);
-
-    let offsetStart = 0xE4 + tableStoreLength;
-    const hasSecondTable = tableTotalLength > table1Length;
-
-    let headerSize = 0;
-    let records1Size = 0;
-
-    if (isArray) {
-      headerSize = 0xE8 + tableStoreLength;
-      const binaryData = utilService.getBitArray(data.slice(0, headerSize));
-      records1Size = utilService.bin2dec(binaryData.slice(records1SizeOffset, records1SizeOffset+9));
-    }
-
-    return {
-      'tableId': tableId,
-      'tablePad1': tablePad1,
-      'tableUnknown1': tableUnknown1,
-      'tableUnknown2': tableUnknown2,
-      'data1Id': data1Id,
-      'data1Type': data1Type,
-      'data1Unknown1': data1Unknown1,
-      'data1Flag1': data1Flag1,
-      'data1Flag2': data1Flag2,
-      'data1Flag3': data1Flag3,
-      'data1Flag4': data1Flag4,
-      'tableStoreLength': tableStoreLength,
-      'tableStoreName': tableStoreName,
-      'data1Offset': data1Offset,
-      'data1TableId': data1TableId,
-      'data1RecordCount': data1RecordCount,
-      'data1Pad2': data1Pad2,
-      'table1Length': table1Length,
-      'table2Length': table2Length,
-      'data1Pad3': data1Pad3,
-      'data1Pad4': data1Pad4,
-      'headerSize': headerSize,
-      'headerOffset': 0xE4,
-      'record1SizeOffset': records1SizeOffset,
-      'record1SizeLength': 9,
-      'record1Size': records1Size,
-      'offsetStart': offsetStart,
-      'data2Id': data2Id,
-      'table1Length2': table1Length2,
-      'tableTotalLength': tableTotalLength,
-      'hasSecondTable': hasSecondTable,
-      'table1StartIndex': tableStoreLength === 0 && !isArray ? headerSize : headerSize - 4 + (data1RecordCount * 4),
-      'table2StartIndex': tableStoreLength === 0 && !isArray ? headerSize + (data1RecordCount * records1Size) : (headerSize -4 + (data1RecordCount * 4)) + (data1RecordCount * records1Size),
-      'data2recordWords': data2RecordWords,
-      'data2RecordCapacity': data2RecordCapacity,
-      'data2IndexEntries': data2IndexEntries,
-      'data2RecordCount': data2RecordCount
-    };
-  };
-
-  function readTableHeader20 (data, isArray) {
-    const headerStart = 0x80;
-    const tableId = utilService.byteArrayToLong(data.slice(headerStart, headerStart+4), true);
-    const tablePad1 = utilService.byteArrayToLong(data.slice(headerStart+4, headerStart+8), true);
-    const tableUnknown1 = utilService.byteArrayToLong(data.slice(headerStart+8, headerStart+12), true);
-    const tableUnknown2 = utilService.byteArrayToLong(data.slice(headerStart+12, headerStart+16), true);
-    const tableUnknown3 = utilService.byteArrayToLong(data.slice(headerStart+16, headerStart+20), true);
-    const data1Id = readTableName(data.slice(headerStart+20, headerStart+24));
-    const data1Type = utilService.byteArrayToLong(data.slice(headerStart+24, headerStart+28), true);
-    const data1Unknown1 = utilService.byteArrayToLong(data.slice(headerStart+28, headerStart+32), true);
-    const data1Flag1 = data[headerStart+32];
-    const data1Flag2 = data[headerStart+33];
-    const data1Flag3 = data[headerStart+34];
-    const data1Flag4 = data[headerStart+35];
-    const tableStoreLength = utilService.byteArrayToLong(data.slice(headerStart+36, headerStart+40), true);
-
-    let headerOffset = headerStart+40;
-    let records1SizeOffset = 1720;
-    let tableStoreName = null;
-
-    if (tableStoreLength > 0) {
-      headerOffset += tableStoreLength;
-      records1SizeOffset += tableStoreLength * 8;
-      tableStoreName = readTableName(data.slice(headerStart+40, headerStart+40+tableStoreLength));
-    }
-
-    const data1Offset = utilService.byteArrayToLong(data.slice(headerOffset, headerOffset+4), true);
-    const data1TableId = utilService.byteArrayToLong(data.slice(headerOffset+4, headerOffset+8), true);
-    const data1RecordCount = utilService.byteArrayToLong(data.slice(headerOffset+8, headerOffset+12), true);
-    const data1Pad2 = utilService.byteArrayToLong(data.slice(headerOffset+12, headerOffset+16), true);
-    const table1Length = utilService.byteArrayToLong(data.slice(headerOffset+16, headerOffset+20), true);
-    const table2Length = utilService.byteArrayToLong(data.slice(headerOffset+20, headerOffset+24), true);
-    const data1Pad3 = utilService.byteArrayToLong(data.slice(headerOffset+24, headerOffset+28), true);
-    const data1Pad4 = utilService.byteArrayToLong(data.slice(headerOffset+28, headerOffset+32), true);
-    const data2Id = readTableName(data.slice(headerOffset+32, headerOffset+36));
-    const table1Length2 = utilService.byteArrayToLong(data.slice(headerOffset+36, headerOffset+40), true);
-    const tableTotalLength = utilService.byteArrayToLong(data.slice(headerOffset+40, headerOffset+44), true);
-    const data2RecordWords = utilService.byteArrayToLong(data.slice(headerOffset+44, headerOffset+48), true);
-    const data2RecordCapacity = utilService.byteArrayToLong(data.slice(headerOffset+48, headerOffset+52), true);
-    const data2IndexEntries = utilService.byteArrayToLong(data.slice(headerOffset+52, headerOffset+56), true);
-    const unknown4 = utilService.byteArrayToLong(data.slice(headerOffset+56, headerOffset+60), true);
-    const data2RecordCount = utilService.byteArrayToLong(data.slice(headerOffset+60, headerOffset+64), true);
-
-    let offsetStart = 0xE8 + tableStoreLength;
-    const hasSecondTable = tableTotalLength > table1Length;
-
-    let headerSize = 0;
-    let records1Size = 0;
-
-    if (isArray) {
-      headerSize = 0xE8 + tableStoreLength;
-      const binaryData = utilService.getBitArray(data.slice(0, headerSize));
-      records1Size = utilService.bin2dec(binaryData.slice(records1SizeOffset, records1SizeOffset+10));
-    }
-
-    return {
-      'tableId': tableId,
-      'tablePad1': tablePad1,
-      'tableUnknown1': tableUnknown1,
-      'tableUnknown2': tableUnknown2,
-      'data1Id': data1Id,
-      'data1Type': data1Type,
-      'data1Unknown1': data1Unknown1,
-      'data1Flag1': data1Flag1,
-      'data1Flag2': data1Flag2,
-      'data1Flag3': data1Flag3,
-      'data1Flag4': data1Flag4,
-      'tableStoreLength': tableStoreLength,
-      'tableStoreName': tableStoreName,
-      'data1Offset': data1Offset,
-      'data1TableId': data1TableId,
-      'data1RecordCount': data1RecordCount,
-      'data1Pad2': data1Pad2,
-      'table1Length': table1Length,
-      'table2Length': table2Length,
-      'data1Pad3': data1Pad3,
-      'data1Pad4': data1Pad4,
-      'headerOffset': 0xE8,
-      'headerSize': headerSize,
-      'record1SizeOffset': records1SizeOffset,
-      'record1SizeLength': 10,
-      'record1Size': records1Size,
-      'offsetStart': offsetStart,
-      'data2Id': data2Id,
-      'table1Length2': table1Length2,
-      'tableTotalLength': tableTotalLength,
-      'hasSecondTable': hasSecondTable,
-      'table1StartIndex': tableStoreLength === 0 && !isArray ? headerSize : headerSize + (data1RecordCount * 4),
-      'table2StartIndex': tableStoreLength === 0 && !isArray ? headerSize + (data1RecordCount * records1Size) : (headerSize + (data1RecordCount * 4)) + (data1RecordCount * records1Size),
-      'data2recordWords': data2RecordWords,
-      'data2RecordCapacity': data2RecordCapacity,
-      'data2IndexEntries': data2IndexEntries,
-      'data2RecordCount': data2RecordCount
-    };
-  };
-};
 
 function readOffsetTable(data, schema, header) {
   let currentIndex = header.offsetStart;
@@ -455,10 +236,6 @@ function readOffsetTable(data, schema, header) {
 
     chunked32bit.push(chunkedOffsets);
   }
-  
-  // chunked32bit.forEach((offsetArray) => {
-  //   console.log(offsetArray);
-  // });
 
   chunked32bit.forEach((offsetArray) => {
     if (offsetArray.length > 0) {

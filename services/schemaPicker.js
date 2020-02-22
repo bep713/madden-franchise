@@ -67,7 +67,7 @@ function getSchemasInFolder(dir) {
 function findApplicableSchema(schemaMeta, gameYear, major, minor) {
   // check if game year exists
   if (schemaMeta) {
-    const schemasToSearch = schemaMeta.filter((schema) => { return schema.gameYear == gameYear || schema.gameYear === null; });
+    const schemasToSearch = schemaMeta.filter((schema) => { return schema.gameYear == gameYear || schema.gameYear === null && schema.major !== null && schema.minor !== null; });
 
     // check if exact major exists
     const exactMajor = schemasToSearch.filter((schema) => { return schema.major == major });

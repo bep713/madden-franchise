@@ -1,9 +1,12 @@
 const fs = require('fs');
 const zlib = require('zlib');
+const Constants = require('./Constants');
+const debug = require('debug')('madden-franchise');
 const EventEmitter = require('events').EventEmitter;
 const FranchiseSchema = require('./FranchiseSchema');
 const utilService = require('./services/utilService');
 const FranchiseFileTable = require('./FranchiseFileTable');
+const StrategyPicker = require('./strategies/StrategyPicker');
 const FranchiseFileSettings = require('./FranchiseFileSettings');
 const schemaPickerService = require('./services/schemaPicker');
 
@@ -23,28 +26,35 @@ class FranchiseFile extends EventEmitter {
     }
     
     this._rawContents = fs.readFileSync(filePath);
-    this._gameYear = getMaddenYear(this._rawContents);
-    // console.log('This was saved in Madden', this._gameYear);
+    this._type = getFileType(this._rawContents);
+    this._gameYear = this._type.year;
+    this._expectedSchemaVersion = getSchemaMetadata(this.rawContents, this._type);
 
-    if (this._rawContents.length === COMPRESSED_FILE_LENGTH) {
-      this._openedFranchiseFile = true;
-      this.packedFileContents = this.rawContents;
-      this.unpackedFileContents = unpackFile(this.rawContents);
-      // fs.writeFileSync(filePath.substring(0, filePath.lastIndexOf('\\')) + '\\M20unpack.frt', this.unpackedFileContents);
-    } else {
-      this._openedFranchiseFile = false;
-      this.unpackedFileContents = this.rawContents;
+    if (this._type.compressed) {
+      this.packedFileContents = this._rawContents;
+      this.unpackedFileContents = unpackFile(this._rawContents, this._type);
+
+      if (this._type.format === Constants.FORMAT.FRANCHISE_COMMON) {
+        const newType = getFileType(this.unpackedFileContents);
+        this._type.year = newType.year;
+        this._gameYear = this._type.year;
+        this._expectedSchemaVersion = getSchemaMetadata(this.unpackedFileContents, newType);
+      }
+    }
+    else {
+      this.unpackedFileContents = this._rawContents;
     }
 
-    this.parse();
+    if (this._settings.autoParse) {
+      this.parse();
+    }
   };
 
   parse() {
     const that = this;
+    this.strategy = StrategyPicker.pick(this.type);
 
     let schemaPromise = new Promise((resolve, reject) => {
-      this.expectedSchemaVersion = getSchemaMetadata(this.openedFranchiseFile, this._gameYear, this.rawContents);
-
       const schemaMeta = this.settings.schemaOverride ? this.settings.schemaOverride : this.expectedSchemaVersion;
 
       const schemaPath = this.settings.schemaOverride && this.settings.schemaOverride.path ? 
@@ -74,6 +84,11 @@ class FranchiseFile extends EventEmitter {
       const altThirdCheck = 0x54;
       const altFourthCheck = 0x4F;
 
+      const alt2FirstCheck = 0x53;
+      const alt2SecondCheck = 0x50;
+      const alt2ThirdCheck = 0x45;
+      const alt2FourthCheck = 0x58;
+
       const tableIndicies = [];
 
       for (let i = 0; i <= this.unpackedFileContents.length - 4; i+=1) {
@@ -84,7 +99,11 @@ class FranchiseFile extends EventEmitter {
           (this.unpackedFileContents[i] === altFirstCheck
           && this.unpackedFileContents[i+1] === altSecondCheck
           && this.unpackedFileContents[i+2] === altThirdCheck
-          && this.unpackedFileContents[i+3] === altFourthCheck)) {
+          && this.unpackedFileContents[i+3] === altFourthCheck) ||
+          (this.unpackedFileContents[i] === alt2FirstCheck
+          && this.unpackedFileContents[i+1] === alt2SecondCheck
+          && this.unpackedFileContents[i+2] === alt2ThirdCheck
+          && this.unpackedFileContents[i+3] === alt2FourthCheck)) {
             const tableStart = i - getTableStartOffsetByGameYear(this._gameYear);
             tableIndicies.push(tableStart);
           }
@@ -98,22 +117,16 @@ class FranchiseFile extends EventEmitter {
 
         const tableData = this.unpackedFileContents.slice(currentTable, nextTable);
 
-        const newFranchiseTable = new FranchiseFileTable(tableData, currentTable, this._gameYear);
+        const newFranchiseTable = new FranchiseFileTable(tableData, currentTable, this._gameYear, this.strategy);
         this.tables.push(newFranchiseTable);
 
         newFranchiseTable.on('change', function () {
+          this.isChanged = true;
+
           if (that.settings.saveOnChange) {
-            const header = that.unpackedFileContents.slice(0, this.offset);
-            const trailer = that.unpackedFileContents.slice(this.offset + this.data.length);
-
-            that.unpackedFileContents = Buffer.concat([header, this.hexData, trailer]);
-            this.isChanged = false;
-
             that.packFile();
-          } else {
-            this.isChanged = true;
           }
-          
+
           that.emit('change', newFranchiseTable);
         });
       }
@@ -147,37 +160,30 @@ class FranchiseFile extends EventEmitter {
     this.emit('saving');
 
     return new Promise((resolve, reject) => {
-      if (!this.settings.saveOnChange) {
-        const changedTables = this.tables.filter((table) => { return table.isChanged; });
+      this.unpackedFileContents = this.strategy.file.generateUnpackedContents(this.tables, this.unpackedFileContents);
+      // const changedTables = this.tables.filter((table) => { return table.isChanged; });
   
-        for (let i = 0; i < changedTables.length; i++) {
-          let table = changedTables[i];
-          const header = that.unpackedFileContents.slice(0, table.offset);
-          const trailer = that.unpackedFileContents.slice(table.offset + table.data.length);
-          that.unpackedFileContents = Buffer.concat([header, table.hexData, trailer]);
+      //   for (let i = 0; i < changedTables.length; i++) {
+      //     let table = changedTables[i];
+      //     const header = that.unpackedFileContents.slice(0, table.offset);
+      //     const trailer = that.unpackedFileContents.slice(table.offset + table.data.length);
+      //     that.unpackedFileContents = Buffer.concat([header, table.hexData, trailer]);
 
-          table.isChanged = false;
-        }
-      }
-  
+      //     table.isChanged = false;
+      //   }
+
       let destination = outputFilePath ? outputFilePath : this.filePath;
   
-      if (this.openedFranchiseFile) {
-        _packFile(this.packedFileContents, this.unpackedFileContents).then((data) => { 
-          _save(destination, data, (err) => {
-            if (err) {
-              reject(err);
-              that.emit('save-error');
-            }
-            resolve('saved');
-            that.emit('saved');
-          });
+      _packFile(this.packedFileContents, this.unpackedFileContents).then((data) => { 
+        _save(destination, data, (err) => {
+          if (err) {
+            reject(err);
+            that.emit('save-error');
+          }
+          resolve('saved');
+          that.emit('saved');
         });
-      }
-      else {
-        reject('no file path')
-        // ask where to save file
-      }
+      });
     });
   };
 
@@ -197,12 +203,20 @@ class FranchiseFile extends EventEmitter {
     return this.schemaList;
   };
 
+  get expectedSchemaVersion () {
+    return this._expectedSchemaVersion;
+  };
+
   get settings () {
     return this._settings;
   };
 
   get gameYear () {
     return this._gameYear;
+  };
+
+  get type () {
+    return this._type;
   };
 
   set filePath (path) {
@@ -247,8 +261,14 @@ function getTableStartOffsetByGameYear(gameYear) {
   }
 };
 
-function unpackFile (fileData) {
-  return zlib.inflateSync(fileData.slice(COMPRESSED_DATA_OFFSET));
+function unpackFile (data, type) {
+  let offset = 0;
+
+  if (type.format === Constants.FORMAT.FRANCHISE) {
+    offset = COMPRESSED_DATA_OFFSET;
+  }
+
+  return zlib.inflateSync(data.slice(offset));
 };
 
 function _packFile (originalData, data) {
@@ -274,46 +294,131 @@ function _save (destination, packedContents, callback) {
   fs.writeFile(destination, packedContents, callback);
 };
 
-function getMaddenYear(compressedData) {
-  if (compressedData.length < 0x24) {
-    return null;
-  }
+function getFileType(data) {
+  const isDataCompressed = isCompressed(data);
+  const format = getFormat(data, isDataCompressed);
+  const year = getGameYear(data, isDataCompressed, format);
 
-
-  // Madden 20 saves will have 'M20' at this location in the compressed file
-  if (compressedData[0x22] === 77 && compressedData[0x23] === 50 && compressedData[0x24] === 48) {
-    return 20;
-  }
-
-  if (compressedData[0x0B]) {
-    return 20;
-  }
-
-  return 19;
+  return {
+    'format': format,
+    'compressed': isDataCompressed,
+    'year': year
+  };
 };
 
-function getSchemaMetadata(isCompressed, gameYear, data) {
-  if (isCompressed) {
-    return {
-      'major': utilService.readDWordAt(0x41, data, true),
-      'minor': utilService.readDWordAt(0x45, data, true),
-      'gameYear': gameYear
-    };
+function isCompressed(data) {
+  const DECOMPRESSED_HEADER = Buffer.from([0x46, 0x72, 0x54, 0x6B]);  // FrTk
+
+  if (Buffer.compare(data.slice(0, 4), DECOMPRESSED_HEADER) === 0) {
+    return false;
   }
-  else {
-    if (gameYear === 20) {
-      return {
-        'major': utilService.readDWordAt(0x2F, data, false),
-        'minor': 0,
-        'gameYear': gameYear
-      }
+
+  return true;
+};
+
+function getFormat(data, isCompressed) {
+  if (isCompressed) {
+    const ZLIB_HEADER = Buffer.from([0x78, 0x9C]);
+
+    if (Buffer.compare(data.slice(0, 2), ZLIB_HEADER) === 0) {
+      return 'franchise-common';
     }
     else {
-      return {
-        'major': 0,
-        'minor': 0,
-        'gameYear': gameYear
-      }
+      return 'franchise';
     }
   }
-}
+  else {
+    // very simple check based on file length.
+    // This assumes the common files are smaller than 9,000 KB.
+    if (data.length > 0x895440) {
+      return 'franchise';
+    }
+    else {
+      return 'franchise-common';
+    }
+  }
+};
+
+function getGameYear(data, isCompressed, format) {
+  const schemaMax = [
+    {
+      'year': 19,
+      'max': 95
+    },
+    {
+      'year': 20,
+      'max': 999
+    }
+  ];
+
+  if(isCompressed) {
+    // look at the max schemas per year. M19 schemas will be less than or equal to 95, 
+    // while M20 schemas can be anywhere from 96 to 999 because the last schema hasn't been made yet.
+    // Once M21 releases, the M20 schema max will be updated with the final number.
+
+    if (format === Constants.FORMAT.FRANCHISE_COMMON) {
+      return null;
+    }
+
+    const schemaMajor = getCompressedSchema(data).major;
+    const year = schemaMax.find((schema) => { return schema.max >= schemaMajor; }).year;
+    return year;
+  }
+  else {
+    const schemaMajor = getDecompressedM20Schema(data).major;
+    
+    if (schemaMajor === 0) {
+      // M19 did not include schema info in uncompressed files.
+      return 19;
+    }
+    else {
+      return 20;
+    }
+  }
+};
+
+function getSchemaMetadata(data, type) {
+  let schemaMeta = {
+    'gameYear': type.year
+  };
+
+  if (type.compressed) {
+    if (type.format === Constants.FORMAT.FRANCHISE_COMMON) {
+      // Compressed FTC files do not contain the schema information.
+      // We need to get it later, after we inflate the file.
+      return;
+    }
+
+    const schemaData = getCompressedSchema(data);
+    schemaMeta.major = schemaData.major;
+    schemaMeta.minor = schemaData.minor;
+  }
+  else {
+    if (type.year === 20) {
+      const schemaData = getDecompressedM20Schema(data);
+      schemaMeta.major = schemaData.major;
+      schemaMeta.minor = schemaData.minor;
+    }
+    else {
+      // M19 did not include schema info in uncompressed files.
+      schemaMeta.major = 0;
+      schemaMeta.minor = 0;
+    }
+  }
+
+  return schemaMeta;
+};
+
+function getCompressedSchema(data) {
+  return {
+    'major': data.readUInt32LE(0x3E),
+    'minor': data.readUInt32LE(0x42)
+  };
+};
+
+function getDecompressedM20Schema(data) {
+  return {
+    'major': data.readUInt32BE(0x2C),
+    'minor': data.readUInt32BE(0x28)
+  };
+};

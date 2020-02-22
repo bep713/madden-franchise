@@ -1,4 +1,4 @@
-const fs = require('fs');
+const path = require('path');
 const expect = require('chai').expect;
 const FranchiseFile = require('../../FranchiseFile');
 const FranchiseFileTable = require('../../FranchiseFileTable');
@@ -19,40 +19,42 @@ let file;
 describe('Madden 19 end to end tests', function () {
   this.timeout(7000);
 
-  // describe('open files', () => {
-  //   it('can open a M19 compressed file', () => {
-  //     file = new FranchiseFile(filePaths.compressed.m19);
-  //   });
+  describe('open files', () => {
+    it('can open a M19 compressed file', () => {
+      file = new FranchiseFile(filePaths.compressed.m19);
+    });
 
-  //   it('can open a M19 uncompressed file', () => {
-  //     file = new FranchiseFile(filePaths.uncompressed.m19);
-  //   });
+    it('can open a M19 uncompressed file', () => {
+      file = new FranchiseFile(filePaths.uncompressed.m19);
+    });
 
-  //   it('fires the `ready` event when the file is done processing', (done) => {
-  //     file = new FranchiseFile(filePaths.compressed.m19);
+    it('fires the `ready` event when the file is done processing', (done) => {
+      file = new FranchiseFile(filePaths.compressed.m19);
 
-  //     expect(file.isLoaded).to.be.false;
+      expect(file.isLoaded).to.be.false;
 
-  //     file.on('ready', () => {
-  //       expect(file.settings).to.eql({
-  //         'saveOnChange': false
-  //       });
+      file.on('ready', () => {
+        expect(file.settings).to.eql({
+          'saveOnChange': false,
+          'schemaOverride': false,
+          'schemaDirectory': false,
+          'autoParse': true
+        });
 
-  //       expect(file.isLoaded).to.be.true;
-  //       expect(file.filePath).to.eql(filePaths.compressed.m19);
-  //       expect(file.gameYear).to.equal(19);
-  //       expect(file.openedFranchiseFile).to.be.true;
-  //       expect(file.rawContents).to.not.be.undefined;
-  //       expect(file.packedFileContents).to.not.be.undefined;
-  //       expect(file.unpackedFileContents).to.not.be.undefined;
+        expect(file.isLoaded).to.be.true;
+        expect(file.filePath).to.eql(filePaths.compressed.m19);
+        expect(file.gameYear).to.equal(19);
+        expect(file.rawContents).to.not.be.undefined;
+        expect(file.packedFileContents).to.not.be.undefined;
+        expect(file.unpackedFileContents).to.not.be.undefined;
 
-  //       expect(file.tables).to.not.be.undefined;
-  //       expect(file.schemaList).to.not.be.undefined;
+        expect(file.tables).to.not.be.undefined;
+        expect(file.schemaList).to.not.be.undefined;
 
-  //       done();
-  //     });
-  //   });
-  // });
+        done();
+      });
+    });
+  });
 
   describe('post-open tests', () => {
     before((done) => {
@@ -77,7 +79,7 @@ describe('Madden 19 end to end tests', function () {
 
       it('can save with changes', (done) => {
         let table = file.getTableByName('PopularityComponentTable');
-        table.readRecords().then(() => { 
+        table.readRecords().then(() => {
           table.records[0].LocalPopularity = 69; 
 
           file.save(filePaths.saveTest.m19).then(() => {
@@ -86,6 +88,7 @@ describe('Madden 19 end to end tests', function () {
               expect(file.unpackedFileContents).to.eql(file2.unpackedFileContents);
 
               let table2 = file2.getTableByName('PopularityComponentTable');
+              
               table2.readRecords().then(() => {
                 expect(table2.records[0].LocalPopularity).to.equal(69);
                 table.records[0].LocalPopularity = 0;
@@ -525,6 +528,10 @@ describe('Madden 19 end to end tests', function () {
           expect(record.FirstName).to.equal('Clark');
           expect(record.LastName).to.equal('Kent');
           expect(record.MetaMorph_GutBase).to.equal(0.49494949494);
+          
+          const secondTableField = record.getFieldByKey('FirstName').secondTableField;
+          expect(secondTableField.value).to.equal('Clark');
+          expect(secondTableField.unformattedValue).to.eql('0100001101101100011000010111001001101011000000000000000000000000000000000000000000000000000000000000000000000000');
         });
 
         it('wont allow invalid reference value', () => {

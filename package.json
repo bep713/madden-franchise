@@ -1,6 +1,6 @@
 {
   "name": "madden-franchise",
-  "version": "1.1.12",
+  "version": "2.0.0",
   "description": "Tools to read a madden franchise file and get data from it",
   "main": "FranchiseFile.js",
   "scripts": {
@@ -13,6 +13,7 @@
   "author": "matthewpanetta",
   "license": "MIT",
   "dependencies": {
+    "debug": "^4.1.1",
     "xml-stream": "^0.4.5"
   },
   "repository": {

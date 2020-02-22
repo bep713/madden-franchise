@@ -12,6 +12,7 @@ class FranchiseFileField extends EventEmitter {
 
     if (offset.valueInSecondTable) {
       this.secondTableField = new FranchiseFileTable2Field(value, offset.maxLength);
+      this.secondTableField.fieldReference = this;
 
       this.secondTableField.on('change', function () {
         this._value = this.secondTableField.value;
@@ -44,7 +45,7 @@ class FranchiseFileField extends EventEmitter {
   };
 
   set value (value) {
-    if (this.offset.type === 'string') {
+    if (this.offset.valueInSecondTable) {
       this.secondTableField.value = value.toString();
     } else {
       if (this.offset.isReference) {

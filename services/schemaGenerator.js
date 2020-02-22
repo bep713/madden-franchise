@@ -186,6 +186,12 @@ schemaGenerator.generate = (inputFile, showOutput, outputFile) => {
             <attribute name="EventRecord" idx="1" type="record" />
             <attribute name="Handle" idx="0" type="bool()" />
         </schema> */
+
+    /* <schema name="Transaction" numMembers="3" base="none()">
+      <attribute name="CurrentStage" idx="0" type="Stage" />
+      <attribute name="Sleep" idx="1" type="ITransaction_Sleep" />
+      <attribute name="TransitionStage" idx="2" type="Stage" />
+    </schema> */
   };
 
   function calculateInheritedSchemas() {

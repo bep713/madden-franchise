@@ -39,13 +39,13 @@ describe('Madden 20 end to end tests', function () {
         expect(file.settings).to.eql({
           'saveOnChange': false,
           'schemaOverride': false,
-          'schemaDirectory': path.join(__dirname, '../data/test-schemas')
+          'schemaDirectory': path.join(__dirname, '../data/test-schemas'),
+          'autoParse': true
         });
 
         expect(file.isLoaded).to.be.true;
         expect(file.filePath).to.eql(filePaths.compressed.m20);
         expect(file.gameYear).to.equal(20);
-        expect(file.openedFranchiseFile).to.be.true;
         expect(file.rawContents).to.not.be.undefined;
         expect(file.packedFileContents).to.not.be.undefined;
         expect(file.unpackedFileContents).to.not.be.undefined;
@@ -146,6 +146,245 @@ describe('Madden 20 end to end tests', function () {
           });
         });
       });
+
+      it('can save table2 fields', (done) => {
+        let table = file.getTableByName('Player');
+        console.time('read records 1');
+
+        table.readRecords(['FirstName']).then(() => {
+          console.timeEnd('read records 1');
+
+          console.time('set value');
+          table.records[20].FirstName = 'FirstNameTest';
+          console.timeEnd('set value');
+
+          console.time('actual save call');
+
+          file.save(filePaths.saveTest.m20).then(() => {
+
+            console.timeEnd('actual save call');
+            console.time('read file');
+            let file2 = new FranchiseFile(filePaths.saveTest.m20);
+
+            file2.on('ready', () => {
+              console.timeEnd('read file');
+              let table2 = file2.getTableByName('Player');
+              console.time('read records 2');
+
+              table2.readRecords(['FirstName']).then(() => {
+                console.timeEnd('read records 2');
+                expect(table2.records[20].FirstName).to.equal('FirstNameTest');
+                done();
+              });
+            });
+          });
+        });
+      });
+
+      it('can save a table2 field and a normal field together', (done) => {
+        let division = file.getTableByName('Division');
+        let popularityComponentTable = file.getTableByName('PopularityComponentTable');
+        let playerArray = file.getTableById(4321);
+
+        let promises = [
+          division.readRecords(),
+          popularityComponentTable.readRecords(),
+          playerArray.readRecords()
+        ];
+
+        Promise.all(promises).then(() => {
+          division.records[4].Name = 'Test Test';
+          popularityComponentTable.records[14].LocalPopularity = 90;
+          let control = playerArray.records[0].Player2;
+
+          file.save(filePaths.saveTest.m20).then(() => {
+            let file2 = new FranchiseFile(filePaths.saveTest.m20);
+
+            file2.on('ready', () => {
+              division = file2.getTableByName('Division');
+              popularityComponentTable = file2.getTableByName('PopularityComponentTable');
+              playerArray = file2.getTableByName('Player[]');
+
+              promises = [
+                division.readRecords(),
+                popularityComponentTable.readRecords(),
+                playerArray.readRecords()
+              ];
+
+              Promise.all(promises).then(() => {
+                expect(division.records[4].Name).to.equal('Test Test');
+                expect(popularityComponentTable.records[14].LocalPopularity).to.equal(90);
+                expect(playerArray.records[0].Player2).to.equal(control);
+                done();
+              });
+            });
+          });
+        });
+      });
+
+      it('can save a table2 field and a normal field together with partial fields', (done) => {
+        let division = file.getTableByName('Division');
+        let popularityComponentTable = file.getTableByName('PopularityComponentTable');
+        let playerArray = file.getTableById(4321);
+
+        let promises = [
+          division.readRecords(['Name']),
+          popularityComponentTable.readRecords(['LocalPopularity']),
+          playerArray.readRecords()
+        ];
+
+        Promise.all(promises).then(() => {
+          division.records[4].Name = 'Test Test';
+          popularityComponentTable.records[14].LocalPopularity = 90;
+          let control = playerArray.records[0].Player2;
+
+          file.save(filePaths.saveTest.m20).then(() => {
+            let file2 = new FranchiseFile(filePaths.saveTest.m20);
+
+            file2.on('ready', () => {
+              division = file2.getTableByName('Division');
+              popularityComponentTable = file2.getTableByName('PopularityComponentTable');
+              playerArray = file2.getTableByName('Player[]');
+
+              promises = [
+                division.readRecords(),
+                popularityComponentTable.readRecords(),
+                playerArray.readRecords()
+              ];
+
+              Promise.all(promises).then(() => {
+                expect(division.records[4].Name).to.equal('Test Test');
+                expect(popularityComponentTable.records[14].LocalPopularity).to.equal(90);
+                expect(playerArray.records[0].Player2).to.equal(control);
+                done();
+              });
+            });
+          });
+        });
+      });
+
+      it('can save a table2 field and an array field together', (done) => {
+        let division = file.getTableByName('Division');
+        let popularityComponentTable = file.getTableByName('PopularityComponentTable');
+        let playerArray = file.getTableById(4321);
+
+        let promises = [
+          division.readRecords(),
+          popularityComponentTable.readRecords(),
+          playerArray.readRecords()
+        ];
+
+        Promise.all(promises).then(() => {
+          division.records[4].Name = 'Test Test';
+          let playerArrayOriginalRef = playerArray.records[0].Player0;
+          playerArray.records[0].Player0 = '00100000011101100000010001111011';
+          let control = popularityComponentTable.records[18].LocalPopularity;
+
+          file.save(filePaths.saveTest.m20).then(() => {
+            let file2 = new FranchiseFile(filePaths.saveTest.m20);
+
+            file2.on('ready', () => {
+              division = file2.getTableByName('Division');
+              popularityComponentTable = file2.getTableByName('PopularityComponentTable');
+              let playerArray2 = file2.getTableByName('Player[]');
+
+              promises = [
+                division.readRecords(),
+                popularityComponentTable.readRecords(),
+                playerArray2.readRecords()
+              ];
+
+              Promise.all(promises).then(() => {
+                expect(division.records[4].Name).to.equal('Test Test');
+                expect(playerArray2.records[0].Player0).to.equal('00100000011101100000010001111011');
+                expect(popularityComponentTable.records[18].LocalPopularity).to.equal(control);
+                playerArray.records[0].Player0 = playerArrayOriginalRef;
+                done();
+              });
+            });
+          });
+        });
+      });
+
+      it('can save a normal field and an array field together', (done) => {
+        let division = file.getTableByName('Division');
+        let popularityComponentTable = file.getTableByName('PopularityComponentTable');
+        let playerArray = file.getTableById(4321);
+
+        let promises = [
+          division.readRecords(),
+          popularityComponentTable.readRecords(),
+          playerArray.readRecords()
+        ];
+
+        Promise.all(promises).then(() => {
+          popularityComponentTable.records[12].RegionalPopularity = 85;
+          let playerArrayOriginalRef = playerArray.records[0].Player0;
+          playerArray.records[0].Player0 = '00111111111101100000010001111011';
+          let control = division.records[4].Name;
+
+          file.save(filePaths.saveTest.m20).then(() => {
+            let file2 = new FranchiseFile(filePaths.saveTest.m20);
+
+            file2.on('ready', () => {
+              division = file2.getTableByName('Division');
+              popularityComponentTable = file2.getTableByName('PopularityComponentTable');
+              let playerArray2 = file2.getTableByName('Player[]');
+
+              promises = [
+                division.readRecords(),
+                popularityComponentTable.readRecords(),
+                playerArray2.readRecords()
+              ];
+
+              Promise.all(promises).then(() => {
+                expect(popularityComponentTable.records[12].RegionalPopularity).to.equal(85);
+                expect(playerArray2.records[0].Player0).to.equal('00111111111101100000010001111011');
+                expect(division.records[4].Name).to.equal(control);
+                playerArray.records[0].Player0 = playerArrayOriginalRef;
+                done();
+              });
+            });
+          });
+        });
+      });
+
+      it('edit field, then load new table and then save both', (done) => {
+        let division = file.getTableByName('Division');
+
+        let promises = [
+          division.readRecords()
+        ];
+
+        Promise.all(promises).then(() => {
+          division.records[0].PresentationId = 5;
+
+          let weeklyTip = file.getTableByName('WeeklyTip');
+          weeklyTip.readRecords().then(() => {
+            weeklyTip.records[10].Title = 'The Test Bowl';
+
+            file.save(filePaths.saveTest.m20).then(() => {
+              let file2 = new FranchiseFile(filePaths.saveTest.m20);
+
+              file2.on('ready', () => {
+                division = file2.getTableByName('Division');
+                weeklyTip = file2.getTableByName('WeeklyTip');
+
+                promises = [
+                  division.readRecords(),
+                  weeklyTip.readRecords()
+                ];
+
+                Promise.all(promises).then(() => {
+                  expect(division.records[0].PresentationId).to.equal(5);
+                  expect(weeklyTip.records[10].Title).to.equal('The Test Bowl');
+                  done();
+                });
+              });
+            });
+          });
+        });
+      });
     });
 
     describe('correctly parses tables', () => {
@@ -171,7 +410,7 @@ describe('Madden 20 end to end tests', function () {
 
         it('parses expected attribute values', () => {
           expect(table.isArray).to.be.false;
-          expect(table.isChanged).to.be.true; //changed above
+          expect(table.isChanged).to.be.false;
           expect(table.recordsRead).to.be.true; //read above
           expect(table.data).to.not.be.undefined;
           expect(table.hexData).to.not.be.undefined;
@@ -336,7 +575,7 @@ describe('Madden 20 end to end tests', function () {
         it('parses expected attribute values', () => {
           expect(table.isArray).to.be.true;
           expect(table.isChanged).to.be.false;
-          expect(table.recordsRead).to.be.false;
+          expect(table.recordsRead).to.be.true;
           expect(table.data).to.not.be.undefined;
           expect(table.hexData).to.not.be.undefined;
           expect(table.readRecords).to.exist;
@@ -401,11 +640,11 @@ describe('Madden 20 end to end tests', function () {
             file.save(filePaths.saveTest.m20).then(() => {
               let file2 = new FranchiseFile(filePaths.saveTest.m20);
               file2.on('ready', () => {
-                let table = file2.getTableByName('Player[]');
-                table.readRecords().then(() => {
-                  expect(table.records[0].Player0).to.eql('00100000011101100000010001111011');
-                  expect(table.records[0].Player1).to.eql('00100001000010100000100011110110');
-                  expect(table.records[0].Player2).to.eql('00100001000010100000001010100000');
+                let table2 = file2.getTableByName('Player[]');
+                table2.readRecords().then(() => {
+                  expect(table2.records[0].Player0).to.eql('00100000011101100000010001111011');
+                  expect(table2.records[0].Player1).to.eql('00100001000010100000100011110110');
+                  expect(table2.records[0].Player2).to.eql('00100001000010100000001010100000');
                   done();
                 });
               });
@@ -428,7 +667,7 @@ describe('Madden 20 end to end tests', function () {
       it('parses expected attribute values', () => {
         expect(table.isArray).to.be.false;
         expect(table.isChanged).to.be.false;
-        expect(table.recordsRead).to.be.false;
+        expect(table.recordsRead).to.be.true; // We read them in a test case above "can save changes to table2"
         expect(table.data).to.not.be.undefined;
         expect(table.hexData).to.not.be.undefined;
         expect(table.readRecords).to.exist;

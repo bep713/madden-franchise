@@ -4,7 +4,7 @@ const FranchiseSchema = require('../../FranchiseSchema');
 
 describe('FranchiseSchema unit tests', () => {
   it('can load a gzip file', (done) => {
-    const schema = new FranchiseSchema('data/schemas/20/M20_360_1.gz')
+    const schema = new FranchiseSchema('tests/data/test-schemas/M20_360_1.gz')
       .once('schemas:done', () => {
         expect(schema.meta.major).to.equal(360);
         expect(schema.meta.minor).to.equal(1);
@@ -17,7 +17,7 @@ describe('FranchiseSchema unit tests', () => {
   });
 
   it('can load a xml file', (done) => {
-    const schema = new FranchiseSchema('data/schemas/schema-19.xml')
+    const schema = new FranchiseSchema('tests/data/test-schemas/schema-19.xml')
       .once('schemas:done', () => {
         expect(schema.meta.major).to.equal(95);
         expect(schema.meta.minor).to.equal(7);

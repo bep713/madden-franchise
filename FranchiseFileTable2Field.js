@@ -4,12 +4,15 @@ const utilService = require('./services/utilService');
 class FranchiseFileTable2Field extends EventEmitter {
   constructor (index, maxLength) {
     super();
-    this.rawIndex = index;
-    this.index = utilService.bin2dec(index);
-    this.maxLength = maxLength;
-    this._unformattedValue = null;
     this._value = '';
+    this.rawIndex = index;
     this.isChanged = false;
+    this._offset = this.index;
+    this.maxLength = maxLength;
+    this.fieldReference = null;
+    this.lengthAtLastSave = null;
+    this._unformattedValue = null;
+    this.index = utilService.bin2dec(index);
   };
 
   get unformattedValue () {
@@ -39,26 +42,38 @@ class FranchiseFileTable2Field extends EventEmitter {
     }
     
     this._value = value;
-    
-    let valuePadded = value;
-    
-    if (value.length < this.maxLength) {
-      const numberOfNullCharactersToAdd = this.maxLength - value.length;
-      
-      for (let i = 0; i < numberOfNullCharactersToAdd; i++) {
-        valuePadded += String.fromCharCode(0);
-      }
+    this._unformattedValue = this._strategy.setUnformattedValueFromFormatted(value, this.maxLength);
+
+    if (this.lengthAtLastSave === null) {
+      this.lengthAtLastSave = value.length;
     }
-    
-    this._unformattedValue = valuePadded.split('').map((char) => {
-      return char.charCodeAt(0).toString(2).padStart(8, '0');
-    }).join('');
     
     this.emit('change');
   };
 
   get hexData () {
     return Buffer.from(utilService.binaryBlockToDecimalBlock(this.unformattedValue));
+  };
+
+  get strategy () {
+    return this._strategy;
+  };
+
+  set strategy (strategy) {
+    this._strategy = strategy;
+  };
+
+  get offset () {
+    return this._offset;
+  };
+
+  set offset (offset) {
+    this._offset = offset;
+    this.index = offset;
+
+    if (this.fieldReference) {
+      this.fieldReference.unformattedValue = utilService.dec2bin(offset, 32);
+    }
   };
 };
 
