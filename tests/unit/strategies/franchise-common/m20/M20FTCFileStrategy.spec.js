@@ -7,11 +7,11 @@ const strategySpy = {
     'generateUnpackedContents': sinon.spy()
 };
 
-const M19FTCFileStrategy = proxyquire('../../../../../strategies/franchise-common/m19/M19FTCFileStrategy', {
+const M19FTCFileStrategy = proxyquire('../../../../../strategies/franchise-common/m20/M20FTCFileStrategy', {
     '../../common/file/FTCFileStrategy': strategySpy
 });
 
-describe('M19 FTC File Strategy unit tests', () => {
+describe('M20 FTC File Strategy unit tests', () => {
     beforeEach(() => {
         strategySpy.postPackFile.resetHistory();
         strategySpy.generateUnpackedContents.resetHistory();

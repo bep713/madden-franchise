@@ -174,8 +174,9 @@ class FranchiseFile extends EventEmitter {
 
       let destination = outputFilePath ? outputFilePath : this.filePath;
   
-      _packFile(this.packedFileContents, this.unpackedFileContents).then((data) => { 
-        _save(destination, data, (err) => {
+      _packFile(this.unpackedFileContents).then((data) => {
+        const dataToSave = this.strategy.file.postPackFile(this.packedFileContents, data);
+        _save(destination, dataToSave, (err) => {
           if (err) {
             reject(err);
             that.emit('save-error');
@@ -271,21 +272,14 @@ function unpackFile (data, type) {
   return zlib.inflateSync(data.slice(offset));
 };
 
-function _packFile (originalData, data) {
+function _packFile (data) {
   return new Promise((resolve, reject) => {
     zlib.deflate(data, {
       windowBits: 15
     }, function (err, newData) {
       if (err) reject(err);
 
-      const header = originalData.slice(0, COMPRESSED_DATA_OFFSET);
-      const endOfData = (newData.length).toString(16);
-      header[0x4A] = parseInt(endOfData.substr(4), 16);
-      header[0x4B] = parseInt(endOfData.substr(2, 2), 16);
-      header[0x4C] = parseInt(endOfData.substr(0, 2), 16);
-    
-      const trailer = originalData.slice(newData.length + COMPRESSED_DATA_OFFSET);
-      resolve(Buffer.concat([header, newData, trailer]));
+      resolve(newData);
     });
   });
 };

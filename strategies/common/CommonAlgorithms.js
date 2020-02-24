@@ -56,6 +56,7 @@ CommonAlgorithms.save = (units, oldData) => {
 
     // Now we need to push records 4 to 100. These did not get added in the loop because they didn't change.
     // We'll push them here.
+    // console.log(oldOffsetCounter);
     bufferArrays.push(oldData.slice(oldOffsetCounter));
 
     // Finally, concat all of the arrays into one buffer to return it.

@@ -1,99 +1,73 @@
+const sinon = require('sinon');
 const expect = require('chai').expect;
-const common = require('../../common/common');
-const M19TableStrategy = require('../../../../strategies/franchise/m19/M19TableStrategy');
+const proxyquire = require('proxyquire');
 
-describe('M19 Table Strategy unit tests', () => {
-    describe('get table2 binary data', () => {
-        it('gives expected result if all fields are parsed', () => {
-            const table2Records = [{
-                'isChanged': false,
-                'index': 0,
-                'hexData': Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00])
-            }, {
-                'isChanged': true,
-                'index': 6,
-                'hexData': Buffer.from([0x68, 0x65, 0x6C, 0x6C, 0x6F, 0x00])
-            }, {
-                'isChanged': false,
-                'index': 12,
-                'hexData': Buffer.from([0x74, 0x65, 0x73, 0x74, 0x31, 0x32])
-            }, {
-                'isChanged': false,
-                'index': 0,
-                'hexData': Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00])
-            }];
+const headerStrategySpy = {
+    'parseHeader': sinon.spy(),
+    'parseHeaderAttributesFromSchema': sinon.spy()
+};
 
-            const oldData = Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4F, 0x6C, 0x64, 0x44, 0x61, 0x74, 
-                0x74, 0x65, 0x73, 0x74, 0x31, 0x32, 0x67, 0x00, 0x00, 0x00, 0x00, 0x00]);
+const tableStrategy = {
+    'getTable2BinaryData': sinon.spy(),
+    'getMandatoryOffsets': sinon.spy()
+};
 
-            const result = M19TableStrategy.getTable2BinaryData(table2Records, oldData);
+const M19TableStrategy = proxyquire('../../../../strategies/franchise/m19/M19TableStrategy', {
+    '../../common/header/m19/M19TableHeaderStrategy': headerStrategySpy,
+    '../../common/table/FranchiseTableStrategy': tableStrategy
+});
 
-            const expectedResult = table2Records.reduce((prev, cur) => {
-                return Buffer.concat([prev, cur.hexData]);
-            }, Buffer.alloc(0));
-
-            common.hashCompare(Buffer.concat(result), expectedResult);
-        });
-
-        it('gives expected results if certain fields are omitted', () => {
-            const table2Records = [{
-                'isChanged': false,
-                'index': 0,
-                'hexData': Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00])
-            }, {
-                'isChanged': true,
-                'index': 6,
-                'hexData': Buffer.from([0x68, 0x65, 0x6C, 0x6C, 0x6F, 0x00])
-            }, {
-                'isChanged': false,
-                'index': 18,
-                'hexData': Buffer.from([0x74, 0x65, 0x73, 0x74, 0x31, 0x32])
-            }, {
-                'isChanged': false,
-                'index': 0,
-                'hexData': Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00])
-            }];
-
-            const oldData = Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4F, 0x6C, 0x64, 0x44, 0x61, 0x74, 0x68, 0x65, 
-                0x6C, 0x6C, 0x6F, 0x00, 0x74, 0x65, 0x73, 0x74, 0x31, 0x32, 0x67, 0x00, 0x00, 0x00, 0x00, 0x00]);
-
-            const expectedResult = Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00, 0x68, 0x65, 0x6C, 0x6C, 0x6F, 0x00, 0x68, 0x65, 
-                0x6C, 0x6C, 0x6F, 0x00, 0x74, 0x65, 0x73, 0x74, 0x31, 0x32, 0x67, 0x00, 0x00, 0x00, 0x00, 0x00]);
-
-            const result = M19TableStrategy.getTable2BinaryData(table2Records, oldData);
-            
-            common.hashCompare(Buffer.concat(result), expectedResult);
-        });
-
-        // it('performance test', () => {
-        //     let table2RecordsPerformanceTest = [];
-
-        //     for (let i = 0; i < 20000; i++) {
-        //         table2RecordsPerformanceTest.push({
-        //             'isChanged': false,
-        //             'index': 0,
-        //             'hexData': Buffer.from([0x74, 0x65, 0x73, 0x74, 0x31, 0x32, 0x74, 0x65, 0x73, 0x74, 0x31, 0x32, 0x74, 0x65, 0x73, 0x74, 0x31, 0x32, 0x74, 0x65, 0x73, 0x74, 0x31, 0x32, 0x00])
-        //         });
-        //     }
-
-        //     for (let i = 0; i < 5000; i++) {
-        //         table2RecordsPerformanceTest.push({
-        //             'isChanged': false,
-        //             'index': 0,
-        //             'hexData': Buffer.from([0x74, 0x65, 0x73, 0x74, 0x31, 0x32, 0x74, 0x65, 0x73, 0x74, 0x31, 0x32, 0x74, 0x65, 0x73, 0x74, 0x31, 0x32, 0x74, 0x65, 0x73, 0x74, 0x31, 0x32, 0x00])
-        //         });
-        //     }
-
-        //     console.time('getTable2BinaryData');
-        //     const perfTestResult = M19TableStrategy.getTable2BinaryData(table2RecordsPerformanceTest);
-        //     let test = Buffer.concat(perfTestResult);
-        //     console.timeEnd('getTable2BinaryData');
-        // });
+describe('M19 Table Field Strategy', () => {
+    beforeEach(() => {
+        headerStrategySpy.parseHeader.resetHistory();
+        headerStrategySpy.parseHeaderAttributesFromSchema.resetHistory();
+        tableStrategy.getTable2BinaryData.resetHistory();
+        tableStrategy.getMandatoryOffsets.resetHistory();
     });
 
-    describe('returns a list of mandatory offsets', () => {
-        it('returns an empty list', () => {
-            expect(M19TableStrategy.getMandatoryOffsets()).to.eql([]);
-        });
+    it('parse header', () => {
+        let buffer = Buffer.from([0x40, 0x30, 0x20, 0x10, 0x00]);
+        M19TableStrategy.parseHeader(buffer);
+        expect(headerStrategySpy.parseHeader.calledOnce).to.be.true;
+        expect(headerStrategySpy.parseHeader.args[0][0]).to.eql(buffer)
+    });
+
+    it('parse header attributes from schema', () => {
+        let buffer = Buffer.from([0x40, 0x30, 0x20, 0x10, 0x00]);
+        let header = {
+            'header': true
+        };
+        let schema = {
+            'schema': true
+        };
+
+        M19TableStrategy.parseHeaderAttributesFromSchema(schema, buffer, header);
+        expect(headerStrategySpy.parseHeaderAttributesFromSchema.calledOnce).to.be.true;
+        expect(headerStrategySpy.parseHeaderAttributesFromSchema.args[0][0]).to.eql(schema);
+        expect(headerStrategySpy.parseHeaderAttributesFromSchema.args[0][1]).to.eql(buffer);
+        expect(headerStrategySpy.parseHeaderAttributesFromSchema.args[0][2]).to.eql(header);
+    });
+
+    it('get table2 binary data', () => {
+        let records = [{
+            'record': true
+        }];
+
+        let buffer = Buffer.from([0x40, 0x30, 0x20, 0x10, 0x00]);
+
+        M19TableStrategy.getTable2BinaryData(records, buffer);
+        expect(tableStrategy.getTable2BinaryData.calledOnce).to.be.true;
+        expect(tableStrategy.getTable2BinaryData.args[0][0]).to.eql(records);
+        expect(tableStrategy.getTable2BinaryData.args[0][1]).to.eql(buffer);
+    });
+
+    it('get mandatory offsets', () => {
+        let offsets = [{
+            'offset': true
+        }];
+
+        M19TableStrategy.getMandatoryOffsets(offsets);
+        expect(tableStrategy.getMandatoryOffsets.calledOnce).to.be.true;
+        expect(tableStrategy.getMandatoryOffsets.args[0][0]).to.eql(offsets);
     });
 });

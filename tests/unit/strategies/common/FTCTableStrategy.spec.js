@@ -1,7 +1,7 @@
 const expect = require('chai').expect;
 const FTCTableStrategy = require('../../../../strategies/common/table/FTCTableStrategy');
 
-describe('FTC Common Table Strategy unit tests', () => {
+describe('FTC Table Strategy unit tests', () => {
     describe('get table2 binary data', () => {
         it('gives expected result if all fields are parsed', () => {
             const table2Records = [{

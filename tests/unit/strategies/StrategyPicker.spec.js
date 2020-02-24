@@ -33,6 +33,6 @@ describe('Strategy Picker unit tests', () => {
         }
 
         const result = StrategyPicker.pick(type);
-        expect(result.name).to.equal('FTCStrategy');
+        expect(result.name).to.equal('M20FTCStrategy');
     });
 });

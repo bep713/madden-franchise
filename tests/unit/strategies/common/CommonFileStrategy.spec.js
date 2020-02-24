@@ -2,7 +2,7 @@ const expect = require('chai').expect;
 const common = require('../../common/common');
 const CommonFileStrategy = require('../../../../strategies/common/file/CommonFileStrategy');
 
-describe('M19 File Strategy unit tests', () => {
+describe('Common File Strategy unit tests', () => {
     describe('can save updates made to data', () => {
         it('returns expected result when no tables change', () => {
             let tables = [{

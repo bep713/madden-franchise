@@ -784,6 +784,18 @@ describe('Madden 20 end to end tests', function () {
             expect(record.Position).to.equal('QB');
             expect(record.TRAIT_BIGHITTER).to.equal(false);
           });
+
+          it('Baker Mayfield - table2 field (First Name)', () => {
+            let record = table.records[1736];
+            const field = record.getFieldByKey('FirstName').secondTableField;
+
+            expect(field).to.not.be.undefined;
+            expect(field.index).to.equal(182280);
+            expect(field.maxLength).to.equal(17);
+            expect(field.value).to.equal('Baker');
+            expect(field.unformattedValue).to
+              .equal('0100001001100001011010110110010101110010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000');
+          });
         });
       });
 

@@ -3,15 +3,17 @@ const expect = require('chai').expect;
 const proxyquire = require('proxyquire');
 
 const strategySpy = {
+    'postPackFile': sinon.spy(),
     'generateUnpackedContents': sinon.spy()
 };
 
 const M19FileStrategy = proxyquire('../../../../strategies/franchise/m19/M19FileStrategy', {
-    '../../common/file/CommonFileStrategy': strategySpy
+    '../../common/file/FranchiseFileStrategy': strategySpy
 });
 
 describe('M19 File Strategy unit tests', () => {
     beforeEach(() => {
+        strategySpy.postPackFile.resetHistory();
         strategySpy.generateUnpackedContents.resetHistory();
     });
 
@@ -39,5 +41,16 @@ describe('M19 File Strategy unit tests', () => {
             expect(strategySpy.generateUnpackedContents.args[0][0]).to.eql(tables);
             expect(strategySpy.generateUnpackedContents.args[0][1]).to.eql(data);
         });
+    });
+
+    it('post pack file', () => {
+        const originalData = Buffer.from([0x20, 0x10, 0x00]);
+        const newData = Buffer.from([0x50, 0x40, 0x30]);
+
+        M19FileStrategy.postPackFile(originalData, newData);
+
+        expect(strategySpy.postPackFile.calledOnce).to.be.true;
+        expect(strategySpy.postPackFile.args[0][0]).to.eql(originalData);
+        expect(strategySpy.postPackFile.args[0][1]).to.eql(newData);
     });
 })

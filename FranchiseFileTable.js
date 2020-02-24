@@ -23,6 +23,9 @@ class FranchiseFileTable extends EventEmitter {
   };
 
   get hexData () {
+    // need to check table2 data first because it may change offsets of the legit records.
+    const table2Data = this.strategy.getTable2BinaryData(this.table2Records, this.data.slice(this.header.table2StartIndex));
+
     const changedRecords = this.records.filter((record) => { return record.isChanged; });
     let currentOffset = 0;
     let bufferArrays = [];
@@ -39,30 +42,7 @@ class FranchiseFileTable extends EventEmitter {
     }
 
     bufferArrays.push(this.data.slice(currentOffset, this.header.table2StartIndex));
-
-    const table2Data = this.strategy.getTable2BinaryData(this.table2Records, this.data.slice(this.header.table2StartIndex));
     bufferArrays = bufferArrays.concat(table2Data);
-
-    // const changedTable2Records = this.table2Records.filter((record) => { return record.isChanged; });
-    // currentOffset = this.header.table2StartIndex;
-
-    // for (let i = 0; i < changedTable2Records.length; i++) {
-    //   let record = changedTable2Records[i];
-    //   const recordOffset = this.header.table2StartIndex + record.index;
-
-    //   if (recordOffset < currentOffset) {
-    //     // this case is true for the last few rows with no data in them. They reference the first table2 value.
-    //     break;
-    //   }
-
-    //   bufferArrays.push(this.data.slice(currentOffset, recordOffset));
-    //   const recordHexData = record.hexData;
-    //   bufferArrays.push(recordHexData);
-
-    //   currentOffset = recordOffset + recordHexData.length;
-    // }
-
-    // bufferArrays.push(this.data.slice(currentOffset));
 
     this.data = Buffer.concat(bufferArrays);
     return this.data;
@@ -119,10 +99,15 @@ class FranchiseFileTable extends EventEmitter {
 
         let offsetTableToUse = this.offsetTable;
 
+        const mandatoryOffsetsToLoad = this.strategy.getMandatoryOffsets(this.offsetTable);
         
         if (attribsToLoad) {
           // get any new attributes to load plus the existing loaded offsets
-          offsetTableToUse = offsetTableToUse.filter((attrib) => { return attribsToLoad.includes(attrib.name) || this.loadedOffsets.find((offset) => { return offset.name === attrib.name; }); });
+          offsetTableToUse = offsetTableToUse.filter((attrib) => { 
+            return mandatoryOffsetsToLoad.includes(attrib.name)
+              || attribsToLoad.includes(attrib.name) 
+              || this.loadedOffsets.find((offset) => { return offset.name === attrib.name; }); 
+          });
         }
 
         this.loadedOffsets = offsetTableToUse;
@@ -159,16 +144,14 @@ class FranchiseFileTable extends EventEmitter {
 
   _parseTable2Values(data, header, records) {
     const that = this;
-    const secondTableBinaryData = utilService.getBitArray(data.slice(header.table2StartIndex));
+    const secondTableData = data.slice(header.table2StartIndex);
   
     records.forEach((record) => {
       const fieldsReferencingSecondTable = record._fields.filter((field) => { return field.secondTableField; });
   
       fieldsReferencingSecondTable.forEach((field) => {
-        const stringStartBinaryIndex = field.secondTableField.index * 8;
-        const stringEndBinaryIndex = stringStartBinaryIndex + (field.offset.maxLength * 8);
+        field.secondTableField.unformattedValue = that.strategyBase.table2Field.getInitialUnformattedValue(field, secondTableData);
         field.secondTableField.strategy = that.strategyBase.table2Field;
-        field.secondTableField.unformattedValue = secondTableBinaryData.slice(stringStartBinaryIndex, stringEndBinaryIndex);
         that.table2Records.push(field.secondTableField);
       });
     });

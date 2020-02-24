@@ -7,12 +7,12 @@ class FranchiseFileTable2Field extends EventEmitter {
     this._value = '';
     this.rawIndex = index;
     this.isChanged = false;
-    this._offset = this.index;
     this.maxLength = maxLength;
     this.fieldReference = null;
     this.lengthAtLastSave = null;
     this._unformattedValue = null;
     this.index = utilService.bin2dec(index);
+    this._offset = this.index;
   };
 
   get unformattedValue () {
@@ -21,6 +21,10 @@ class FranchiseFileTable2Field extends EventEmitter {
 
   set unformattedValue (value) {
     this._unformattedValue = value;
+
+    if (this.lengthAtLastSave === null) {
+      this.lengthAtLastSave = getLengthOfUnformattedValue(this._unformattedValue);
+    }
     
     let formattedValue = '';
     const chunked = utilService.chunk(this._unformattedValue, 8);
@@ -45,7 +49,7 @@ class FranchiseFileTable2Field extends EventEmitter {
     this._unformattedValue = this._strategy.setUnformattedValueFromFormatted(value, this.maxLength);
 
     if (this.lengthAtLastSave === null) {
-      this.lengthAtLastSave = value.length;
+      this.lengthAtLastSave = getLengthOfUnformattedValue(this._unformattedValue);
     }
     
     this.emit('change');
@@ -78,3 +82,7 @@ class FranchiseFileTable2Field extends EventEmitter {
 };
 
 module.exports = FranchiseFileTable2Field;
+
+function getLengthOfUnformattedValue(value) {
+    return value.length / 8;
+};

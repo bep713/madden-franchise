@@ -1,7 +1,8 @@
-const CommonFileStrategy = require('../../common/file/CommonFileStrategy');
+const FTCFileStrategy = require('../../common/file/FTCFileStrategy');
 
 let M19FTCFileStrategy = {};
 
-M19FTCFileStrategy.generateUnpackedContents = CommonFileStrategy.generateUnpackedContents;
+M19FTCFileStrategy.postPackFile = FTCFileStrategy.postPackFile;
+M19FTCFileStrategy.generateUnpackedContents = FTCFileStrategy.generateUnpackedContents;
 
 module.exports = M19FTCFileStrategy;
