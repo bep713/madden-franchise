@@ -1,7 +1,7 @@
 const fs = require('fs');
 const zlib = require('zlib');
 const Constants = require('./Constants');
-const debug = require('debug')('madden-franchise');
+// const debug = require('debug')('madden-franchise');
 const EventEmitter = require('events').EventEmitter;
 const FranchiseSchema = require('./FranchiseSchema');
 const utilService = require('./services/utilService');
