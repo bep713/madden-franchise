@@ -48,7 +48,7 @@ Franchise file settings
       'schemaDirectory': string // path to a directory containing schema files to choose
 
       // AUTO PARSE - specify if you want the system to automatically parse all tables in the file, or if you want to explicity call file.parse()
-      'autoParse': true/false [default: false]
+      'autoParse': true/false [default: true]
     }
 
 #### fields
