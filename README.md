@@ -1,10 +1,10 @@
 # madden-franchise
-JS API for reading and writing Madden franchise files
+JS API for reading and writing Madden franchise files and common files.
 
 ## Usage
     const Franchise = require('madden-franchise');
 
-    let franchise = new Franchise([path to file]);
+    let franchise = new Franchise([path to file], [options]);
 
     franchise.on('ready', function () {
       let playerTable = franchise.getTableByName('Player');
@@ -33,7 +33,22 @@ constructor(filePath [,settings]) - will automatically parse the tables and sche
 Franchise file settings  
   
     {
-       'saveOnChange': true/false [default: false] // if any field value is changed, the file will be saved automatically. You won't need to call .save() every time.
+      // SAVE ON CHANGE
+      'saveOnChange': true/false [default: false] // if any field value is changed, the file will be saved automatically. You won't need to call .save() every time.
+
+      // SCHEMA OVERRIDE - manually specify a schema version and path to use
+      'schemaOverride': {
+        'major': int,  // the schema major version
+        'minor': int,  // the schema minor version
+        'gameYear': int, // the Madden year (19 or 20)
+        'path': string // path to the schema file
+      }
+
+      // SCHEMA DIRECTORY - add a custom directory of schemas for the system to automatically choose from in addition to the bundled ones.
+      'schemaDirectory': string // path to a directory containing schema files to choose
+
+      // AUTO PARSE - specify if you want the system to automatically parse all tables in the file, or if you want to explicity call file.parse()
+      'autoParse': true/false [default: false]
     }
 
 #### fields
