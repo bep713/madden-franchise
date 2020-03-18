@@ -1030,7 +1030,64 @@ describe('Madden 20 end to end tests', function () {
         expect(record.WeeklyDefenseMedal).to.equal('MedalNone');
         expect(record.getFieldByKey('WeeklyDefenseMedal').unformattedValue).to.equal('1000');
       });
-      
+    
+    });
+
+    describe('Spline', () => {
+        before((done) => {
+          table = file.getTableByName('Spline');
+          table.readRecords().then(() => {
+            done();
+          });
+        });
+
+        it('correctly parses attribute types', () => {
+            expect(table.offsetTable.length).to.equal(2);
+            expect(table.offsetTable[0].type).to.equal('int[]');
+            expect(table.offsetTable[0].isReference).to.equal(true);
+        });
+    });
+
+    describe('int[]', () => {
+      before((done) => {
+        table = file.getTableById(7182); //OverallPercentage -> Spline -> int[]
+        table.readRecords().then(() => {
+          done();
+        });
+      });
+
+      it('correctly parses attribute types', () => {
+          expect(table.offsetTable[0].type).to.equal('int');
+          expect(table.offsetTable[0].isReference).to.equal(false);
+      });
+
+      it('correctly reads in records', () => {
+        expect(table.records[0].int0).to.equal(53);
+      });
+
+      it('changes record correctly', () => {
+        table.records[0].int0 = 54;
+        expect(table.records[0].int0).to.equal(54);
+        expect(table.records[0].fields[0].unformattedValue).to.equal('10000000000000000000000000110110');
+      });
+
+      it('changes an invalid value to the minimum allowed value', (done) => {
+        table.records[0].int0 = -1;
+        expect(table.records[0].int0).to.equal(-1);
+        expect(table.records[0].fields[0].unformattedValue).to.equal('01111111111111111111111111111111');
+
+        file.save(filePaths.saveTest.m20).then(() => {
+          let file2 = new FranchiseFile(filePaths.saveTest.m20);
+          file2.on('ready', () => {
+            let table2 = file2.getTableById(7182);
+            table2.readRecords().then(() => {
+              expect(table2.records[0].int0).to.eql(-1);
+              expect(table2.records[0].fields[0].unformattedValue).to.eql('01111111111111111111111111111111');
+              done();
+            });
+          });
+        });
+      });
     });
 
     describe('can follow references', () => {

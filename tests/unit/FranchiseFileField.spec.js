@@ -57,7 +57,9 @@ describe('FranchiseFileField unit tests', () => {
     unformattedValue = '01101011';
     offset = {
       'type': 'int',
-      'length': 5
+      'length': 5,
+      'minValue': 0,
+      'maxValue': 15
     };
 
     listenerFns = [];
@@ -84,6 +86,46 @@ describe('FranchiseFileField unit tests', () => {
         expect(utilService.bin2dec.firstCall.args[0]).to.eql(unformattedValue);
         expect(field.value).to.eql(bin2DecResponse);
       });
+
+      describe('parses int values without a max/min correctly', () => {
+        it('parses int values without a max/min correctly', () => {
+          let offset2 = {
+            'type': 'int',
+            'length': 32
+          };
+  
+          field = new FranchiseFileField(key, unformattedValue, offset2);
+  
+          // bin2dec is stubbed out to always return 1. if you look
+          // inside the method here, it would do 1-1 which equals 0.
+          expect(field.value).to.equal(0);
+        });
+  
+        it('parses int values of 0 correctly', () => {
+          let offset2 = {
+            'type': 'int',
+            'length': 32
+          };
+
+          utilService.bin2dec = sinon.spy((num) => {
+            if (num[0] === '1') {
+              return 214000000;
+            }
+            else {
+              return 0;
+            }
+          });
+  
+          field = new FranchiseFileField(key, '000000000000000000000000000000000', offset2);
+
+          utilService.bin2dec = sinon.spy(() => { return bin2DecResponse; });
+  
+          // bin2dec is stubbed out to always return 1. if you look
+          // inside the method here, it would do 1-1 which equals 0.
+          expect(field.value).to.equal(0);
+        });
+      });
+
 
       it('parses s_ints correctly', () => {
         offset = {

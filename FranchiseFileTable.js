@@ -6,6 +6,7 @@ const FranchiseFileRecord = require('./FranchiseFileRecord');
 class FranchiseFileTable extends EventEmitter {
   constructor(data, offset, gameYear, strategy) {
     super();
+    this.index = -1;
     this.data = data;
     this.lengthAtLastSave = data.length;
     this.offset = offset;
@@ -85,9 +86,10 @@ class FranchiseFileTable extends EventEmitter {
               'name': `${this.name.substring(0, this.name.length - 2)}${i}`,
               'offset': i * 32,
               'type': this.name.substring(0, this.name.length - 2),
-              'valueInSecondTable': false,
-              'isReference': true
+              'valueInSecondTable': false
             }
+            
+            offset.isReference = !offset.enum && (offset.type[0] == offset.type[0].toUpperCase() || offset.type.includes('[]')) ? true : false,
 
             offsetTable.push(offset);
           }
@@ -258,7 +260,7 @@ function readOffsetTable(data, schema, header) {
         'originalIndex': parseInt(attribute.index),
         'name': attribute.name,
         'type': (minValue < 0 || maxValue < 0) ? 's_' + attribute.type : attribute.type,
-        'isReference': !attribute.enum && (attribute.type[0] == attribute.type[0].toUpperCase()) ? true : false,
+        'isReference': !attribute.enum && (attribute.type[0] == attribute.type[0].toUpperCase() || attribute.type.includes('[]')) ? true : false,
         'valueInSecondTable': header.hasSecondTable && attribute.type === 'string',
         'isSigned': minValue < 0 || maxValue < 0,
         'minValue': minValue,

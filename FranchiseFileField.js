@@ -147,7 +147,21 @@ function parseFieldValue(unformatted, offset) {
       case 's_int':
         return utilService.bin2dec(unformatted) + offset.minValue;
       case 'int':
-        return utilService.bin2dec(unformatted);
+        if (offset.minValue || offset.maxValue) {
+          return utilService.bin2dec(unformatted);
+        }
+        else {
+          const maxValueBinary = getMaxValueBinary(offset);
+          const maxValue = utilService.bin2dec(maxValueBinary);
+          const newValue = utilService.bin2dec(unformatted);
+          
+          if (newValue === 0) {
+            return 0;
+          }
+          else {
+            return newValue - maxValue;
+          }
+        }
       case 'bool':
         return unformatted[0] === '1' ? true : false;
       case 'float':
@@ -189,7 +203,14 @@ function parseFormattedValue(formatted, offset) {
         const actualValue = parseInt(formatted);
         return utilService.dec2bin(actualValue - offset.minValue, offset.length);
       case 'int':
-        return utilService.dec2bin(formatted, offset.length);
+        if (offset.minValue || offset.maxValue) {
+          return utilService.dec2bin(formatted, offset.length);
+        }
+        else {
+          const maxValueBinary = getMaxValueBinary(offset);
+          const maxValue = utilService.bin2dec(maxValueBinary);
+          return utilService.dec2bin(formatted + maxValue, offset.length);
+        }
       case 'bool':
         return (formatted == 1 || (formatted.toString().toLowerCase() == 'true')) ? '1' : '0';
       case 'float':
@@ -198,4 +219,12 @@ function parseFormattedValue(formatted, offset) {
         return formatted;
     }
   }
+};
+
+function getMaxValueBinary(offset) {
+  let maxValue = '1';
+  for (let j = 0; j < (offset.length - 1); j++) {
+    maxValue += '0';
+  }
+  return maxValue;
 };
