@@ -30,9 +30,9 @@ describe('schema picker service unit tests', () => {
 
     it('retrieves the closest one before if no higher one exists', () => {
       const schema = schemaPicker.pick(20, 371, 1, schemaPickerSettings);
-      expect(schema.major).to.equal(370);
-      expect(schema.minor).to.equal(0);
-      expect(schema.path).to.equal('C:\\Projects\\madden-franchise\\data\\schemas\\20\\M20_370_0.gz');
+      expect(schema.major).to.equal(371);
+      expect(schema.minor).to.equal(1);
+      expect(schema.path).to.equal('C:\\Projects\\madden-franchise\\data\\schemas\\20\\M20_371_1.gz');
     });
 
     it('retrieves schemas in a custom directory', () => {
@@ -58,6 +58,6 @@ describe('schema picker service unit tests', () => {
     const schemas = schemaPicker.retrieveSchemas();
     expect(schemas.length).to.equal(2);
     expect(schemas[0].major).to.equal(95);
-    expect(schemas[1].major).to.equal(370);
+    expect(schemas[1].major).to.equal(371);
   }); 
 });

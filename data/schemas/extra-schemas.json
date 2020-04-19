@@ -1,0 +1,679 @@
+[{
+        "numMembers": "1",
+        "assetId": "28862",
+        "name": "UserEntity",
+        "base": null,
+        "attributes": [{
+            "index": "0",
+            "name": "IsUserControlled",
+            "type": "bool",
+            "minValue": null,
+            "maxValue": null,
+            "maxLength": null,
+            "default": "False",
+            "final": null,
+            "enum": null,
+            "const": null
+        }]
+    },
+    {
+        "numMembers": "2",
+        "assetId": null,
+        "name": "Reaction",
+        "base": "none()",
+        "attributes": [{
+                "index": "1",
+                "name": "EventRecord",
+                "type": "record",
+                "minValue": null,
+                "maxValue": null,
+                "maxLength": null,
+                "default": null,
+                "final": null,
+                "enum": null,
+                "const": null
+            },
+            {
+                "index": "0",
+                "name": "Handle",
+                "type": "bool()",
+                "minValue": null,
+                "maxValue": null,
+                "maxLength": null,
+                "default": null,
+                "final": null,
+                "enum": null,
+                "const": null
+            }
+        ]
+    },
+    {
+        "numMembers": "20",
+        "assetId": null,
+        "name": "Request",
+        "base": "none()",
+        "attributes": [{
+                "index": "0",
+                "name": "IsBlocking",
+                "type": "bool",
+                "minValue": null,
+                "maxValue": null,
+                "maxLength": null,
+                "default": null,
+                "final": null,
+                "enum": null,
+                "const": null
+            },
+            {
+                "index": "1",
+                "name": "IsConnectionRequired",
+                "type": "bool",
+                "minValue": null,
+                "maxValue": null,
+                "maxLength": null,
+                "default": null,
+                "final": null,
+                "enum": null,
+                "const": null
+            },
+            {
+                "index": "2",
+                "name": "IsPersistent",
+                "type": "bool",
+                "minValue": null,
+                "maxValue": null,
+                "maxLength": null,
+                "default": null,
+                "final": null,
+                "enum": null,
+                "const": null
+            },
+            {
+                "index": "3",
+                "name": "IsResponseRequired",
+                "type": "bool",
+                "minValue": null,
+                "maxValue": null,
+                "maxLength": null,
+                "default": null,
+                "final": null,
+                "enum": null,
+                "const": null
+            },
+            {
+                "index": "4",
+                "name": "IsSubmittable",
+                "type": "bool",
+                "minValue": null,
+                "maxValue": null,
+                "maxLength": null,
+                "default": null,
+                "final": null,
+                "enum": null,
+                "const": null
+            },
+            {
+                "index": "5",
+                "name": "CpuResponseDuration",
+                "type": "int",
+                "minValue": 0,
+                "maxValue": 16777215,
+                "maxLength": null,
+                "default": 0,
+                "final": null,
+                "enum": null,
+                "const": null
+            },
+            {
+                "index": "6",
+                "name": "CpuResponseMaxDuration",
+                "type": "int",
+                "minValue": 0,
+                "maxValue": 16777215,
+                "maxLength": null,
+                "default": 0,
+                "final": null,
+                "enum": null,
+                "const": null
+            },
+            {
+                "index": "7",
+                "name": "CpuResponseMinDuration",
+                "type": "int",
+                "minValue": 0,
+                "maxValue": 16777215,
+                "maxLength": null,
+                "default": 0,
+                "final": null,
+                "enum": null,
+                "const": null
+            },
+            {
+                "index": "8",
+                "name": "DefaultResponse",
+                "type": "ResponseForm",
+                "minValue": null,
+                "maxValue": null,
+                "maxLength": null,
+                "default": null,
+                "final": null,
+                "enum": null,
+                "const": null
+            },
+            {
+                "index": "9",
+                "name": "Issue",
+                "type": "Request_Issue",
+                "minValue": null,
+                "maxValue": null,
+                "maxLength": null,
+                "default": null,
+                "final": null,
+                "enum": null,
+                "const": null
+            },
+            {
+                "index": "10",
+                "name": "RequestData",
+                "type": "record",
+                "minValue": null,
+                "maxValue": null,
+                "maxLength": null,
+                "default": null,
+                "final": null,
+                "enum": null,
+                "const": null
+            },
+            {
+                "index": "11",
+                "name": "RequestForm",
+                "type": "ResponseForm",
+                "minValue": null,
+                "maxValue": null,
+                "maxLength": null,
+                "default": null,
+                "final": null,
+                "enum": null,
+                "const": null
+            },
+            {
+                "index": "12",
+                "name": "RequestStyle",
+                "type": "RequestStyle",
+                "minValue": null,
+                "maxValue": null,
+                "maxLength": null,
+                "default": null,
+                "final": null,
+                "enum": "RequestStyle",
+                "const": null
+            },
+            {
+                "index": "13",
+                "name": "Response",
+                "type": "ResponseForm",
+                "minValue": null,
+                "maxValue": null,
+                "maxLength": null,
+                "default": null,
+                "final": null,
+                "enum": null,
+                "const": null
+            },
+            {
+                "index": "14",
+                "name": "ResponseForms",
+                "type": "ResponseForm[]",
+                "minValue": null,
+                "maxValue": null,
+                "maxLength": null,
+                "default": null,
+                "final": null,
+                "enum": null,
+                "const": null
+            },
+            {
+                "index": "15",
+                "name": "Priority",
+                "type": "int",
+                "minValue": 0,
+                "maxValue": 255,
+                "maxLength": null,
+                "default": 0,
+                "final": null,
+                "enum": null,
+                "const": null
+            },
+            {
+                "index": "16",
+                "name": "Commands",
+                "type": "Command[]",
+                "minValue": null,
+                "maxValue": null,
+                "maxLength": null,
+                "default": null,
+                "final": null,
+                "enum": null,
+                "const": null
+            },
+            {
+                "index": "17",
+                "name": "ExpirationDuration",
+                "type": "int",
+                "minValue": 0,
+                "maxValue": 16777215,
+                "maxLength": null,
+                "default": 0,
+                "final": null,
+                "enum": null,
+                "const": null
+            },
+            {
+                "index": "18",
+                "name": "SeenByUser",
+                "type": "bool",
+                "minValue": null,
+                "maxValue": null,
+                "maxLength": null,
+                "default": null,
+                "final": null,
+                "enum": null,
+                "const": null
+            }
+        ]
+    },
+    {
+        "name": "Event",
+        "numMembers": "2",
+        "base": "none()",
+        "attributes": [{
+                "name": "Enqueue",
+                "idx": "0",
+                "type": "none()",
+                "guid": "55-94029",
+                "final": "true"
+            },
+            {
+                "name": "Send",
+                "idx": "1",
+                "type": "none()",
+                "guid": "55-317",
+                "final": "true"
+            }
+        ]
+    },
+    {
+        "name": "SeasonScheduleManager.SeasonScheduleWeeklyGameInfo",
+        "numMembers": "4",
+        "base": "none()",
+        "attributes": [{
+                "name": "MondayTimes",
+                "idx": "0",
+                "type": "int[]"
+            },
+            {
+                "name": "ThursdayTimes",
+                "idx": "1",
+                "type": "int[]"
+            },
+            {
+                "name": "SundayTimes",
+                "idx": "2",
+                "type": "int[]"
+            },
+            {
+                "name": "SaturdayTimes",
+                "idx": "3",
+                "type": "int[]"
+            }
+        ]
+    },
+    {
+        "name": "SeasonScheduleManager",
+        "numMembers": "6",
+        "base": "none()",
+        "attributes": [{
+                "name": "TunableRuleSets",
+                "idx": "0",
+                "type": "SeasonScheduleTunableData[]"
+            },
+            {
+                "name": "Schedules",
+                "idx": "1",
+                "type": "SeasonGame[]"
+            },
+            {
+                "name": "Cities",
+                "idx": "2",
+                "type": "City[]"
+            },
+            {
+                "name": "Franchise",
+                "idx": "3",
+                "type": "Franchise"
+            },
+            {
+                "name": "Unknown2",
+                "idx": "4",
+                "type": "Unknown"
+            },
+            {
+                "name": "Unknown1",
+                "idx": "5",
+                "type": "Unknown"
+            }
+        ]
+    },
+    {
+        "name": "SeasonScheduleManager.SeasonScheduleTunableData",
+        "numMembers": "25",
+        "base": "none()",
+        "attributes": [{
+                "name": "BaseYear",
+                "idx": "0",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "2047"
+            },
+            {
+                "name": "OriginYear",
+                "idx": "1",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "2047"
+            },
+            {
+                "name": "NumberTeams",
+                "idx": "2",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "32"
+            },
+            {
+                "name": "ThanksgivingWeek",
+                "idx": "3",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "11"
+            },
+            {
+                "name": "ThanksgivingHomeTeams",
+                "idx": "4",
+                "type": "Team[]"
+            },
+            {
+                "name": "RegSeasWeeklyInfo",
+                "idx": "5",
+                "type": "SeasonScheduleManager.SeasonScheduleWeeklyGameInfo[]"
+            },
+            {
+                "name": "PreSeasNumGamesPerTeam",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "4"
+            },
+            {
+                "name": "RegSeasMaxGamesPerWeek",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "16"
+            },
+            {
+                "name": "RegSeasGamesPerWeek",
+                "type": "int[]"
+            },
+            {
+                "name": "RegSeasNumAFCTeams",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "16"
+            },
+            {
+                "name": "RegSeasNumNFCTeams",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "16"
+            },
+            {
+                "name": "Unknown1",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "50"
+            },
+            {
+                "name": "IntraConfMaxGames",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "4"
+            },
+            {
+                "name": "IntraConfOppSeeds",
+                "type": "int[][][]"
+            },
+            {
+                "name": "InterConfMaxGames",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "4"
+            },
+            {
+                "name": "InterConfOppSeeds",
+                "type": "int[][]"
+            },
+            {
+                "name": "DivPlayOffWeek",
+                "type": "SeasonScheduleManager.SeasonScheduleWeeklyGameInfo"
+            },
+            {
+                "name": "WildCardWeek",
+                "type": "SeasonScheduleManager.SeasonScheduleWeeklyGameInfo"
+            },
+            {
+                "name": "ConfPlayOffWeek",
+                "type": "SeasonScheduleManager.SeasonScheduleWeeklyGameInfo"
+            },
+            {
+                "name": "ProBowlWeek",
+                "type": "SeasonScheduleManager.SeasonScheduleWeeklyGameInfo"
+            },
+            {
+                "name": "SuperBowlWeek",
+                "type": "SeasonScheduleManager.SeasonScheduleWeeklyGameInfo"
+            },
+            {
+                "name": "SuperBowlBeforeProBowl",
+                "type": "bool"
+            },
+            {
+                "name": "PreSeasNumByeWeeks",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "0"
+            },
+            {
+                "name": "RegSeasNumHomeGames",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "8"
+            },
+            {
+                "name": "PreSeasNumGamesPerWeek",
+                "type": "int[]"
+            }
+        ]
+    },
+    {
+        "name": "Scheduler",
+        "numMembers": "3",
+        "base": "none()",
+        "attributes": [{
+                "name": "Epoch",
+                "type": "Scheduler.DateTime"
+            },
+            {
+                "name": "CurrentTime",
+                "type": "int"
+            },
+            {
+                "name": "Appointments",
+                "type": "Scheduler.Appointment[]"
+            }
+        ]
+    },
+    {
+        "name": "Scheduler.DateTime",
+        "numMembers": "6",
+        "base": "none()",
+        "attributes": [{
+                "name": "Month",
+                "type": "Month",
+                "enum": "Month"
+            },
+            {
+                "name": "DayOfMonth",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "30"
+            },
+            {
+                "name": "Year",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "99"
+            },
+            {
+                "name": "Hour",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "23"
+            },
+            {
+                "name": "Minute",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "59"
+            },
+            {
+                "name": "Second",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "59"
+            }
+        ]
+    },
+    {
+        "name": "Scheduler.Appointment",
+        "numMembers": "10",
+        "base": "none()",
+        "attributes": [{
+                "name": "Name",
+                "type": "string",
+                "maxLength": "32"
+            },
+            {
+                "name": "OccurrenceCount",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "9"
+            },
+            {
+                "name": "IsActive",
+                "type": "bool"
+            },
+            {
+                "name": "Start",
+                "type": "Scheduler.RelativeApptDateTime"
+            },
+            {
+                "name": "StartOccurrenceTime",
+                "type": "int"
+            },
+            {
+                "name": "StartEvent",
+                "type": "Event"
+            },
+            {
+                "name": "End",
+                "type": "Scheduler.RelativeApptDateTime"
+            },
+            {
+                "name": "EndOccurrenceTime",
+                "type": "int"
+            },
+            {
+                "name": "EndEvent",
+                "type": "Event"
+            },
+            {
+                "name": "RecurrenceRule",
+                "type": "Scheduler.RecurrenceRule"
+            }
+        ]
+    },
+    {
+        "name": "Scheduler.RelativeAppt",
+        "numMembers": "4",
+        "base": "none()",
+        "attributes": [{
+                "name": "Appointment",
+                "type": "Scheduler.Appointment"
+            },
+            {
+                "name": "Reoccur",
+                "type": "bool"
+            },
+            {
+                "name": "Units",
+                "type": "int"
+            },
+            {
+                "name": "UnitType",
+                "type": "SchedulerUnitType",
+                "enum": "SchedulerUnitType"
+            }
+        ]
+    },
+    {
+        "name": "Scheduler.RelativeApptDateTime",
+        "numMembers": "7",
+        "base": "none()",
+        "attributes": [{
+                "name": "Appointment",
+                "type": "Scheduler.Appointment"
+            },
+            {
+                "name": "Reoccur",
+                "type": "bool"
+            },
+            {
+                "name": "DayOfWeek",
+                "type": "DayOfWeek",
+                "enum": "DayOfWeek"
+            },
+            {
+                "name": "WeekNumber",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "19"
+            },
+            {
+                "name": "Hour",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "23"
+            },
+            {
+                "name": "Minute",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "59"
+            },
+            {
+                "name": "Second",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "59"
+            }
+        ]
+    }
+]

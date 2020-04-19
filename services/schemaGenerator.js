@@ -8,16 +8,22 @@ const XmlStream = require('xml-stream');
 const utilService = require('./utilService');
 const FranchiseEnum = require('../FranchiseEnum');
 const EventEmitter = require('events').EventEmitter;
+const extraSchemas = require('../data/schemas/extra-schemas.json');
 
 let schemaGenerator = {};
 schemaGenerator.eventEmitter = new EventEmitter();
 
 schemaGenerator.generate = (inputFile, showOutput, outputFile) => {
+  const stream = fs.createReadStream(inputFile);
+  schemaGenerator.generateFromStream(stream, showOutput, outputFile);
+};
+
+schemaGenerator.generateFromStream = (stream, showOutput, outputFile) => {
   schemaGenerator.root = {}
   schemaGenerator.schemas = [];
+  schemaGenerator.schemaMap = {};
   schemaGenerator.enums = [];
 
-  const stream = fs.createReadStream(inputFile);
   schemaGenerator.xml = new XmlStream(stream);
 
   schemaGenerator.xml.collect('attribute');
@@ -37,7 +43,8 @@ schemaGenerator.generate = (inputFile, showOutput, outputFile) => {
         'minor': parseInt(minorVersion),
         'gameYear': parseInt(gameYear)
       },
-      'schemas': schemaGenerator.schemas
+      'schemas': schemaGenerator.schemas,
+      'schemaMap': schemaGenerator.schemaMap
     };
 
     if (outputFile) {
@@ -95,6 +102,7 @@ schemaGenerator.generate = (inputFile, showOutput, outputFile) => {
     };
 
     schemaGenerator.schemas.push(element);
+    schemaGenerator.schemaMap[element.name] = element;
 
     if (element.name === 'WinLossStreakPlayerGoal') {
       // calculateInheritedSchemas();
@@ -107,108 +115,22 @@ schemaGenerator.generate = (inputFile, showOutput, outputFile) => {
   });
 
   function addExtraSchemas() {
-    if (!(schemaGenerator.schemas.find((schema) => { return schema.name === 'UserEntity'; }))) {
-      if (showOutput) console.log('ADDING USER ENTITY EXTRA SCHEMA');
-      addUserEntity();
-    }
+    extraSchemas.forEach((schema) => {
 
-    if (!(schemaGenerator.schemas.find((schema) => { return schema.name === 'Reaction'; }))) {
-      if (showOutput) console.log('ADDING REACTION EXTRA SCHEMA');
-      addReaction();
-    }
-
-    function addUserEntity() {
-      const element = {
-        'numMembers': '1',
-        'assetId': '28862',
-        'name': 'UserEntity',
-        'base': null,
-        'attributes': [
-          {
-            'index': '0',
-            'name': 'IsUserControlled',
-            'type': 'bool',
-            'minValue': null,
-            'maxValue': null,
-            'maxLength': null,
-            'default': 'False',
-            'final': null,
-            'enum': getEnum(null),
-            'const': null
-          }
-        ]
-      };
-
-      schemaGenerator.schemas.unshift(element);
-    };
-
-    function addReaction() {
-      const element = {
-        'numMembers': '2',
-        'assetId': null,
-        'name': 'Reaction',
-        'base': 'none()',
-        'attributes': [
-          {
-            'index': '1',
-            'name': 'EventRecord',
-            'type': 'record',
-            'minValue': null,
-            'maxValue': null,
-            'maxLength': null,
-            'default': null,
-            'final': null,
-            'enum': getEnum(null),
-            'const': null
-          },
-          {
-            'index': '0',
-            'name': 'Handle',
-            'type': 'bool()',
-            'minValue': null,
-            'maxValue': null,
-            'maxLength': null,
-            'default': null,
-            'final': null,
-            'enum': getEnum(null),
-            'const': null
-          }
-        ]
-      };
-
-      schemaGenerator.schemas.unshift(element);
-    };
-    /* <schema name="UserEntity" numMembers="1" assetId="28862" isRecordPersistent="true">
-            <attribute name="IsUserControlled" idx="0" type="bool" default="False" />
-        </schema> */
-
-    /* <schema name="Reaction" numMembers="1" base="none()">
-            <attribute name="EventRecord" idx="1" type="record" />
-            <attribute name="Handle" idx="0" type="bool()" />
-        </schema> */
-
-    /* <schema name="Transaction" numMembers="3" base="none()">
-      <attribute name="CurrentStage" idx="0" type="Stage" />
-      <attribute name="Sleep" idx="1" type="ITransaction_Sleep" />
-      <attribute name="TransitionStage" idx="2" type="Stage" />
-    </schema> */
+      if (!schemaGenerator.schemaMap[schema.name]) {
+        schema.attributes.filter((attrib) => { 
+          return attrib.enum && !(attrib.enum instanceof FranchiseEnum);
+        }).forEach((attrib) => {
+          attrib.enum = getEnum(attrib.enum);
+        });
+  
+        schemaGenerator.schemas.unshift(schema);
+      }
+    });
   };
 
   function calculateInheritedSchemas() {
-    const schemasWithBase = schemaGenerator.schemas.filter((schema) => { return schema.base && schema.base.indexOf("()") === -1; });
-    schemasWithBase.forEach((schema) => {
-      if (schema.base && schema.base.indexOf('()') === -1) {
-        schema.originalAttributesOrder = schema.attributes;
-        const baseSchema = schemaGenerator.schemas.find((schemaToSearch) => { return schemaToSearch.name === schema.base; });
-
-        if (baseSchema) {
-          baseSchema.attributes.forEach((baseAttribute, index) => {
-            let oldIndex = schema.attributes.findIndex((schemaAttribute) => { return schemaAttribute.name === baseAttribute.name; });
-            utilService.arrayMove(schema.attributes, oldIndex, index);
-          });
-        }
-      }
-    });
+    schemaGenerator.calculateInheritedSchemas(schemaGenerator.schemas);
   };
 
   function getSchema(name) {
@@ -218,6 +140,39 @@ schemaGenerator.generate = (inputFile, showOutput, outputFile) => {
   function getEnum(name) {
     return schemaGenerator.enums.find((theEnum) => { return theEnum.name === name; });
   };
+};
+
+schemaGenerator.getExtraSchemas = () => {
+  let newSchemas = [];
+
+  extraSchemas.forEach((schema) => {
+    schema.attributes.filter((attrib) => { 
+      return attrib.enum && !(attrib.enum instanceof FranchiseEnum);
+    }).forEach((attrib) => {
+      attrib.enum = new FranchiseEnum(attrib.enum);
+    });
+
+    newSchemas.push(schema);
+  });
+
+  return newSchemas;
+};
+
+schemaGenerator.calculateInheritedSchemas = (schemaList) => {
+  const schemasWithBase = schemaList.filter((schema) => { return schema.base && schema.base.indexOf("()") === -1; });
+  schemasWithBase.forEach((schema) => {
+    if (schema.base && schema.base.indexOf('()') === -1) {
+      schema.originalAttributesOrder = schema.attributes;
+      const baseSchema = schemaList.find((schemaToSearch) => { return schemaToSearch.name === schema.base; });
+
+      if (baseSchema) {
+        baseSchema.attributes.forEach((baseAttribute, index) => {
+          let oldIndex = schema.attributes.findIndex((schemaAttribute) => { return schemaAttribute.name === baseAttribute.name; });
+          utilService.arrayMove(schema.attributes, oldIndex, index);
+        });
+      }
+    }
+  });
 };
 
 module.exports = schemaGenerator;

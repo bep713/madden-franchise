@@ -3,8 +3,8 @@ const utilService = require('./services/utilService');
 class FranchiseEnumValue {
   constructor(name, index, value, unformattedValue) {
     this._name = name;
-    this._index = parseInt(index);
-    this._value = parseInt(value);
+    this._index = typeof(index) === 'number' ? index : parseInt(index);
+    this._value = typeof(value) === 'number' ? value : parseInt(value);
     this._unformattedValue = unformattedValue ? unformattedValue : parseFormattedValue(parseInt(value));
   };
 

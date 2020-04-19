@@ -13,7 +13,7 @@ class FranchiseFileTable extends EventEmitter {
     this.strategyBase = strategy;
     this.strategy = this.strategyBase.table;
     this.recordsRead = false;
-    this._gameYear = gameYear;
+    this._gameYear = gameYear; 
     this.header = this.strategy.parseHeader(this.data);
     this.name = this.header.name;
     this.isArray = this.header.isArray;
@@ -50,6 +50,7 @@ class FranchiseFileTable extends EventEmitter {
   };
 
   set schema (schema) {
+    // console.time('set schema');
     this._schema = schema;
     const modifiedHeaderAttributes = this.strategy.parseHeaderAttributesFromSchema(schema, this.data, this.header);
 
@@ -57,6 +58,7 @@ class FranchiseFileTable extends EventEmitter {
     this.header.record1Size = modifiedHeaderAttributes.record1Size;
     this.header.table1StartIndex = modifiedHeaderAttributes.table1StartIndex;
     this.header.table2StartIndex = modifiedHeaderAttributes.table2StartIndex;
+    // console.timeEnd('set schema');
   };
 
   get schema () {

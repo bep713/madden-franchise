@@ -136,18 +136,18 @@ class FranchiseFile extends EventEmitter {
     });
 
     Promise.all([schemaPromise, tablePromise]).then(() => {
-      that.tables.forEach((table) => {
-        // console.log(table.name);
+      that.tables.forEach((table, index) => {
         const schema = that.schemaList.getSchema(table.name);
 
         if (schema) {
-          table.schema = that.schemaList.getSchema(table.name);
+          table.schema = schema;
         }
       });
 
       that.isLoaded = true;
       that.emit('ready');
     }).catch((err) => {
+      console.log(err);
       that.emit('error', err);
     });
   };

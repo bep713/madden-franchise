@@ -8,6 +8,7 @@ const schemaGenerator = require('./services/schemaGenerator');
 class FranchiseSchema extends EventEmitter {
   constructor (filePath) {
     super();
+    this.schemas = [];
     this.path = filePath;
   };
 
@@ -16,8 +17,8 @@ class FranchiseSchema extends EventEmitter {
 
     switch (fileExtension) {
       case '.gz':
-        const schemaFile = fs.readFileSync(this.path);
-        this.evaluateSchemaGzip(schemaFile);
+        // const schemaFile = fs.readFileSync(this.path);
+        this.evaluateSchemaGzip(this.path);
         break;
       case '.ftx':
       case '.xml':
@@ -29,20 +30,26 @@ class FranchiseSchema extends EventEmitter {
   };
 
   getSchema(name) {
-    return this.schemas.find((schema) => { return schema.name === name; });
+    // return this.schemas.find((schema) => { return schema.name === name; });
+    return this.schemaMap[name];
   };
 
   getEnum(name) {
     return this.enums.find((theEnum) => { return theEnum.name === name; });
   };
 
-  evaluateSchemaGzip(schemaFile) {
-    this.schema = JSON.parse(zlib.gunzipSync(schemaFile).toString());
+  evaluateSchemaGzip(schemaPath) {
+    const schemaFile = fs.readFileSync(this.path);
+    const uncompressed = zlib.gunzipSync(schemaFile);
+    this.schema = JSON.parse(uncompressed.toString());
+
     this.meta = this.schema.meta;
     this.schemas = this.schema.schemas;
+    this.schemaMap = {};
   
     for (let i = 0; i < this.schemas.length; i++) {
       const schema = this.schemas[i];
+      this.schemaMap[schema.name] = schema;
   
       for (let j = 0; j < schema.attributes.length; j++) {
         const attribute = schema.attributes[j];
@@ -53,6 +60,20 @@ class FranchiseSchema extends EventEmitter {
       }
     }
 
+    let addedExtraSchema = false;
+    const extraSchemas = schemaGenerator.getExtraSchemas();
+    extraSchemas.forEach((schema) => {
+      if (!this.schemaMap[schema.name]) {
+        this.schemas.unshift(schema);
+        this.schemaMap[schema.name] = schema;
+        addedExtraSchema = true;
+      }
+    })
+
+    if (addedExtraSchema) {
+      schemaGenerator.calculateInheritedSchemas(this.schemas);
+    }
+
     this.emit('schemas:done');
   };
 
@@ -61,6 +82,7 @@ class FranchiseSchema extends EventEmitter {
       this.schema = schema;
       this.meta = schema.meta;
       this.schemas = schema.schemas;
+      this.schemaMap = schema.schemaMap;
       this.emit('schemas:done');
     });
 

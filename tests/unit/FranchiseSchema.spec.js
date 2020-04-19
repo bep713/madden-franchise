@@ -9,7 +9,10 @@ describe('FranchiseSchema unit tests', () => {
         expect(schema.meta.major).to.equal(360);
         expect(schema.meta.minor).to.equal(1);
         expect(schema.meta.gameYear).to.equal(20);
-        expect(schema.schemas.length).to.equal(2626);
+
+        // will add extra schemas if they don't already exist
+        expect(schema.schemas.length).to.equal(2636);
+        expect(schema.schemas.find((schema) => { return schema.name === 'Scheduler'})).to.not.be.undefined;
         done();
       });
 
@@ -22,7 +25,7 @@ describe('FranchiseSchema unit tests', () => {
         expect(schema.meta.major).to.equal(95);
         expect(schema.meta.minor).to.equal(7);
         expect(schema.meta.gameYear).to.equal(19);
-        expect(schema.schemas.length).to.equal(2399);
+        expect(schema.schemas.length).to.equal(2408);
         done();
       });
 
@@ -35,7 +38,7 @@ describe('FranchiseSchema unit tests', () => {
         expect(schema.meta.major).to.equal(367);
         expect(schema.meta.minor).to.equal(1);
         expect(schema.meta.gameYear).to.equal(20);
-        expect(schema.schemas.length).to.equal(2631);
+        expect(schema.schemas.length).to.equal(2641);
         done();
       });
 
