@@ -11,7 +11,7 @@ class FranchiseFileTable2Field extends EventEmitter {
     this.fieldReference = null;
     this.lengthAtLastSave = null;
     this._unformattedValue = null;
-    this.index = utilService.bin2dec(index);
+    this.index = index;
     this._offset = this.index;
   };
 

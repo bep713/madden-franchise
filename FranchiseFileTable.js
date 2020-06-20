@@ -281,16 +281,16 @@ function readOffsetTable(data, schema, header) {
 };
 
 function readRecords(data, header, offsetTable) {
-  const binaryData = utilService.getBitArray(data.slice(header.table1StartIndex, header.table2StartIndex));
+  // const binaryData = utilService.getBitArray(data.slice(header.table1StartIndex, header.table2StartIndex));
 
   let records = [];
 
-  if (binaryData) {
-    for (let i = 0; i < binaryData.length; i += (header.record1Size * 8)) {
-      const recordBinary = binaryData.slice(i, i + (header.record1Size * 8));
-      records.push(new FranchiseFileRecord(recordBinary, (i / (header.record1Size * 8)), offsetTable));
+  // if (binaryData) {
+    for (let i = header.table1StartIndex; i < header.table2StartIndex; i += (header.record1Size)) {
+      const recordData = data.subarray(i, i + header.record1Size);
+      records.push(new FranchiseFileRecord(recordData, (i / (header.record1Size * 8)), offsetTable));
     }
-  }
+  // }
 
   return records;
 };

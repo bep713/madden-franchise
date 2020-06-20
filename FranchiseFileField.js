@@ -130,7 +130,7 @@ function setFormattedValue(value, offset) {
 function parseFieldValue(unformatted, offset) {
   if (offset.enum) {
     try {
-      const theEnum = offset.enum.getMemberByUnformattedValue(unformatted);
+      const theEnum = offset.enum.getMemberByValue(unformatted);
 
       if (theEnum) {
         return theEnum.name;
@@ -145,27 +145,33 @@ function parseFieldValue(unformatted, offset) {
   else {
     switch (offset.type) {
       case 's_int':
-        return utilService.bin2dec(unformatted) + offset.minValue;
+        return unformatted + offset.minValue;
       case 'int':
         if (offset.minValue || offset.maxValue) {
-          return utilService.bin2dec(unformatted);
+          return unformatted;
         }
         else {
-          const maxValueBinary = getMaxValueBinary(offset);
-          const maxValue = utilService.bin2dec(maxValueBinary);
-          const newValue = utilService.bin2dec(unformatted);
+          // To get the implied maximum value, take the offset's length as zeros with a 1 in front.
+          // Ex: length of 5, max value would be 10000. The max value's length is 5 with a '1' and 5-1 (4) trailing zeros.
+
+          // Explanation of the below operation: https://stackoverflow.com/a/6850212
+          // We're using a bitshift to do what was mentioned above. The >>> at the end
+          // is tricking JS into using unsigned 32 bit operators.
+          const maxValue = (1 << (offset.length-1)) >>> 0;
           
-          if (newValue === 0) {
+          if (unformatted === 0) {
             return 0;
           }
           else {
-            return newValue - maxValue;
+            return unformatted - maxValue;
           }
         }
       case 'bool':
-        return unformatted[0] === '1' ? true : false;
+        return unformatted === 1 ? true : false;
       case 'float':
-        return utilService.bin2Float(unformatted);
+        let buf = Buffer.alloc(Math.ceil(offset.length / 8));
+        buf.writeUInt32BE(unformatted);
+        return buf.readFloatBE(0);
       default:
         return unformatted;
     }

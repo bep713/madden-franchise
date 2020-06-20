@@ -115,7 +115,7 @@ class FranchiseFile extends EventEmitter {
         const currentTable = tableIndicies[i];
         const nextTable = tableIndicies.length >= i+1 ? tableIndicies[i+1] : null;
 
-        const tableData = this.unpackedFileContents.slice(currentTable, nextTable);
+        const tableData = this.unpackedFileContents.subarray(currentTable, nextTable);
 
         const newFranchiseTable = new FranchiseFileTable(tableData, currentTable, this._gameYear, this.strategy);
         newFranchiseTable.index = i;
