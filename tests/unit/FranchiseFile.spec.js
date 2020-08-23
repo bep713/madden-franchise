@@ -5,6 +5,7 @@ const expect = require('chai').expect;
 const proxyquire = require('proxyquire');
 const common = require('./common/common');
 const Constants = require('../../Constants');
+const { deepStrictEqual } = require('assert');
 
 const zlibSpy = {
     'inflateSync': sinon.spy((data) => { return zlib.inflateSync(data); }),
@@ -17,11 +18,13 @@ const FranchiseFile = proxyquire('../../FranchiseFile', {
 const filePaths = {
     'compressed': {
         'm19': 'tests/data/CAREER-19COMPRESS',
-        'm20': 'tests/data/CAREER-20COMPRESS'
+        'm20': 'tests/data/CAREER-20COMPRESS',
+        'm21': 'tests/data/CAREER-21COMPRESS'
     },
     'decompressed': {
         'm19': 'tests/data/19UNCOMPRESS.frt',
-        'm20': 'tests/data/20UNCOMPRESS.frt'
+        'm20': 'tests/data/20UNCOMPRESS.frt',
+        'm21': 'tests/data/21UNCOMPRESS.frt'
     },
     'saveTest': {
         'm20': 'tests/data/CAREER-TESTSAVE'
@@ -35,11 +38,13 @@ const filePaths = {
 const files = {
     'compressed': {
         'm19': fs.readFileSync(filePaths.compressed.m19),
-        'm20': fs.readFileSync(filePaths.compressed.m20)
+        'm20': fs.readFileSync(filePaths.compressed.m20),
+        'm21': fs.readFileSync(filePaths.compressed.m21)
     },
     'decompressed': {
         'm19': fs.readFileSync(filePaths.decompressed.m19),
-        'm20': fs.readFileSync(filePaths.decompressed.m20)
+        'm20': fs.readFileSync(filePaths.decompressed.m20),
+        'm21': fs.readFileSync(filePaths.decompressed.m21)
     },
     'ftc': {
         'tuningCompressed': fs.readFileSync(filePaths.ftc.tuningCompressed),
@@ -90,6 +95,24 @@ describe('Franchise File unit tests', () => {
                 'format': Constants.FORMAT.FRANCHISE,
                 'compressed': true,
                 'year': 20
+            });
+        });
+
+        it('Compressed M21', () => {
+            const file = new FranchiseFile(filePaths.compressed.m21, franchiseFileOptions);
+            expect(file.type).to.eql({
+                'format': Constants.FORMAT.FRANCHISE,
+                'compressed': true,
+                'year': 21
+            });
+        });
+
+        it('Decompressed M21', () => {
+            const file = new FranchiseFile(filePaths.decompressed.m21, franchiseFileOptions);
+            expect(file.type).to.eql({
+                'format': Constants.FORMAT.FRANCHISE,
+                'compressed': false,
+                'year': 21
             });
         });
 
@@ -149,6 +172,24 @@ describe('Franchise File unit tests', () => {
             });
         });
 
+        it('Decompressed M21', () => {
+            const file = new FranchiseFile(filePaths.decompressed.m21, franchiseFileOptions);
+            expect(file.expectedSchemaVersion).to.eql({
+                'major': 202,
+                'minor': 1,
+                'gameYear': 21
+            });
+        });
+
+        it('Compressed M21', () => {
+            const file = new FranchiseFile(filePaths.compressed.m21, franchiseFileOptions);
+            expect(file.expectedSchemaVersion).to.eql({
+                'major': 202,
+                'minor': 15,
+                'gameYear': 21
+            });
+        });
+
         it('Compressed FTC', () => {
             const file = new FranchiseFile(filePaths.ftc.tuningCompressed, franchiseFileOptions);
             expect(file.expectedSchemaVersion).to.eql({
@@ -197,6 +238,21 @@ describe('Franchise File unit tests', () => {
             const file = new FranchiseFile(filePaths.compressed.m20, franchiseFileOptions);
             common.hashCompare(file.packedFileContents, files.compressed.m20);
             expect(file.unpackedFileContents).to.not.be.undefined;
+            expect(zlibSpy.inflateSync.calledOnce).to.be.true;
+            expect(zlibSpy.inflateSync.args[0][0].slice(0, 2)).to.eql(Buffer.from([0x78, 0x9C]));
+        });
+
+        it('Decompressed M21', () => {
+            const file = new FranchiseFile(filePaths.decompressed.m21, franchiseFileOptions);
+            expect(file.packedFileContents).to.be.undefined;
+            common.hashCompare(file.unpackedFileContents, files.decompressed.m21);
+            expect(zlibSpy.inflateSync.called).to.be.false;
+        });
+
+        it('Compressed M21', () => {
+            const file = new FranchiseFile(filePaths.compressed.m21, franchiseFileOptions);
+            common.hashCompare(file.packedFileContents, files.compressed.m21);
+            common.hashCompare(file.unpackedFileContents, files.decompressed.m21);
             expect(zlibSpy.inflateSync.calledOnce).to.be.true;
             expect(zlibSpy.inflateSync.args[0][0].slice(0, 2)).to.eql(Buffer.from([0x78, 0x9C]));
         });

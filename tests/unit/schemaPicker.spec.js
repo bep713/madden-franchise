@@ -56,8 +56,23 @@ describe('schema picker service unit tests', () => {
 
   it('returns a list of saved schemas', () => {
     const schemas = schemaPicker.retrieveSchemas();
-    expect(schemas.length).to.equal(2);
+    expect(schemas.length).to.equal(3);
     expect(schemas[0].major).to.equal(95);
     expect(schemas[1].major).to.equal(371);
-  }); 
+    expect(schemas[2].major).to.equal(202);
+  });
+
+  it('retrieves M21 schema', () => {
+    const schema = schemaPicker.pick(21, 202, 15, schemaPickerSettings);
+      expect(schema.major).to.equal(202);
+      expect(schema.minor).to.equal(15);
+      expect(schema.path).to.equal('C:\\Projects\\madden-franchise\\data\\schemas\\21\\M21_202_15.gz');
+  });
+
+  it('does not pick schema from different game year', () => {
+    const schema = schemaPicker.pick(21, 95, 7, schemaPickerSettings);
+      expect(schema.major).to.equal(202);
+      expect(schema.minor).to.equal(15);
+      expect(schema.path).to.equal('C:\\Projects\\madden-franchise\\data\\schemas\\21\\M21_202_15.gz');
+  });
 });

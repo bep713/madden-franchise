@@ -25,6 +25,17 @@ describe('Strategy Picker unit tests', () => {
         expect(result.name).to.equal('M20Strategy');
     });
 
+    it('M21', () => {
+        let type = {
+            'format': Constants.FORMAT.FRANCHISE,
+            'compressed': true,
+            'year': 21
+        }
+
+        const result = StrategyPicker.pick(type);
+        expect(result.name).to.equal('M20Strategy');
+    });
+
     it('FTC', () => {
         let type = {
             'format': Constants.FORMAT.FRANCHISE_COMMON,

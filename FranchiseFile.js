@@ -255,11 +255,12 @@ module.exports = FranchiseFile;
 
 function getTableStartOffsetByGameYear(gameYear) {
   switch (gameYear) {
-    case 20:
-      return 0x94;
     case 19:
-    default:
       return 0x90;
+    case 20:
+    case 21:
+    default:
+      return 0x94;
   }
 };
 
@@ -355,9 +356,27 @@ function getGameYear(data, isCompressed, format) {
       return null;
     }
 
-    const schemaMajor = getCompressedSchema(data).major;
-    const year = schemaMax.find((schema) => { return schema.max >= schemaMajor; }).year;
-    return year;
+    // M19 = RL12
+    // M20 = M20
+    // M21 = M21
+
+    const yearIdentifier = data.slice(0x22, 0x25);
+
+    if (yearIdentifier[0] === 0x52) {
+      return 19;
+    }
+    else if (yearIdentifier[2] === 0x30) {
+      return 20;
+    }
+    else if (yearIdentifier[2] === 0x31) {
+      return 21;
+    }
+    else {
+      const schemaMajor = getCompressedSchema(data).major;
+      const year = schemaMax.find((schema) => { return schema.max >= schemaMajor; }).year;
+      return year;
+    }
+
   }
   else {
     const schemaMajor = getDecompressedM20Schema(data).major;
@@ -367,7 +386,13 @@ function getGameYear(data, isCompressed, format) {
       return 19;
     }
     else {
-      return 20;
+      // M21 and M20 have very similar formats. We can tell M21 because it has a table with 'M21' in the name.
+      if (data.indexOf('M21') > -1) {
+        return 21;
+      }
+      else {
+        return 20;
+      }
     }
   }
 };
@@ -389,15 +414,15 @@ function getSchemaMetadata(data, type) {
     schemaMeta.minor = schemaData.minor;
   }
   else {
-    if (type.year === 20) {
-      const schemaData = getDecompressedM20Schema(data);
-      schemaMeta.major = schemaData.major;
-      schemaMeta.minor = schemaData.minor;
-    }
-    else {
+    if (type.year === 19) {
       // M19 did not include schema info in uncompressed files.
       schemaMeta.major = 0;
       schemaMeta.minor = 0;
+    }
+    else {
+      const schemaData = getDecompressedM20Schema(data);
+      schemaMeta.major = schemaData.major;
+      schemaMeta.minor = schemaData.minor;
     }
   }
 
