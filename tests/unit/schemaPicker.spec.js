@@ -75,4 +75,11 @@ describe('schema picker service unit tests', () => {
       expect(schema.minor).to.equal(15);
       expect(schema.path).to.equal('C:\\Projects\\madden-franchise\\data\\schemas\\21\\M21_202_15.gz');
   });
+
+  it('picks closest minor version', () => {
+    const schema = schemaPicker.pick(21, 202, 16, schemaPickerSettings);
+    expect(schema.major).to.equal(202);
+    expect(schema.minor).to.equal(16);
+    expect(schema.path).to.equal('C:\\Projects\\madden-franchise\\tests\\data\\test-schemas\\M21_202_16.gz');
+  });
 });

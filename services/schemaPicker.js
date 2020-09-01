@@ -73,7 +73,7 @@ function findApplicableSchema(schemaMeta, gameYear, major, minor) {
     const exactMajor = schemasToSearch.filter((schema) => { return schema.major == major });
 
     if (exactMajor.length > 0) {
-      return getClosestMinor(exactMajor);
+      return getClosestMinor(exactMajor, minor);
     }
     else {
       const majors = schemasToSearch.map((schema) => {
