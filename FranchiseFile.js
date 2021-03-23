@@ -135,7 +135,30 @@ class FranchiseFile extends EventEmitter {
       resolve();
     });
 
-    Promise.all([schemaPromise, tablePromise]).then(() => {
+    let assetTablePromise = new Promise((resolve, reject) => {
+      this.assetTable = [];
+
+      const assetTableOffset = this.unpackedFileContents.readUInt32BE(4);
+      const assetTableEntries = this.unpackedFileContents.readUInt32BE(36);
+
+      let currentOffset = assetTableOffset;
+      
+      for (let i = 0; i < assetTableEntries; i++) {
+        const assetId = this.unpackedFileContents.readUInt32BE(currentOffset);
+        const reference = this.unpackedFileContents.readUInt32BE(currentOffset + 4);
+
+        this.assetTable.push({
+          'assetId': assetId,
+          'reference': reference
+        });
+
+        currentOffset += 8;
+      } 
+
+      resolve();
+    });
+
+    Promise.all([schemaPromise, tablePromise, assetTablePromise]).then(() => {
       that.tables.forEach((table, index) => {
         const schema = that.schemaList.getSchema(table.name);
 
@@ -248,6 +271,20 @@ class FranchiseFile extends EventEmitter {
   getReferencedRecord (referenceValue) {
     const reference = utilService.getReferenceData(referenceValue);
     return this.getTableById(reference.tableId).records[reference.rowNumber];
+  };
+
+  getReferenceFromAssetId (assetId) {
+    const assetEntry = this.assetTable.find((assetEntry) => {
+      return assetEntry.assetId === assetId;
+    });
+
+    if (assetEntry) {
+      const referenceBinaryString = assetEntry.reference.toString(2).padStart(32);
+      return utilService.getReferenceData(referenceBinaryString);
+    }
+    else {
+      return null;
+    }
   };
 };
 

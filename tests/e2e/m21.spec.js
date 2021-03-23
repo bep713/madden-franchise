@@ -102,6 +102,34 @@ describe('Madden 21 end to end tests', function () {
       })
     });
 
+    describe('can read in the file\'s asset table', () => {
+      it('expected length', () => { 
+        expect(file.assetTable.length).to.eql(0xD6);
+      });
+
+      it('first asset entry is correct', () => {
+        expect(file.assetTable[0]).to.eql({
+          'assetId': 0x8000086F,
+          'reference': 0x3C180000
+        });
+      });
+
+      it('last asset entry is correct', () => {
+        expect(file.assetTable[file.assetTable.length-1]).to.eql({
+          'assetId': 0x802E1F71,
+          'reference': 0x38EA0001
+        });
+      });
+
+      it('can retrieve reference information from an asset id', () => {
+        const result = file.getReferenceFromAssetId(0x80163171);
+        expect(result).to.eql({
+          'tableId': 7708,
+          'rowNumber': 10 
+        });
+      });
+    });
+
     describe('can save', () => {
       it('can save without any changes', (done) => {
         file.save(filePaths.saveTest.m21).then(() => {
