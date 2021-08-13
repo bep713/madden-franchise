@@ -52,7 +52,6 @@ class FranchiseFile extends EventEmitter {
 
   parse() {
     const that = this;
-    console.log(this.type);
     this.strategy = StrategyPicker.pick(this.type);
 
     let schemaPromise = new Promise((resolve, reject) => {
