@@ -52,6 +52,7 @@ class FranchiseFile extends EventEmitter {
 
   parse() {
     const that = this;
+    console.log(this.type);
     this.strategy = StrategyPicker.pick(this.type);
 
     let schemaPromise = new Promise((resolve, reject) => {
@@ -407,6 +408,9 @@ function getGameYear(data, isCompressed, format) {
     }
     else if (yearIdentifier[2] === 0x31) {
       return 21;
+    }
+    else if (yearIdentifier[2] === 0x32) {
+      return 22;
     }
     else {
       const schemaMajor = getCompressedSchema(data).major;
