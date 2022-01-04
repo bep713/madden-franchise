@@ -28,7 +28,7 @@ class FranchiseFileRecord extends EventEmitter {
 
         // NOTE: At this time, we can only change the size of arrays of references.
         // I'm not sure how to change the size of non-reference arrays, or if it's even possible.
-        if (that.arraySize) {
+        if (that.arraySize !== null && that.arraySize !== undefined) {
           const referenceData = this.referenceData;
 
           // If the field is outside of the previous array size and was edited to a valid reference,

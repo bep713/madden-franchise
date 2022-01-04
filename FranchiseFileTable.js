@@ -32,8 +32,8 @@ class FranchiseFileTable extends EventEmitter {
     let currentOffset = 0;
     let bufferArrays = [];
 
-    // Add all of the array sizes to the buffer if the table is an array
-    if (this.isArray) {
+    // Add all of the array sizes to the buffer if the table is an array and had a change
+    if (this.isArray && changedRecords.length > 0) {
       // Push the header data
       bufferArrays.push(this.data.slice(currentOffset, this.header.headerSize));
 

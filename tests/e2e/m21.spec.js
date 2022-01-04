@@ -709,6 +709,18 @@ describe('Madden 21 end to end tests', function () {
             });
           });
 
+          it('allows users to modify array length - array size starts at 0', (done) => {
+            let newTable = file.getTableById(7720);
+            
+            newTable.readRecords().then(() => {
+              newTable.arraySizes[0] = 0;
+              newTable.records[0].arraySize = 0;
+              newTable.records[0].Player396 = '00100000011101100000010001111011';
+              expect(newTable.arraySizes[0]).to.equal(397);
+              done();
+            });
+          });
+
           it('allows users to modify array length - multiple rows', (done) => {
             let newTable = file.getTableById(7704);
             
