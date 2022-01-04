@@ -592,6 +592,7 @@ describe('Madden 21 end to end tests', function () {
           expect(table.isChanged).to.be.false;
           expect(table.recordsRead).to.be.false;
           expect(table.data).to.not.be.undefined;
+          expect(table.hexData).to.not.be.undefined;
           expect(table.readRecords).to.exist;
           expect(table.offset).to.equal(5406691);
         });
