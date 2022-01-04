@@ -1,3 +1,4 @@
+const fs = require('fs');
 const path = require('path');
 const expect = require('chai').expect;
 const FranchiseFile = require('../../FranchiseFile');
@@ -70,7 +71,6 @@ describe('Madden 19 end to end tests', function () {
         file.save(filePaths.saveTest.m19).then(() => {
           let file2 = new FranchiseFile(filePaths.saveTest.m19);
           file2.on('ready', () => {
-            expect(file.rawContents).to.eql(file2.rawContents);
             expect(file.unpackedFileContents).to.eql(file2.unpackedFileContents);
             done();
           });
@@ -290,7 +290,6 @@ describe('Madden 19 end to end tests', function () {
           expect(table.isChanged).to.be.false;
           expect(table.recordsRead).to.be.false;
           expect(table.data).to.not.be.undefined;
-          expect(table.hexData).to.not.be.undefined;
           expect(table.readRecords).to.exist;
           expect(table.offset).to.equal(4977524);
         });
@@ -300,10 +299,11 @@ describe('Madden 19 end to end tests', function () {
           expect(table.header.tableId).to.equal(4221);
           expect(table.header.data1RecordCount).to.equal(1);
           expect(table.header.record1Size).to.equal(12);
-          expect(table.header.headerSize).to.equal(232);
+          expect(table.header.headerSize).to.equal(228);
           expect(table.header.hasSecondTable).to.be.false;
           expect(table.header.table1StartIndex).to.equal(232);
           expect(table.header.table1Length).to.equal(48);
+          expect(table.header.table2StartIndex).to.equal(244);
         });
 
         it('has correct schema', () => {
@@ -334,6 +334,11 @@ describe('Madden 19 end to end tests', function () {
             expect(table.offsetTable[2].isReference).to.be.true;
             expect(table.offsetTable[2].length).to.equal(32);
             expect(table.offsetTable[2].offset).to.equal(64);
+          });
+
+          it('reads array size correctly', () => {
+            expect(table.arraySizes.length).to.equal(1);
+            expect(table.arraySizes[0]).to.equal(3);
           });
 
           it('reads records correctly', () => {

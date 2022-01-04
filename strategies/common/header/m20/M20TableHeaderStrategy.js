@@ -68,7 +68,6 @@ M20TableHeaderStrategy.parseHeader = (data) => {
         table2StartIndex = table1StartIndex + (data1RecordCount * records1Size)
     }
     
-    
     return {
         'name': tableName,
         'isArray': isArray,

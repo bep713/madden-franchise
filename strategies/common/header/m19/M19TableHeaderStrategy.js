@@ -54,9 +54,9 @@ M19TableHeaderStrategy.parseHeader = (data) => {
     let records1Size = 0;
 
     if (isArray) {
-        headerSize = 0xE8 + tableStoreLength;
-        const binaryData = utilService.getBitArray(data.slice(0, headerSize));
-        records1Size = utilService.bin2dec(binaryData.slice(records1SizeOffset, records1SizeOffset+9));
+        headerSize = 0xE4 + tableStoreLength;
+        // const binaryData = utilService.getBitArray(data.slice(0, headerSize));
+        records1Size = data2RecordWords * 4;
     }
 
     return {
@@ -93,8 +93,8 @@ M19TableHeaderStrategy.parseHeader = (data) => {
         'table1Length2': table1Length2,
         'tableTotalLength': tableTotalLength,
         'hasSecondTable': hasSecondTable,
-        'table1StartIndex': tableStoreLength === 0 && !isArray ? headerSize : headerSize - 4 + (data1RecordCount * 4),
-        'table2StartIndex': tableStoreLength === 0 && !isArray ? headerSize + (data1RecordCount * records1Size) : (headerSize -4 + (data1RecordCount * 4)) + (data1RecordCount * records1Size),
+        'table1StartIndex': tableStoreLength === 0 && !isArray ? headerSize : headerSize + (data1RecordCount * 4),
+        'table2StartIndex': tableStoreLength === 0 && !isArray ? headerSize + (data1RecordCount * records1Size) : headerSize + (data1RecordCount * 4) + (data1RecordCount * records1Size),
         'data2recordWords': data2RecordWords,
         'data2RecordCapacity': data2RecordCapacity,
         'data2IndexEntries': data2IndexEntries,
@@ -103,16 +103,26 @@ M19TableHeaderStrategy.parseHeader = (data) => {
 };
 
 M19TableHeaderStrategy.parseHeaderAttributesFromSchema = (schema, data, header) => {
-    headerSize = header.headerOffset + (schema.numMembers * 4) + header.tableStoreLength;
-    const binaryData = utilService.getBitArray(data.slice(0, headerSize));
-    records1Size = utilService.bin2dec(binaryData.slice(header.record1SizeOffset, header.record1SizeOffset + header.record1SizeLength));
+    if (header.isArray) {
+        return {
+            'headerSize': header.headerSize,
+            'record1Size': header.record1Size,
+            'table1StartIndex': header.table1StartIndex,
+            'table2StartIndex': header.table2StartIndex
+        }
+    }
+    else {
+        headerSize = header.headerOffset + (schema.numMembers * 4) + header.tableStoreLength;
+        const binaryData = utilService.getBitArray(data.slice(0, headerSize));
+        records1Size = utilService.bin2dec(binaryData.slice(header.record1SizeOffset, header.record1SizeOffset + header.record1SizeLength));
 
-    return {
-        'headerSize': headerSize,
-        'record1Size': records1Size,
-        'table1StartIndex': headerSize,
-        'table2StartIndex': headerSize + (header.data1RecordCount * records1Size)
-    };
+        return {
+            'headerSize': headerSize,
+            'record1Size': records1Size,
+            'table1StartIndex': headerSize,
+            'table2StartIndex': headerSize + (header.data1RecordCount * records1Size)
+        };
+    }
 };
 
 module.exports = M19TableHeaderStrategy;

@@ -174,7 +174,7 @@ describe('M19 Table Header unit tests', () => {
             // We can get the following header attribs from the header
 
             it('header size', () => {
-                expect(result.headerSize).to.equal(232);
+                expect(result.headerSize).to.equal(228);
             });
 
             it('record1 size', () => {

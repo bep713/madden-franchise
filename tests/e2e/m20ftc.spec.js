@@ -462,7 +462,6 @@ describe('Madden 20 FTC end to end tests', function () {
                 file.save(filePaths.saveTest.ftc).then(() => {
                     let file2 = new FranchiseFile(filePaths.saveTest.ftc);
                     file2.on('ready', () => {
-                        expect(file.rawContents).to.eql(file2.rawContents);
                         expect(file.unpackedFileContents).to.eql(file2.unpackedFileContents);
                         done();
                     });

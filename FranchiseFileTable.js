@@ -21,6 +21,7 @@ class FranchiseFileTable extends EventEmitter {
     this.isChanged = false;
     this.records = [];
     this.table2Records = [];
+    this.arraySizes = [];
   };
 
   get hexData () {
@@ -30,6 +31,21 @@ class FranchiseFileTable extends EventEmitter {
     const changedRecords = this.records.filter((record) => { return record.isChanged; });
     let currentOffset = 0;
     let bufferArrays = [];
+
+    // Add all of the array sizes to the buffer if the table is an array
+    if (this.isArray) {
+      // Push the header data
+      bufferArrays.push(this.data.slice(currentOffset, this.header.headerSize));
+
+      let arraySizeBuffer = Buffer.alloc(this.header.data1RecordCount * 4);
+
+      this.arraySizes.forEach((arraySize) => {
+        arraySizeBuffer.writeUInt32BE(arraySize);
+      });
+
+      bufferArrays.push(arraySizeBuffer);
+      currentOffset += this.header.headerSize + this.header.data1RecordCount * 4;
+    }
 
     for (let i = 0; i < changedRecords.length; i++) {
       let record = changedRecords[i];
@@ -74,6 +90,7 @@ class FranchiseFileTable extends EventEmitter {
         } else if (this.isArray) {
           const numberOfFields = this.header.record1Size / 4;
           let offsetTable = [];
+          let arraySizes = [];
 
           for (let i = 0; i < numberOfFields; i++) {
             const offset = {
@@ -96,7 +113,12 @@ class FranchiseFileTable extends EventEmitter {
             offsetTable.push(offset);
           }
 
+          for (let i = 0; i < this.header.data1RecordCount; i++) {
+            arraySizes.push(this.data.readUInt32BE(this.header.headerSize + (i * 4)));
+          }
+
           this.offsetTable = offsetTable;
+          this.arraySizes = arraySizes;
         } else {
           reject('Cannot read records: Schema is not defined.');
         }
@@ -122,9 +144,14 @@ class FranchiseFileTable extends EventEmitter {
         }
 
         this.records.forEach((record, index) => {
+          if (this.isArray) {
+            record.arraySize = this.arraySizes[index];
+          }
+
           const that = this;
-          record.on('change', function () {
+          record.on('change', function (changedOffset) {
             this.isChanged = true;
+            that.arraySizes[index] = this.arraySize;
             that.emit('change');
           });
         });

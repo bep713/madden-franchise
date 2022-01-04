@@ -135,7 +135,6 @@ describe('Madden 21 end to end tests', function () {
         file.save(filePaths.saveTest.m21).then(() => {
           let file2 = new FranchiseFile(filePaths.saveTest.m21);
           file2.on('ready', () => {
-            expect(file.rawContents).to.eql(file2.rawContents);
             expect(file.unpackedFileContents).to.eql(file2.unpackedFileContents);
             done();
           });
@@ -593,7 +592,6 @@ describe('Madden 21 end to end tests', function () {
           expect(table.isChanged).to.be.false;
           expect(table.recordsRead).to.be.false;
           expect(table.data).to.not.be.undefined;
-          expect(table.hexData).to.not.be.undefined;
           expect(table.readRecords).to.exist;
           expect(table.offset).to.equal(5406691);
         });
@@ -639,6 +637,21 @@ describe('Madden 21 end to end tests', function () {
             expect(table.offsetTable[2].offset).to.equal(64);
           });
 
+          it('parses array sizes correctly', () => {
+            expect(table.arraySizes.length).to.equal(1);
+            expect(table.arraySizes[0]).to.equal(3);
+          });
+
+          it('parses array sizes correctly - multiple rows', async () => {
+            const table = file.getTableById(7704);
+            await table.readRecords();
+
+            expect(table.arraySizes.length).to.equal(table.header.data1RecordCount);
+            expect(table.arraySizes[0]).to.equal(70);
+            expect(table.arraySizes[14]).to.equal(70);
+            expect(table.arraySizes[22]).to.equal(74);
+          });
+
           it('reads records correctly', () => {
             expect(table.records.length).to.equal(1);
             expect(table.recordsRead).to.be.true;
@@ -662,6 +675,67 @@ describe('Madden 21 end to end tests', function () {
                   expect(table2.records[0].Player1).to.eql('00100001000001000000001010100001');
                   expect(table2.records[0].Player2).to.eql('00100001000001000000000001010110');
                   done();
+                });
+              });
+            });
+          });
+
+          it('allows users to modify array length', (done) => {
+            let newTable = file.getTableById(7720);
+            
+            newTable.readRecords().then(() => {
+              expect(newTable.arraySizes.length).to.equal(newTable.header.data1RecordCount);
+              expect(newTable.arraySizes[0]).to.equal(396);
+
+              newTable.records[0].Player396 = '00100000011101100000010001111011';
+              expect(newTable.arraySizes[0]).to.equal(397);
+
+              file.save(filePaths.saveTest.m21).then(() => {
+                let file2 = new FranchiseFile(filePaths.saveTest.m21);
+
+                file2.on('ready', () => {
+                  let table2 = file2.getTableById(7720);
+
+                  table2.readRecords().then(() => {
+                    expect(table2.arraySizes[0]).to.equal(397);
+                    expect(table2.records[0].Player0).to.eql('00100001000001000000010001111100');
+                    expect(table2.records[0].Player1).to.eql('00100001000001000000010111111110');
+                    expect(table2.records[0].Player396).to.eql('00100000011101100000010001111011');
+                    expect(table2.records[0].Player397).to.eql('00000000000000000000000000000000');
+                    done();
+                  });
+                });
+              });
+            });
+          });
+
+          it('allows users to modify array length - multiple rows', (done) => {
+            let newTable = file.getTableById(7704);
+            
+            newTable.readRecords().then(() => {
+              expect(newTable.arraySizes.length).to.equal(newTable.header.data1RecordCount);
+              expect(newTable.arraySizes[17]).to.equal(75);
+              expect(newTable.arraySizes[26]).to.equal(70);
+
+              newTable.records[17].Player75 = '00100000011101100000010001111011';
+              newTable.records[26].Player70 = '00100000011101100000010001111011';
+              expect(newTable.arraySizes[17]).to.equal(76);
+              expect(newTable.arraySizes[26]).to.equal(71);
+
+              file.save(filePaths.saveTest.m21).then(() => {
+                let file2 = new FranchiseFile(filePaths.saveTest.m21);
+
+                file2.on('ready', () => {
+                  let table2 = file2.getTableById(7704);
+
+                  table2.readRecords().then(() => {
+                    expect(newTable.arraySizes[17]).to.equal(76);
+                    expect(newTable.arraySizes[26]).to.equal(71);
+
+                    expect(table2.records[17].Player75).to.eql('00100000011101100000010001111011');
+                    expect(table2.records[26].Player70).to.eql('00100000011101100000010001111011');
+                    done();
+                  });
                 });
               });
             });

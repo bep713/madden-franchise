@@ -119,7 +119,6 @@ describe('Madden 20 end to end tests', function () {
         file.save(filePaths.saveTest.m20).then(() => {
           let file2 = new FranchiseFile(filePaths.saveTest.m20);
           file2.on('ready', () => {
-            expect(file.rawContents).to.eql(file2.rawContents);
             expect(file.unpackedFileContents).to.eql(file2.unpackedFileContents);
             done();
           });
