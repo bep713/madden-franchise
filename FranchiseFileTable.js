@@ -39,8 +39,8 @@ class FranchiseFileTable extends EventEmitter {
 
       let arraySizeBuffer = Buffer.alloc(this.header.data1RecordCount * 4);
 
-      this.arraySizes.forEach((arraySize) => {
-        arraySizeBuffer.writeUInt32BE(arraySize);
+      this.arraySizes.forEach((arraySize, index) => {
+        arraySizeBuffer.writeUInt32BE(arraySize, (index * 4));
       });
 
       bufferArrays.push(arraySizeBuffer);

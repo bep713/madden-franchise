@@ -742,8 +742,8 @@ describe('Madden 21 end to end tests', function () {
                   let table2 = file2.getTableById(7704);
 
                   table2.readRecords().then(() => {
-                    expect(newTable.arraySizes[17]).to.equal(76);
-                    expect(newTable.arraySizes[26]).to.equal(71);
+                    expect(table2.arraySizes[17]).to.equal(76);
+                    expect(table2.arraySizes[26]).to.equal(71);
 
                     expect(table2.records[17].Player75).to.eql('00100000011101100000010001111011');
                     expect(table2.records[26].Player70).to.eql('00100000011101100000010001111011');
