@@ -602,6 +602,33 @@ describe('Madden 21 end to end tests', function () {
 
               record.empty();
 
+              expect(record.isEmpty).to.be.true;
+              expect(table.emptyRecords.size).to.equal(96);
+              expect(table.emptyRecords.get(255)).to.eql({
+                previous: 254,
+                next: 0
+              });
+              expect(table.emptyRecords.get(0)).to.eql({
+                previous: 255,
+                next: 256
+              });
+
+              expect(table.data.readUInt32BE(table.header.table1StartIndex)).to.equal(256);
+              expect(table.data.readUInt32BE(table.header.table1StartIndex + (255 * 4))).to.equal(0);
+
+              // Make sure the next record buffer is unchanged.
+              expect(table.data.readUInt32BE(table.header.table1StartIndex + 4)).to.eql(firstRecordValue);
+
+              expect(table.records[0]._data).to.eql('00000000000000000000000100000000');
+              expect(table.records[255]._data).to.eql('00000000000000000000000000000000');
+            });
+
+            it('cannot empty an already emptied record', () => {
+              // This table is 4 bytes long so we can do this safely
+              const firstRecordValue = table.data.readUInt32BE(table.header.table1StartIndex + 4);
+
+              record.empty();
+
               expect(table.emptyRecords.size).to.equal(96);
               expect(table.emptyRecords.get(255)).to.eql({
                 previous: 254,
@@ -625,9 +652,13 @@ describe('Madden 21 end to end tests', function () {
 
           describe('can fill an empty record', () => {
             it('filling a record when there is already one or more empty records', () => {
+              expect(table.records[253].isEmpty).to.be.true;
+
               table.records[253].LocalPopularity = 20;
               table.records[253].NationalPopularity = 23;
               table.records[253].RegionalPopularity = 25;
+
+              expect(table.records[253].isEmpty).to.be.false;
 
               expect(table.emptyRecords.size).to.equal(95);
               expect(table.emptyRecords.get(252)).to.eql({
@@ -1205,6 +1236,12 @@ describe('Madden 21 end to end tests', function () {
 
           // Updates buffer to reflect header change
           expect(table.data.readUInt32BE(table.header.headerOffset - 4)).to.equal(9);
+
+          // Updates table buffer to reflect change
+          expect(table.data.readUInt32BE(table.header.table1StartIndex + (9 * table.header.record1Size))).to.equal(21);
+
+          // Updates record buffer to reflect change
+          expect(table.records[9]._data).to.equal('0000000000000000000000000001010100000000000000000000000000000000');
         });
 
         it('can empty a 2nd record', () => {
@@ -1226,6 +1263,18 @@ describe('Madden 21 end to end tests', function () {
 
           // Buffer should still be 9 from above test
           expect(table.data.readUInt32BE(table.header.headerOffset - 4)).to.equal(9);
+
+          // Updates table buffer to reflect change
+          expect(table.data.readUInt32BE(table.header.table1StartIndex + (6 * table.header.record1Size))).to.equal(21);
+
+          // Updates table buffer of previous empty record to reflect change
+          expect(table.data.readUInt32BE(table.header.table1StartIndex + (9 * table.header.record1Size))).to.equal(6);
+
+          // Updates record buffer to reflect change
+          expect(table.records[6]._data).to.equal('0000000000000000000000000001010100000000000000000000000000000000');
+
+          // Updates other record buffer to reflect change to point to 6
+          expect(table.records[9]._data).to.equal('0000000000000000000000000000011000000000000000000000000000000000');
         });
 
         it('can fill the 1st empty record', () => {

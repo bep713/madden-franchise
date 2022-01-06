@@ -11,6 +11,7 @@ class FranchiseFileRecord extends EventEmitter {
     this._fields = parseRecordFields(data, offsetTable);
     this.isChanged = false;
     this.arraySize = null;
+    this.isEmpty = false;
 
     const that = this;
     this._fields.forEach((field) => {
@@ -87,6 +88,7 @@ class FranchiseFileRecord extends EventEmitter {
 
   empty() {
     this.emit('empty');
+    this.isEmpty = true;
   };
 };
 

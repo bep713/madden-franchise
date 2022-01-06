@@ -149,6 +149,10 @@ class FranchiseFileTable extends EventEmitter {
             record.arraySize = this.arraySizes[index];
           }
 
+          if (this.emptyRecords.get(index)) {
+            record.isEmpty = true;
+          }
+
           const that = this;
           record.on('change', function (changedOffset) {
             this.isChanged = true;
@@ -170,6 +174,9 @@ class FranchiseFileTable extends EventEmitter {
 
               // Delete the empty record entry because it is no longer empty
               that.emptyRecords.delete(this.index);
+
+              // Set the isEmpty back to false because it's no longer empty
+              this.isEmpty = false;
 
               // Check if there is a previous empty record
               const previousEmptyReference = that.emptyRecords.get(emptyRecordReference.previous);
@@ -214,49 +221,54 @@ class FranchiseFileTable extends EventEmitter {
           });
 
           record.on('empty', function () {
-            this.isChanged = true;
-            const lastEmptyRecordMapEntry = Array.from(that.emptyRecords).pop();
-
-            // When we empty a record, we need to check if another empty record exists in the table.
-            if (lastEmptyRecordMapEntry !== null && lastEmptyRecordMapEntry !== undefined) {
-
-              // If an empty record already exists, we just need to get the last empty record
-              // and update its index to point to the current record that we want to empty.
-              const lastEmptyRecordIndex = lastEmptyRecordMapEntry[0];
-
-              that.emptyRecords.set(lastEmptyRecordIndex, {
-                previous: lastEmptyRecordMapEntry[1].previous,
-                next: this.index
-              });
-
-              // Then we need to update the current record index to point to the record capacity.
-              that.emptyRecords.set(this.index, {
-                previous: lastEmptyRecordIndex,
-                next: that.header.recordCapacity
-              });
-
-              // Finally, we need to update the buffers to reflect this data.
-              // First, place the new referenced index (will be the first 4 bytes)
-              // Next, fill the rest of the record with 0s (the last bytes of the record)
-
-              // And update both record's data. This will set the unformatted and formatted values
-              // without emitting an event
-              changeRecordBuffers(lastEmptyRecordIndex, this.index);
-              changeRecordBuffers(this.index, that.header.recordCapacity);
+            // First, check if the record is already empty. If so, don't do anything...
+            // If not empty, then we need to empty it.
+            if (!this.isEmpty) {
+              this.isChanged = true;
+              const lastEmptyRecordMapEntry = Array.from(that.emptyRecords).pop();
+  
+              // When we empty a record, we need to check if another empty record exists in the table.
+              if (lastEmptyRecordMapEntry !== null && lastEmptyRecordMapEntry !== undefined) {
+  
+                // If an empty record already exists, we just need to get the last empty record
+                // and update its index to point to the current record that we want to empty.
+                const lastEmptyRecordIndex = lastEmptyRecordMapEntry[0];
+  
+                that.emptyRecords.set(lastEmptyRecordIndex, {
+                  previous: lastEmptyRecordMapEntry[1].previous,
+                  next: this.index
+                });
+  
+                // Then we need to update the current record index to point to the record capacity.
+                that.emptyRecords.set(this.index, {
+                  previous: lastEmptyRecordIndex,
+                  next: that.header.recordCapacity
+                });
+  
+                // Finally, we need to update the buffers to reflect this data.
+                // First, place the new referenced index (will be the first 4 bytes)
+                // Next, fill the rest of the record with 0s (the last bytes of the record)
+  
+                // And update both record's data. This will set the unformatted and formatted values
+                // without emitting an event
+                changeRecordBuffers(lastEmptyRecordIndex, this.index);
+                changeRecordBuffers(this.index, that.header.recordCapacity);
+              }
+              else {
+                // In this case, the record that was emptied is the first empty record in the table
+                that.emptyRecords.set(this.index, {
+                  previous: null,
+                  next: that.header.recordCapacity
+                });
+  
+                // Finally update the table header and buffer so that the game uses this new empty
+                // record as the next record to use (or fill)
+                updateNextRecordToUseHeaderAndBuffer(this.index);
+                changeRecordBuffers(this.index, that.header.recordCapacity);
+              }
+              
+              that.emit('change');
             }
-            else {
-              // In this case, the record that was emptied is the first empty record in the table
-              that.emptyRecords.set(this.index, {
-                previous: null,
-                next: that.header.recordCapacity
-              });
-
-              // Finally update the table header and buffer so that the game uses this new empty
-              // record as the next record to use (or fill)
-              updateNextRecordToUseHeaderAndBuffer(this.index);
-            }
-            
-            that.emit('change');
           });
 
           function updateNextRecordToUseHeaderAndBuffer(nextRecordToUse) {
@@ -279,7 +291,14 @@ class FranchiseFileTable extends EventEmitter {
           };
 
           function setRecordInternalBuffer(index, emptyRecordReference) {
-            that.records[index].data = utilService.dec2bin(emptyRecordReference, that.header.record1Size * 8);
+            let newData = utilService.dec2bin(emptyRecordReference, 32);
+
+            const recordSizeInBits = that.header.record1Size * 8;
+            if (recordSizeInBits > 32) {
+              newData += utilService.dec2bin(0, recordSizeInBits - 32);
+            }
+
+            that.records[index].data = newData;
           };
         });
 
