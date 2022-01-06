@@ -64,6 +64,11 @@ class FranchiseFileField extends EventEmitter {
   };
 
   set unformattedValue (unformattedValue) {
+    this.setUnformattedValueWithoutChangeEvent(unformattedValue);
+    this.emit('change');
+  };
+
+  setUnformattedValueWithoutChangeEvent(unformattedValue) {
     if (!utilService.isString(unformattedValue)) { throw new Error(`Argument must be of type string. You passed in a ${typeof unformattedValue}.`); }
     else if (!utilService.stringOnlyContainsBinaryDigits(unformattedValue)) { throw new Error(`Argument must only contain binary digits 1 and 0. If you would like to set the value, please set the 'value' attribute instead.`)}
     else {
@@ -89,10 +94,8 @@ class FranchiseFileField extends EventEmitter {
       else {
         this._unformattedValue = unformattedValue;
       }
-
-      this.emit('change');
     }
-  };
+  }
 };
 
 module.exports = FranchiseFileField;

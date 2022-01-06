@@ -45,7 +45,7 @@ M19TableHeaderStrategy.parseHeader = (data) => {
     const data2RecordCapacity = data.readUInt32BE(headerOffset+48);
     const data2IndexEntries = data.readUInt32BE(headerOffset+52);
     const unknown4 = data.readUInt32BE(headerOffset+56);
-    const data2RecordCount = data.readUInt32BE(headerOffset+60);
+    const nextRecordToUse = data.readUInt32BE(headerOffset+60);
 
     let offsetStart = 0xE4 + tableStoreLength;
     const hasSecondTable = tableTotalLength > table1Length;
@@ -98,7 +98,7 @@ M19TableHeaderStrategy.parseHeader = (data) => {
         'data2recordWords': data2RecordWords,
         'data2RecordCapacity': data2RecordCapacity,
         'data2IndexEntries': data2IndexEntries,
-        'data2RecordCount': data2RecordCount
+        'nextRecordToUse': nextRecordToUse
     };
 };
 

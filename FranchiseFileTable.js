@@ -1,4 +1,3 @@
-const assert = require('assert');
 const EventEmitter = require('events').EventEmitter;
 const utilService = require('./services/utilService');
 const FranchiseFileRecord = require('./FranchiseFileRecord');
@@ -22,6 +21,7 @@ class FranchiseFileTable extends EventEmitter {
     this.records = [];
     this.table2Records = [];
     this.arraySizes = [];
+    this.emptyRecords = new Map();
   };
 
   get hexData () {
@@ -122,9 +122,10 @@ class FranchiseFileTable extends EventEmitter {
         } else {
           reject('Cannot read records: Schema is not defined.');
         }
+        
+        this.emptyRecords = this._parseEmptyRecords();
 
         let offsetTableToUse = this.offsetTable;
-
         const mandatoryOffsetsToLoad = this.strategy.getMandatoryOffsets(this.offsetTable);
         
         if (attribsToLoad) {
@@ -151,9 +152,135 @@ class FranchiseFileTable extends EventEmitter {
           const that = this;
           record.on('change', function (changedOffset) {
             this.isChanged = true;
-            that.arraySizes[index] = this.arraySize;
+
+            if (that.isArray) {
+              that.arraySizes[index] = this.arraySize;
+            }
+
+            // When a record changes, we need to check if it was previously empty
+            // If so, we need to consider the record as no longer empty
+            // So we need to adjust the empty records
+
+            // Ex: Empty record list looks like this: A -> B -> C
+            // When B's value is changed, the records need updated to: A -> C
+            const emptyRecordReference = that.emptyRecords.get(this.index);
+            const changedRecordWasEmpty = emptyRecordReference !== null && emptyRecordReference !== undefined;
+
+            if (changedRecordWasEmpty) {
+
+              // Delete the empty record entry because it is no longer empty
+              that.emptyRecords.delete(this.index);
+
+              // Check if there is a previous empty record
+              const previousEmptyReference = that.emptyRecords.get(emptyRecordReference.previous);
+
+              if (previousEmptyReference) {
+                // Set the previous empty record to point to the old reference's next node
+                that.emptyRecords.set(emptyRecordReference.previous, {
+                  previous: that.emptyRecords.get(emptyRecordReference.previous).previous,
+                  next: emptyRecordReference.next
+                });
+
+                // change the table buffer and record buffer to reflect this change
+                changeRecordBuffers(emptyRecordReference.previous, emptyRecordReference.next);
+              }
+
+              // If there is a next empty reference, update the previous value accordingly to now point
+              // to the current record's previous index.
+              const nextEmptyReference = that.emptyRecords.get(emptyRecordReference.next);
+
+              if (nextEmptyReference) {
+                that.emptyRecords.set(emptyRecordReference.next, {
+                  previous: emptyRecordReference.previous,
+                  next: that.emptyRecords.get(emptyRecordReference.next).next
+                });
+
+                if (!previousEmptyReference) {
+                  // If no previous empty record exists and a next record exists, we need to update the header to
+                  // point to this record as the next record to use.
+                  updateNextRecordToUseHeaderAndBuffer(emptyRecordReference.next);
+                }
+              }
+
+              // If there are no previous or next empty references
+              // Then there are no more empty references in the table
+              // Update the table header nextRecordToUse back to the table record capacity
+              if (!previousEmptyReference && !nextEmptyReference) {
+                updateNextRecordToUseHeaderAndBuffer(that.header.recordCapacity);
+              }
+            }
+
             that.emit('change');
           });
+
+          record.on('empty', function () {
+            this.isChanged = true;
+            const lastEmptyRecordMapEntry = Array.from(that.emptyRecords).pop();
+
+            // When we empty a record, we need to check if another empty record exists in the table.
+            if (lastEmptyRecordMapEntry !== null && lastEmptyRecordMapEntry !== undefined) {
+
+              // If an empty record already exists, we just need to get the last empty record
+              // and update its index to point to the current record that we want to empty.
+              const lastEmptyRecordIndex = lastEmptyRecordMapEntry[0];
+
+              that.emptyRecords.set(lastEmptyRecordIndex, {
+                previous: lastEmptyRecordMapEntry[1].previous,
+                next: this.index
+              });
+
+              // Then we need to update the current record index to point to the record capacity.
+              that.emptyRecords.set(this.index, {
+                previous: lastEmptyRecordIndex,
+                next: that.header.recordCapacity
+              });
+
+              // Finally, we need to update the buffers to reflect this data.
+              // First, place the new referenced index (will be the first 4 bytes)
+              // Next, fill the rest of the record with 0s (the last bytes of the record)
+
+              // And update both record's data. This will set the unformatted and formatted values
+              // without emitting an event
+              changeRecordBuffers(lastEmptyRecordIndex, this.index);
+              changeRecordBuffers(this.index, that.header.recordCapacity);
+            }
+            else {
+              // In this case, the record that was emptied is the first empty record in the table
+              that.emptyRecords.set(this.index, {
+                previous: null,
+                next: that.header.recordCapacity
+              });
+
+              // Finally update the table header and buffer so that the game uses this new empty
+              // record as the next record to use (or fill)
+              updateNextRecordToUseHeaderAndBuffer(this.index);
+            }
+            
+            that.emit('change');
+          });
+
+          function updateNextRecordToUseHeaderAndBuffer(nextRecordToUse) {
+            // We need to update the table header to use this row next
+            table.header.nextRecordToUse = nextRecordToUse;
+
+            // And finally update the buffer to reflect this change
+            that.data.writeUInt32BE(nextRecordToUse, that.header.headerOffset - 4);
+          };
+
+          function changeRecordBuffers(index, emptyRecordReference) {
+            setBufferToEmptyRecordReference(index, emptyRecordReference);
+            setRecordInternalBuffer(index, emptyRecordReference);
+          };
+
+          function setBufferToEmptyRecordReference(index, emptyRecordReference) {
+            const recordStartIndex = that.header.table1StartIndex + (index * that.header.record1Size)
+            that.data.writeUInt32BE(emptyRecordReference, recordStartIndex);
+            that.data.fill(0, recordStartIndex + 4, recordStartIndex + that.header.record1Size);
+          };
+
+          function setRecordInternalBuffer(index, emptyRecordReference) {
+            that.records[index].data = utilService.dec2bin(emptyRecordReference, that.header.record1Size * 8);
+          };
         });
 
         this.table2Records.forEach((record, index) => {
@@ -172,6 +299,33 @@ class FranchiseFileTable extends EventEmitter {
       }
     });
   };
+
+  _parseEmptyRecords() {
+    const firstEmptyRecord = this.header.nextRecordToUse;
+    const sizeOfEachRecord = this.header.record1Size;
+    
+    let emptyRecords = new Map();
+
+    let previousEmptyRecordIndex = null;
+    let currentEmptyRecordIndex = firstEmptyRecord;
+
+    if (this.header.nextRecordToUse !== this.header.recordCapacity) {
+      while (currentEmptyRecordIndex !== this.header.recordCapacity) {
+        let nextEmptyRecordIndex = this.data.readUInt32BE(this.header.table1StartIndex + (currentEmptyRecordIndex * sizeOfEachRecord));
+
+        emptyRecords.set(currentEmptyRecordIndex, {
+          previous: previousEmptyRecordIndex,
+          next: nextEmptyRecordIndex
+        });
+
+        previousEmptyRecordIndex = currentEmptyRecordIndex;
+        currentEmptyRecordIndex = nextEmptyRecordIndex;
+      }
+    }
+
+    return emptyRecords;
+  };
+
 
   _parseTable2Values(data, header, records) {
     const that = this;

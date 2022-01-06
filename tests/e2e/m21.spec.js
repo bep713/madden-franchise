@@ -426,7 +426,7 @@ describe('Madden 21 end to end tests', function () {
         it('parses expected attribute values', () => {
           expect(table.isArray).to.be.false;
           expect(table.isChanged).to.be.false;
-          expect(table.recordsRead).to.be.true; //read above
+          // expect(table.recordsRead).to.be.true; //read above
           expect(table.data).to.not.be.undefined;
           expect(table.hexData).to.not.be.undefined;
           expect(table.readRecords).to.exist;
@@ -453,7 +453,7 @@ describe('Madden 21 end to end tests', function () {
         });
 
         describe('read records', () => {
-          before((done) => {
+          beforeEach((done) => {
             table.readRecords().then(() => {
               done();
             });
@@ -463,6 +463,14 @@ describe('Madden 21 end to end tests', function () {
             expect(table.recordsRead).to.be.true;
             expect(table.records.length).to.equal(256);
             expect(table.offsetTable).to.not.be.undefined;
+          });
+
+          it('identifies empty records', () => {
+            expect(table.emptyRecords.size).to.equal(95);
+            expect(table.emptyRecords.get(230)).to.eql({
+              previous: 229,
+              next: 231
+            });
           });
 
           describe('reads offset table correctly', () => {
@@ -572,6 +580,82 @@ describe('Madden 21 end to end tests', function () {
                 expect(record.getFieldByKey('NationalPopularity').unformattedValue).to.equal('0111100');
                 expect(record.getFieldByKey('RegionalPopularity').unformattedValue).to.equal('1000001');
               });
+            });
+          });
+        });
+
+        describe('updates empty records properly', () => {
+          let record; 
+
+          beforeEach(async () => {
+            await table.readRecords();
+          });
+
+          describe('can empty a record', () => {
+            beforeEach(() => {
+              record = table.records[0];
+            });
+
+            it('emptying a record where there is already one or more empty records', () => {
+              // This table is 4 bytes long so we can do this safely
+              const firstRecordValue = table.data.readUInt32BE(table.header.table1StartIndex + 4);
+
+              record.empty();
+
+              expect(table.emptyRecords.size).to.equal(96);
+              expect(table.emptyRecords.get(255)).to.eql({
+                previous: 254,
+                next: 0
+              });
+              expect(table.emptyRecords.get(0)).to.eql({
+                previous: 255,
+                next: 256
+              });
+
+              expect(table.data.readUInt32BE(table.header.table1StartIndex)).to.equal(256);
+              expect(table.data.readUInt32BE(table.header.table1StartIndex + (255 * 4))).to.equal(0);
+
+              // Make sure the next record buffer is unchanged.
+              expect(table.data.readUInt32BE(table.header.table1StartIndex + 4)).to.eql(firstRecordValue);
+
+              expect(table.records[0]._data).to.eql('00000000000000000000000100000000');
+              expect(table.records[255]._data).to.eql('00000000000000000000000000000000');
+            });
+          });
+
+          describe('can fill an empty record', () => {
+            it('filling a record when there is already one or more empty records', () => {
+              table.records[253].LocalPopularity = 20;
+              table.records[253].NationalPopularity = 23;
+              table.records[253].RegionalPopularity = 25;
+
+              expect(table.emptyRecords.size).to.equal(95);
+              expect(table.emptyRecords.get(252)).to.eql({
+                previous: 251,
+                next: 254
+              });
+              expect(table.emptyRecords.get(254)).to.eql({
+                previous: 252,
+                next: 255
+              });
+
+              expect(table.data.readUInt32BE(table.header.table1StartIndex + (252 * 4))).to.equal(254);
+              expect(table.records[252]._data).to.eql('00000000000000000000000011111110');
+            });
+
+            it('filling a record when there is already one or more empty records - last record', () => {
+              table.records[0].LocalPopularity = 20;
+              table.records[0].NationalPopularity = 23;
+              table.records[0].RegionalPopularity = 25;
+
+              expect(table.emptyRecords.size).to.equal(94);
+              expect(table.emptyRecords.get(255)).to.eql({
+                previous: 254,
+                next: 256
+              });
+
+              expect(table.data.readUInt32BE(table.header.table1StartIndex + (255 * 4))).to.equal(256);
+              expect(table.records[255]._data).to.eql('00000000000000000000000100000000');
             });
           });
         });
@@ -1099,6 +1183,80 @@ describe('Madden 21 end to end tests', function () {
       it('sets enum values as values without an underscore if possible', () => {
         let seventh = table.records[6].getFieldByKey('PlayerPosition');
         expect(seventh.value).to.equal('K');
+      });
+      
+      describe('can empty and fill records', () => {
+        it('does not find any empty records', () => {
+          expect(table.emptyRecords.size).to.equal(0);
+        });
+
+        it('can empty a record when no other records is empty', () => {
+          table.records[9].empty();
+
+          // Adds empty record to map
+          expect(table.emptyRecords.size).to.equal(1);
+          expect(table.emptyRecords.get(9)).to.eql({
+            previous: null,
+            next: 21
+          });
+
+          // Updates header object
+          expect(table.header.nextRecordToUse).to.equal(9);
+
+          // Updates buffer to reflect header change
+          expect(table.data.readUInt32BE(table.header.headerOffset - 4)).to.equal(9);
+        });
+
+        it('can empty a 2nd record', () => {
+          table.records[6].empty();
+
+          // Adds empty record to map
+          expect(table.emptyRecords.size).to.equal(2);
+          expect(table.emptyRecords.get(9)).to.eql({
+            previous: null,
+            next: 6
+          });
+          expect(table.emptyRecords.get(6)).to.eql({
+            previous: 9,
+            next: 21
+          });
+
+          // Next record to use should still be 9 from above test
+          expect(table.header.nextRecordToUse).to.equal(9);
+
+          // Buffer should still be 9 from above test
+          expect(table.data.readUInt32BE(table.header.headerOffset - 4)).to.equal(9);
+        });
+
+        it('can fill the 1st empty record', () => {
+          table.records[9].PercentageSpline = '10000000000000000000000000000011';
+
+          // Adds empty record to map
+          expect(table.emptyRecords.size).to.equal(1);
+          expect(table.emptyRecords.get(6)).to.eql({
+            previous: null,
+            next: 21
+          });
+
+          // Next record to use should now be updated to 6.
+          expect(table.header.nextRecordToUse).to.equal(6);
+
+          // Buffer should be updated to 6 as well.
+          expect(table.data.readUInt32BE(table.header.headerOffset - 4)).to.equal(6);
+        });
+
+        it('can fill all empty records', () => {
+          table.records[6].PercentageSpline = '10000000000000000000000000000011';
+
+          // Adds empty record to map
+          expect(table.emptyRecords.size).to.equal(0);
+
+          // Next record to use should now be updated to 6.
+          expect(table.header.nextRecordToUse).to.equal(21);
+
+          // Buffer should be updated to 6 as well.
+          expect(table.data.readUInt32BE(table.header.headerOffset - 4)).to.equal(21);
+        });
       });
     });
 

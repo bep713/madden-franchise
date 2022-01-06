@@ -58,6 +58,19 @@ class FranchiseFileRecord extends EventEmitter {
     return Buffer.from(utilService.binaryBlockToDecimalBlock(this._data));
   };
 
+  get fields () {
+    return this._fields;
+  };
+
+  set data (data) {
+    this._data = data;
+
+    this._fields.forEach((field) => {
+      const unformattedValue = data.slice(field.offset.offset, field.offset.offset + field.offset.length);
+      field.setUnformattedValueWithoutChangeEvent(unformattedValue);
+    });
+  };
+
   getFieldByKey(key) {
     return this._fields.find((field) => { return field.key === key; });
   };
@@ -72,8 +85,8 @@ class FranchiseFileRecord extends EventEmitter {
     return field ? field.referenceData : null;
   };
 
-  get fields () {
-    return this._fields;
+  empty() {
+    this.emit('empty');
   };
 };
 
