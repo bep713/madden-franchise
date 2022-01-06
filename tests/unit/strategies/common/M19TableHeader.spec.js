@@ -148,20 +148,20 @@ describe('M19 Table Header unit tests', () => {
                 expect(result.hasSecondTable).to.equal(false);
             });
 
-            it('data2 record words', () => {
-                expect(result.data2recordWords).to.equal(1);
+            it('record words', () => {
+                expect(result.recordWords).to.equal(1);
             });
 
-            it('data2 record capacity', () => {
-                expect(result.data2RecordCapacity).to.equal(256);
+            it('record capacity', () => {
+                expect(result.recordCapacity).to.equal(256);
             });
 
-            it('data2 index entries', () => {
-                expect(result.data2IndexEntries).to.equal(3);
+            it('number of members', () => {
+                expect(result.numMembers).to.equal(3);
             });
 
-            it('data2 record count', () => {
-                expect(result.data2RecordCount).to.equal(161);
+            it('next record to use', () => {
+                expect(result.nextRecordToUse).to.equal(161);
             });
         });
 

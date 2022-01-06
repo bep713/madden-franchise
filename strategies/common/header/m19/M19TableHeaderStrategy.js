@@ -95,9 +95,9 @@ M19TableHeaderStrategy.parseHeader = (data) => {
         'hasSecondTable': hasSecondTable,
         'table1StartIndex': tableStoreLength === 0 && !isArray ? headerSize : headerSize + (data1RecordCount * 4),
         'table2StartIndex': tableStoreLength === 0 && !isArray ? headerSize + (data1RecordCount * records1Size) : headerSize + (data1RecordCount * 4) + (data1RecordCount * records1Size),
-        'data2recordWords': data2RecordWords,
-        'data2RecordCapacity': data2RecordCapacity,
-        'data2IndexEntries': data2IndexEntries,
+        'recordWords': data2RecordWords,
+        'recordCapacity': data2RecordCapacity,
+        'numMembers': data2IndexEntries,
         'nextRecordToUse': nextRecordToUse
     };
 };
