@@ -261,7 +261,7 @@ class FranchiseFileTable extends EventEmitter {
 
           function updateNextRecordToUseHeaderAndBuffer(nextRecordToUse) {
             // We need to update the table header to use this row next
-            table.header.nextRecordToUse = nextRecordToUse;
+            that.header.nextRecordToUse = nextRecordToUse;
 
             // And finally update the buffer to reflect this change
             that.data.writeUInt32BE(nextRecordToUse, that.header.headerOffset - 4);
