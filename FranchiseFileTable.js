@@ -25,6 +25,27 @@ class FranchiseFileTable extends EventEmitter {
   };
 
   get hexData () {
+    this.updateBuffer();
+    return this.data;
+  };
+
+  set schema (schema) {
+    // console.time('set schema');
+    this._schema = schema;
+    const modifiedHeaderAttributes = this.strategy.parseHeaderAttributesFromSchema(schema, this.data, this.header);
+
+    this.header.headerSize = modifiedHeaderAttributes.headerSize;
+    this.header.record1Size = modifiedHeaderAttributes.record1Size;
+    this.header.table1StartIndex = modifiedHeaderAttributes.table1StartIndex;
+    this.header.table2StartIndex = modifiedHeaderAttributes.table2StartIndex;
+    // console.timeEnd('set schema');
+  };
+
+  get schema () {
+    return this._schema;
+  };
+  
+  updateBuffer() {
     // need to check table2 data first because it may change offsets of the legit records.
     const table2Data = this.strategy.getTable2BinaryData(this.table2Records, this.data.slice(this.header.table2StartIndex));
 
@@ -62,23 +83,21 @@ class FranchiseFileTable extends EventEmitter {
     bufferArrays = bufferArrays.concat(table2Data);
 
     this.data = Buffer.concat(bufferArrays);
-    return this.data;
   };
 
-  set schema (schema) {
-    // console.time('set schema');
-    this._schema = schema;
-    const modifiedHeaderAttributes = this.strategy.parseHeaderAttributesFromSchema(schema, this.data, this.header);
+  setNextRecordToUse(index, resetEmptyRecordMap) {
+    // We need to update the table header to use this row next
+    this.header.nextRecordToUse = index;
 
-    this.header.headerSize = modifiedHeaderAttributes.headerSize;
-    this.header.record1Size = modifiedHeaderAttributes.record1Size;
-    this.header.table1StartIndex = modifiedHeaderAttributes.table1StartIndex;
-    this.header.table2StartIndex = modifiedHeaderAttributes.table2StartIndex;
-    // console.timeEnd('set schema');
-  };
+    // And finally update the buffer to reflect this change
+    this.data.writeUInt32BE(index, this.header.headerOffset - 4);
 
-  get schema () {
-    return this._schema;
+    // Recalculate the empty record map if the option is set and the
+    // records have already been read.
+    if (resetEmptyRecordMap && this.recordsRead) {
+      this.updateBuffer();
+      this.emptyRecords = this._parseEmptyRecords();
+    }
   };
 
   // attribsToLoad is an array of attribute names (strings) to load. It is optional - if nothing is provided to the function it will load all attributes.
@@ -154,6 +173,7 @@ class FranchiseFileTable extends EventEmitter {
           }
 
           const that = this;
+
           record.on('change', function (changedOffset) {
             this.isChanged = true;
 
@@ -215,7 +235,7 @@ class FranchiseFileTable extends EventEmitter {
                     if (!previousEmptyReference) {
                       // If no previous empty record exists and a next record exists, we need to update the header to
                       // point to this record as the next record to use.
-                      updateNextRecordToUseHeaderAndBuffer(emptyRecordReference.next);
+                      that.setNextRecordToUse(emptyRecordReference.next);
                     }
                   }
     
@@ -223,8 +243,16 @@ class FranchiseFileTable extends EventEmitter {
                   // Then there are no more empty references in the table
                   // Update the table header nextRecordToUse back to the table record capacity
                   if (!previousEmptyReference && !nextEmptyReference) {
-                    updateNextRecordToUseHeaderAndBuffer(that.header.recordCapacity);
+                    that.setNextRecordToUse(that.header.recordCapacity);
                   }
+                }
+              }
+              else {
+                // The field was not empty, let's check if it is now
+                const referenceData = utilService.getReferenceData(this._data.slice(0, 32));
+                if (referenceData.tableId === 0) {
+                  // In this case, the record is now empty. Add an entry to the empty record map
+                  // onRecordEmpty(this);
                 }
               }
             }
@@ -233,10 +261,14 @@ class FranchiseFileTable extends EventEmitter {
           });
 
           record.on('empty', function () {
+            onRecordEmpty(this);
+          });
+
+          function onRecordEmpty(record) {
             // First, check if the record is already empty. If so, don't do anything...
             // If not empty, then we need to empty it.
-            if (!this.isEmpty) {
-              this.isChanged = true;
+            if (!record.isEmpty) {
+              record.isChanged = true;
               const lastEmptyRecordMapEntry = Array.from(that.emptyRecords).pop();
   
               // When we empty a record, we need to check if another empty record exists in the table.
@@ -248,11 +280,11 @@ class FranchiseFileTable extends EventEmitter {
   
                 that.emptyRecords.set(lastEmptyRecordIndex, {
                   previous: lastEmptyRecordMapEntry[1].previous,
-                  next: this.index
+                  next: record.index
                 });
   
                 // Then we need to update the current record index to point to the record capacity.
-                that.emptyRecords.set(this.index, {
+                that.emptyRecords.set(record.index, {
                   previous: lastEmptyRecordIndex,
                   next: that.header.recordCapacity
                 });
@@ -263,32 +295,24 @@ class FranchiseFileTable extends EventEmitter {
   
                 // And update both record's data. This will set the unformatted and formatted values
                 // without emitting an event
-                changeRecordBuffers(lastEmptyRecordIndex, this.index);
-                changeRecordBuffers(this.index, that.header.recordCapacity);
+                changeRecordBuffers(lastEmptyRecordIndex, record.index);
+                changeRecordBuffers(record.index, that.header.recordCapacity);
               }
               else {
                 // In this case, the record that was emptied is the first empty record in the table
-                that.emptyRecords.set(this.index, {
+                that.emptyRecords.set(record.index, {
                   previous: null,
                   next: that.header.recordCapacity
                 });
   
                 // Finally update the table header and buffer so that the game uses this new empty
                 // record as the next record to use (or fill)
-                updateNextRecordToUseHeaderAndBuffer(this.index);
-                changeRecordBuffers(this.index, that.header.recordCapacity);
+                that.setNextRecordToUse(record.index);
+                changeRecordBuffers(record.index, that.header.recordCapacity);
               }
               
               that.emit('change');
             }
-          });
-
-          function updateNextRecordToUseHeaderAndBuffer(nextRecordToUse) {
-            // We need to update the table header to use this row next
-            that.header.nextRecordToUse = nextRecordToUse;
-
-            // And finally update the buffer to reflect this change
-            that.data.writeUInt32BE(nextRecordToUse, that.header.headerOffset - 4);
           };
 
           function changeRecordBuffers(index, emptyRecordReference) {

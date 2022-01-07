@@ -68,7 +68,7 @@ class FranchiseFileField extends EventEmitter {
     this.emit('change');
   };
 
-  setUnformattedValueWithoutChangeEvent(unformattedValue) {
+  setUnformattedValueWithoutChangeEvent(unformattedValue, suppressErrors) {
     if (!utilService.isString(unformattedValue)) { throw new Error(`Argument must be of type string. You passed in a ${typeof unformattedValue}.`); }
     else if (!utilService.stringOnlyContainsBinaryDigits(unformattedValue)) { throw new Error(`Argument must only contain binary digits 1 and 0. If you would like to set the value, please set the 'value' attribute instead.`)}
     else {
@@ -82,7 +82,7 @@ class FranchiseFileField extends EventEmitter {
       }
 
       // check for 'allowed' error - this will be true if the unformatted value is invalid.
-      if (this._offset.enum && value === unformattedValue.padStart(this._offset.length, '0')) {
+      if (this._offset.enum && value === unformattedValue.padStart(this._offset.length, '0') && !suppressErrors) {
         throw new Error(`Argument is not a valid unformatted value for this field. You passed in ${value}.`)
       }
 

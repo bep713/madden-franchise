@@ -1316,6 +1316,43 @@ describe('Madden 21 end to end tests', function () {
           // Buffer should be updated to 6 as well.
           expect(table.data.readUInt32BE(table.header.headerOffset - 4)).to.equal(21);
         });
+
+        it('can manually set the next record to use in the header', () => {
+          table.records[5].PercentageSpline = '00000000000000000000000000010101';
+          table.setNextRecordToUse(5, true);
+
+          // Adds empty record to map
+          expect(table.emptyRecords.size).to.equal(1);
+
+          // Next record to use should now be updated to 5.
+          expect(table.header.nextRecordToUse).to.equal(5);
+
+          // Buffer should be updated to 6 as well.
+          expect(table.data.readUInt32BE(table.header.headerOffset - 4)).to.equal(5);
+        });
+
+        it('recalcuating empty records returns expected result', () => {
+          table.records[5].PercentageSpline = '00000000000000000000000000000110';
+          table.records[6].PercentageSpline = '00000000000000000000000000010101';
+          table.setNextRecordToUse(5, true);
+
+          // Adds empty record to map
+          expect(table.emptyRecords.size).to.equal(2);
+          expect(table.emptyRecords.get(5)).to.eql({
+            previous: null,
+            next: 6
+          });
+          expect(table.emptyRecords.get(6)).to.eql({
+            previous: 5,
+            next: 21
+          });
+
+          // Next record to use should now be updated to 5.
+          expect(table.header.nextRecordToUse).to.equal(5);
+
+          // Buffer should be updated to 6 as well.
+          expect(table.data.readUInt32BE(table.header.headerOffset - 4)).to.equal(5);
+        });
       });
     });
 
