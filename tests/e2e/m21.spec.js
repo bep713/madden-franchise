@@ -1241,7 +1241,7 @@ describe('Madden 21 end to end tests', function () {
           expect(table.data.readUInt32BE(table.header.table1StartIndex + (9 * table.header.record1Size))).to.equal(21);
 
           // Updates record buffer to reflect change
-          expect(table.records[9]._data).to.equal('0000000000000000000000000001010100000000000000000000000000000000');
+          expect(table.records[9]._data.slice(0, 32)).to.equal('00000000000000000000000000010101');
         });
 
         it('can empty a 2nd record', () => {
@@ -1271,10 +1271,10 @@ describe('Madden 21 end to end tests', function () {
           expect(table.data.readUInt32BE(table.header.table1StartIndex + (9 * table.header.record1Size))).to.equal(6);
 
           // Updates record buffer to reflect change
-          expect(table.records[6]._data).to.equal('0000000000000000000000000001010100000000000000000000000000000000');
+          expect(table.records[6]._data.slice(0, 32)).to.equal('00000000000000000000000000010101');
 
           // Updates other record buffer to reflect change to point to 6
-          expect(table.records[9]._data).to.equal('0000000000000000000000000000011000000000000000000000000000000000');
+          expect(table.records[9]._data.slice(0, 32)).to.equal('00000000000000000000000000000110');
         });
 
         it('can fill the 1st empty record', () => {

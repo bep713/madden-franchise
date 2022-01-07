@@ -323,7 +323,7 @@ class FranchiseFileTable extends EventEmitter {
           function setBufferToEmptyRecordReference(index, emptyRecordReference) {
             const recordStartIndex = that.header.table1StartIndex + (index * that.header.record1Size)
             that.data.writeUInt32BE(emptyRecordReference, recordStartIndex);
-            that.data.fill(0, recordStartIndex + 4, recordStartIndex + that.header.record1Size);
+            // that.data.fill(0, recordStartIndex + 4, recordStartIndex + that.header.record1Size);
           };
 
           function setRecordInternalBuffer(index, emptyRecordReference) {
@@ -331,7 +331,7 @@ class FranchiseFileTable extends EventEmitter {
 
             const recordSizeInBits = that.header.record1Size * 8;
             if (recordSizeInBits > 32) {
-              newData += utilService.dec2bin(0, recordSizeInBits - 32);
+              newData += that.records[index]._data.slice(32);
             }
 
             that.records[index].data = newData;
