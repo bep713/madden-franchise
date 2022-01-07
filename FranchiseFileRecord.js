@@ -68,7 +68,7 @@ class FranchiseFileRecord extends EventEmitter {
 
     this._fields.forEach((field) => {
       const unformattedValue = data.slice(field.offset.offset, field.offset.offset + field.offset.length);
-      field.setUnformattedValueWithoutChangeEvent(unformattedValue);
+      field.setUnformattedValueWithoutChangeEvent(unformattedValue, true);
     });
   };
 
