@@ -1294,6 +1294,16 @@ describe('Madden 21 end to end tests', function () {
           expect(table.data.readUInt32BE(table.header.headerOffset - 4)).to.equal(6);
         });
 
+        it('record stays empty as long as the first 4 bytes reference the 0th table', () => {
+          table.records[6].PlayerPosition = 'WR';
+
+          expect(table.emptyRecords.size).to.equal(1);
+          expect(table.emptyRecords.get(6)).to.eql({
+            previous: null,
+            next: 21
+          });
+        });
+
         it('can fill all empty records', () => {
           table.records[6].PercentageSpline = '10000000000000000000000000000011';
 

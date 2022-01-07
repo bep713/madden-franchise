@@ -165,55 +165,67 @@ class FranchiseFileTable extends EventEmitter {
             // If so, we need to consider the record as no longer empty
             // So we need to adjust the empty records
 
-            // Ex: Empty record list looks like this: A -> B -> C
-            // When B's value is changed, the records need updated to: A -> C
-            const emptyRecordReference = that.emptyRecords.get(this.index);
-            const changedRecordWasEmpty = emptyRecordReference !== null && emptyRecordReference !== undefined;
+            // First, check if the record's length is greater than 4 bytes (32 bits)
+            // If less than 4 bytes, it can never become empty...probably. :)
+            if (that.header.record1Size >= 4) {
+              
+              // Ex: Empty record list looks like this: A -> B -> C
+              // When B's value is changed, the records need updated to: A -> C
+              const emptyRecordReference = that.emptyRecords.get(this.index);
+              const changedRecordWasEmpty = emptyRecordReference !== null && emptyRecordReference !== undefined;
+  
+              if (changedRecordWasEmpty) {
+                // Check if the record's first four bytes still have a reference to the 0th table.
+                // If so, then the record is still considered empty.
+                
+                // We need to check the buffer because the first field is not always a reference.
+                const referenceData = utilService.getReferenceData(this._data.slice(0, 32));
+                if (referenceData.tableId !== 0) {
 
-            if (changedRecordWasEmpty) {
-
-              // Delete the empty record entry because it is no longer empty
-              that.emptyRecords.delete(this.index);
-
-              // Set the isEmpty back to false because it's no longer empty
-              this.isEmpty = false;
-
-              // Check if there is a previous empty record
-              const previousEmptyReference = that.emptyRecords.get(emptyRecordReference.previous);
-
-              if (previousEmptyReference) {
-                // Set the previous empty record to point to the old reference's next node
-                that.emptyRecords.set(emptyRecordReference.previous, {
-                  previous: that.emptyRecords.get(emptyRecordReference.previous).previous,
-                  next: emptyRecordReference.next
-                });
-
-                // change the table buffer and record buffer to reflect this change
-                changeRecordBuffers(emptyRecordReference.previous, emptyRecordReference.next);
-              }
-
-              // If there is a next empty reference, update the previous value accordingly to now point
-              // to the current record's previous index.
-              const nextEmptyReference = that.emptyRecords.get(emptyRecordReference.next);
-
-              if (nextEmptyReference) {
-                that.emptyRecords.set(emptyRecordReference.next, {
-                  previous: emptyRecordReference.previous,
-                  next: that.emptyRecords.get(emptyRecordReference.next).next
-                });
-
-                if (!previousEmptyReference) {
-                  // If no previous empty record exists and a next record exists, we need to update the header to
-                  // point to this record as the next record to use.
-                  updateNextRecordToUseHeaderAndBuffer(emptyRecordReference.next);
+                  // Delete the empty record entry because it is no longer empty
+                  that.emptyRecords.delete(this.index);
+    
+                  // Set the isEmpty back to false because it's no longer empty
+                  this.isEmpty = false;
+    
+                  // Check if there is a previous empty record
+                  const previousEmptyReference = that.emptyRecords.get(emptyRecordReference.previous);
+    
+                  if (previousEmptyReference) {
+                    // Set the previous empty record to point to the old reference's next node
+                    that.emptyRecords.set(emptyRecordReference.previous, {
+                      previous: that.emptyRecords.get(emptyRecordReference.previous).previous,
+                      next: emptyRecordReference.next
+                    });
+    
+                    // change the table buffer and record buffer to reflect this change
+                    changeRecordBuffers(emptyRecordReference.previous, emptyRecordReference.next);
+                  }
+    
+                  // If there is a next empty reference, update the previous value accordingly to now point
+                  // to the current record's previous index.
+                  const nextEmptyReference = that.emptyRecords.get(emptyRecordReference.next);
+    
+                  if (nextEmptyReference) {
+                    that.emptyRecords.set(emptyRecordReference.next, {
+                      previous: emptyRecordReference.previous,
+                      next: that.emptyRecords.get(emptyRecordReference.next).next
+                    });
+    
+                    if (!previousEmptyReference) {
+                      // If no previous empty record exists and a next record exists, we need to update the header to
+                      // point to this record as the next record to use.
+                      updateNextRecordToUseHeaderAndBuffer(emptyRecordReference.next);
+                    }
+                  }
+    
+                  // If there are no previous or next empty references
+                  // Then there are no more empty references in the table
+                  // Update the table header nextRecordToUse back to the table record capacity
+                  if (!previousEmptyReference && !nextEmptyReference) {
+                    updateNextRecordToUseHeaderAndBuffer(that.header.recordCapacity);
+                  }
                 }
-              }
-
-              // If there are no previous or next empty references
-              // Then there are no more empty references in the table
-              // Update the table header nextRecordToUse back to the table record capacity
-              if (!previousEmptyReference && !nextEmptyReference) {
-                updateNextRecordToUseHeaderAndBuffer(that.header.recordCapacity);
               }
             }
 
