@@ -918,7 +918,7 @@ describe('Madden 21 end to end tests', function () {
       });
 
       describe('reads records that are passed in', () => {
-        before((done) => {
+        beforeEach((done) => {
           table.readRecords(['FirstName', 'LastName', 'Position', 'TRAIT_BIGHITTER', 'MetaMorph_GutBase', 'SeasonStats', 'InjuryType']).then(() => {
             done();
           });
@@ -1017,6 +1017,11 @@ describe('Madden 21 end to end tests', function () {
             expect(field.unformattedValue).to
               .equal('0100001001100001011010110110010101110010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000');
           });
+        });
+
+        it('can set a Player record to empty', () => {
+          let record = table.records[5];
+          record.empty();
         });
       });
 
@@ -1317,18 +1322,36 @@ describe('Madden 21 end to end tests', function () {
           expect(table.data.readUInt32BE(table.header.headerOffset - 4)).to.equal(21);
         });
 
-        it('can manually set the next record to use in the header', () => {
-          table.records[5].PercentageSpline = '00000000000000000000000000010101';
-          table.setNextRecordToUse(5, true);
+        it('can manually set the next record to use in the header', async () => {
+          table.records[10].PercentageSpline = '00000000000000000000000000010101';
+          table.setNextRecordToUse(10, true);
 
           // Adds empty record to map
           expect(table.emptyRecords.size).to.equal(1);
 
           // Next record to use should now be updated to 5.
-          expect(table.header.nextRecordToUse).to.equal(5);
+          expect(table.header.nextRecordToUse).to.equal(10);
 
           // Buffer should be updated to 6 as well.
-          expect(table.data.readUInt32BE(table.header.headerOffset - 4)).to.equal(5);
+          expect(table.data.readUInt32BE(table.header.headerOffset - 4)).to.equal(10);
+
+          // Save test
+          await file.save(filePaths.saveTest.m21);
+          
+          let file2 = new FranchiseFile(filePaths.saveTest.m21);
+
+          let readyPromise = new Promise((resolve, reject) => {
+            file2.on('ready', () => {
+              resolve();
+            });
+          });
+
+          await readyPromise;
+
+          let table2 = file2.getTableByName('OverallPercentage');
+          await table2.readRecords();
+
+          expect(table2.header.nextRecordToUse).to.eql(10);
         });
 
         it('recalcuating empty records returns expected result', () => {

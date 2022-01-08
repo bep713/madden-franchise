@@ -98,6 +98,8 @@ class FranchiseFileTable extends EventEmitter {
       this.updateBuffer();
       this.emptyRecords = this._parseEmptyRecords();
     }
+
+    this.emit('change');
   };
 
   // attribsToLoad is an array of attribute names (strings) to load. It is optional - if nothing is provided to the function it will load all attributes.
