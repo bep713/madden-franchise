@@ -1,3 +1,4 @@
+const fs = require('fs');
 const path = require('path');
 const expect = require('chai').expect;
 const FranchiseFile = require('../../FranchiseFile');
@@ -1645,6 +1646,44 @@ describe('Madden 21 end to end tests', function () {
 
         expect(newTable.records[0].AuthorName).to.equal('Test');
         expect(newTable.records[0].ImageData).to.equal('It works');
+      });
+
+      describe('can replace raw data', () => {
+        it('replace with the same data', async () => {
+          table.replaceRawData(table.data);
+          expect(table.recordsRead).to.be.false;
+          expect(table.records.length).to.equal(0);
+          expect(table.table2Records.length).to.equal(0);
+          expect(table.emptyRecords.size).to.equal(0);
+        });
+
+        it('re-read records from the same data', async () => {
+          await table.readRecords();
+
+          expect(table.recordsRead).to.be.true;
+          expect(table.records.length).to.equal(101);
+          expect(table.table2Records.length).to.equal(303);
+          expect(table.emptyRecords.size).to.equal(97);
+
+          expect(table.records[1].TweetHash).to.equal(1685623759);
+          expect(table.records[1].Tweet).to.equal('Wonder how Matt Patricia will do this year. Still have some questions.');
+          expect(table.records[1].AuthorName).to.equal('Charles Davis@CharlesDavisEA');
+        });
+
+        it('can replace with modified data', async () => {
+          const modifiedData = fs.readFileSync(path.join(__dirname, '../data/table-import/21_TweetTableModified.dat'));
+          await table.replaceRawData(modifiedData, true);
+
+          expect(table.recordsRead).to.be.true;
+          expect(table.records.length).to.equal(101);
+          expect(table.table2Records.length).to.equal(303);
+          expect(table.emptyRecords.size).to.equal(97);
+
+          expect(table.header.tableId).to.equal(4294);
+          expect(table.records[1].TweetHash).to.equal(1);
+          expect(table.records[1].Tweet).to.equal('Jesus, Tony');
+          expect(table.records[1].AuthorName).to.equal('Baker Mayfield');
+        });
       });
     });
 

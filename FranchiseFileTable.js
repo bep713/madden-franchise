@@ -161,6 +161,27 @@ class FranchiseFileTable extends EventEmitter {
     }
   };
 
+  async replaceRawData(buf, shouldReadRecords) {
+    this.data = buf;
+
+    // Reset fields
+    this.recordsRead = false;
+    this.header = this.strategy.parseHeader(this.data);
+    this.name = this.header.name;
+    this.isArray = this.header.isArray;
+    this.loadedOffsets = [];
+    this.isChanged = false;
+    this.records = [];
+    this.table2Records = [];
+    this.arraySizes = [];
+    this.emptyRecords = new Map();
+
+    // Re-read records if desired
+    if (shouldReadRecords) {
+      return this.readRecords();
+    }
+  };
+
   // attribsToLoad is an array of attribute names (strings) to load. It is optional - if nothing is provided to the function it will load all attributes.
   readRecords (attribsToLoad) {
     return new Promise((resolve, reject) => {
