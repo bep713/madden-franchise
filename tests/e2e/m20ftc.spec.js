@@ -509,7 +509,7 @@ describe('Madden 20 FTC end to end tests', function () {
                 });
             });
 
-            it('record field values remain correct after modifiying a table2 value and saving', () => {
+            it('record field values remain correct after modifiying a table2 value and saving', (done) => {
                 let table = file.getTableByName('EnumTable');
                 table.readRecords().then(() => {
                     table.records[7].Name = 'DraftTestTestPosition'
@@ -517,8 +517,37 @@ describe('Madden 20 FTC end to end tests', function () {
 
                     file.save(filePaths.saveTest.ftc).then(() => {
                         expect(table.records[7].Name).to.equal('DraftTestTestPosition');
+                        done();
                     });
                 });
+            });
+
+            it('can save table2 fields where the fields are saved in reverse order from when they are parsed', async () => {
+                const tableName = 'InjuryStatusEnumTableEntry';
+
+                let table = file.getTableByName(tableName);
+                await table.readRecords();
+
+                table.records[0].ShortName = 'ShortName';
+                table.records[0].LongName = 'LongName';
+
+                expect(table.records[0].ShortName).to.equal('ShortName');
+                expect(table.records[0].LongName).to.equal('LongName');
+
+                await file.save(filePaths.saveTest.ftc);
+                let file2 = new FranchiseFile(filePaths.saveTest.ftc);
+
+                await new Promise((resolve, reject) => {
+                    file2.on('ready', () => {
+                        resolve();
+                    });
+                });
+                
+                let table2 = file2.getTableByName(tableName);
+                await table2.readRecords();
+
+                expect(table2.records[0].ShortName).to.equal('ShortName');
+                expect(table2.records[0].LongName).to.equal('LongName');
             });
         });
     });

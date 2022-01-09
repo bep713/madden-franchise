@@ -13,6 +13,9 @@ CommonAlgorithms.save = (units, oldData) => {
     let oldOffsetCounter = 0;
     let bufferArrays = [];
 
+    // Ensure the units are sorted by index in the actual file. Otherwise, we may overwrite data
+    units.sort((a, b) => { return a.index - b.index; });
+
     units.forEach((unit, index) => {
         if (unit.offset === 0 && index > 0) {
             // there are usually trailing records at the end of the table that reference

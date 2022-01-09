@@ -3,7 +3,8 @@ let FranchiseTableStrategy = {};
 FranchiseTableStrategy.getTable2BinaryData = (table2Records, fullTable2Buffer) => {
     let table2Data = [];
 
-    const changedTable2Records = table2Records.filter((record) => { return record.isChanged; });
+    // Make sure to sort the table2 records by index
+    const changedTable2Records = table2Records.filter((record) => { return record.isChanged; }).sort((a, b) => { return a.index - b.index; });
     let currentOffset = 0;
 
     for (let i = 0; i < changedTable2Records.length; i++) {

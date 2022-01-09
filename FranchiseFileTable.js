@@ -253,8 +253,21 @@ class FranchiseFileTable extends EventEmitter {
                 // The field was not empty, let's check if it is now
                 const referenceData = utilService.getReferenceData(this._data.slice(0, 32));
                 if (referenceData.tableId === 0) {
-                  // In this case, the record is now empty. Add an entry to the empty record map
-                  // onRecordEmpty(this);
+                  // The record has a reference to table id 0, now we need to see if its referencing the 0th record or not
+                  // We have to be careful not to mistake a null reference for an empty reference to record 0
+                  if (referenceData.rowNumber !== 0) {
+                    // If the value is referencing a row number greater than 0, we need to treat this record as an empty reference.
+                    // onRecordEmpty(record);
+                  }
+                  else {
+                    // The record was updated to either be a null reference or an empty record reference to row 0.
+                    // First let's make sure we aren't editing row 0...if we are, then the value is a null reference
+                    // because a record cannot point to itself.
+                    if (this.index > 0) {
+                      // Now that we know that the edit isn't coming from row 0, let's check if row 0 is an empty reference.
+                      // If it is NOT an empty reference, then the updated value is not an empty reference.
+                    }
+                  }
                 }
               }
             }

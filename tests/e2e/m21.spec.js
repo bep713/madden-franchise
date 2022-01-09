@@ -1373,9 +1373,37 @@ describe('Madden 21 end to end tests', function () {
           // Next record to use should now be updated to 5.
           expect(table.header.nextRecordToUse).to.equal(5);
 
-          // Buffer should be updated to 6 as well.
+          // Buffer should be updated to 5 as well.
           expect(table.data.readUInt32BE(table.header.headerOffset - 4)).to.equal(5);
         });
+
+        // it('empty record reference is set automatically when value changes', () => {
+        //   table.records[7].PercentageSpline = '00000000000000000000000000000110';
+
+        //   // Adds empty record to map
+        //   expect(table.emptyRecords.size).to.equal(3);
+        //   expect(table.emptyRecords.get(5)).to.eql({
+        //     previous: null,
+        //     next: 7
+        //   });
+        //   expect(table.emptyRecords.get(7)).to.eql({
+        //     previous: 5,
+        //     next: 6
+        //   });
+        //   expect(table.emptyRecords.get(6)).to.eql({
+        //     previous: 7,
+        //     next: 21
+        //   });
+
+        //   // Next record to use should now be updated to 5.
+        //   expect(table.header.nextRecordToUse).to.equal(5);
+
+        //   // Buffer should be updated to 5 as well.
+        //   expect(table.data.readUInt32BE(table.header.headerOffset - 4)).to.equal(5);
+
+        //   // Record 5 should now point to 7
+        //   expect(table.records[5]._data).to.equal('00000000000000000000000000000111');
+        // });
       });
     });
 
@@ -1492,6 +1520,39 @@ describe('Madden 21 end to end tests', function () {
 
         const result = file.getReferencedRecord(record.SeasonStats);
         expect(result).to.be.undefined;
+      });
+    });
+
+    describe('Tweet', () => {
+      const tweetTableId = 4293;
+
+      beforeEach(async () => {
+        table = file.getTableById(tweetTableId);
+        await table.readRecords();
+      });
+
+      it('can set two table2 fields that exist in the file in inverse order', async () => {
+        table.records[0].AuthorName = 'Test';
+        table.records[0].ImageData = 'It works';
+
+        expect(table.records[0].AuthorName).to.equal('Test');
+        expect(table.records[0].ImageData).to.equal('It works');
+
+        await file.save(filePaths.saveTest.m21);
+
+        let file2 = new FranchiseFile(filePaths.saveTest.m21);
+
+        await new Promise((resolve, reject) => {
+          file2.on('ready', () => {
+            resolve();
+          });
+        });
+
+        const newTable = file2.getTableById(tweetTableId);
+        await newTable.readRecords();
+
+        expect(newTable.records[0].AuthorName).to.equal('Test');
+        expect(newTable.records[0].ImageData).to.equal('It works');
       });
     });
 
