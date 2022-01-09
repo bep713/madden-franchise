@@ -157,6 +157,7 @@ class FranchiseFileTable extends EventEmitter {
 
       this._setNextRecordToUseBuffer(nextRecordToUse);
       this.emptyRecords = this._parseEmptyRecords();
+      this.emit('change');
     }
   };
 
