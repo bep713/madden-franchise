@@ -176,6 +176,8 @@ class FranchiseFileTable extends EventEmitter {
     this.arraySizes = [];
     this.emptyRecords = new Map();
 
+    this.emit('change');
+
     // Re-read records if desired
     if (shouldReadRecords) {
       return this.readRecords();

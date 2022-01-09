@@ -1619,7 +1619,7 @@ describe('Madden 21 end to end tests', function () {
     describe('Tweet', () => {
       const tweetTableId = 4293;
 
-      beforeEach(async () => {
+      before(async () => {
         table = file.getTableById(tweetTableId);
         await table.readRecords();
       });
@@ -1679,7 +1679,27 @@ describe('Madden 21 end to end tests', function () {
           expect(table.table2Records.length).to.equal(303);
           expect(table.emptyRecords.size).to.equal(97);
 
-          expect(table.header.tableId).to.equal(4294);
+          expect(table.header.tableId).to.equal(4000);
+          expect(table.records[1].TweetHash).to.equal(1);
+          expect(table.records[1].Tweet).to.equal('Jesus, Tony');
+          expect(table.records[1].AuthorName).to.equal('Baker Mayfield');
+        });
+
+        it('modified data is saved properly', async () => {
+          await file.save(filePaths.saveTest.m21);
+
+          let file2 = new FranchiseFile(filePaths.saveTest.m21);
+          await new Promise((resolve, reject) => {
+            file2.on('ready', () => {
+              resolve();
+            });
+          });
+
+          const table = file2.getTableById(4000);
+          expect(table).to.exist;
+
+          await table.readRecords();
+          expect(table.header.tableId).to.equal(4000);
           expect(table.records[1].TweetHash).to.equal(1);
           expect(table.records[1].Tweet).to.equal('Jesus, Tony');
           expect(table.records[1].AuthorName).to.equal('Baker Mayfield');
