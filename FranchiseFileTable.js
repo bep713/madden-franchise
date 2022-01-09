@@ -86,11 +86,7 @@ class FranchiseFileTable extends EventEmitter {
   };
 
   setNextRecordToUse(index, resetEmptyRecordMap) {
-    // We need to update the table header to use this row next
-    this.header.nextRecordToUse = index;
-
-    // And finally update the buffer to reflect this change
-    this.data.writeUInt32BE(index, this.header.headerOffset - 4);
+    this._setNextRecordToUseBuffer(index);
 
     // Recalculate the empty record map if the option is set and the
     // records have already been read.
@@ -100,6 +96,63 @@ class FranchiseFileTable extends EventEmitter {
     }
 
     this.emit('change');
+  };
+
+  _setNextRecordToUseBuffer(index) {
+    // We need to update the table header to use this row next
+    this.header.nextRecordToUse = index;
+
+    // And finally update the buffer to reflect this change
+    this.data.writeUInt32BE(index, this.header.headerOffset - 4);
+  };
+
+  recalculateEmptyRecordReferences() {
+    // For this method, we are not going to assume any existing empty records.
+    // We're going through each record and checking if it is an empty reference.
+    // If so, we'll add it to the list. At the end we will check if there are any unreachable empty references
+    // and update those accordingly.
+    let emptyRecordReferenceIndicies = [];
+
+    this.records.forEach((record) => {
+      let isEmptyReference = false;
+      const firstFourBytesReference = utilService.getReferenceData(record._data.slice(0, 32));
+
+      if (firstFourBytesReference.tableId === 0 && firstFourBytesReference.rowNumber !== 0) {
+        // Could be a an empty record reference or a table2 field.
+        // Check for a table2 field reference.
+        const firstOffset = this.offsetTable[0];
+        if (firstOffset.type !== 'string') {
+          isEmptyReference = true;
+
+          // Save the row number that this record points to.
+          emptyRecordReferenceIndicies.push(firstFourBytesReference.rowNumber);
+        }
+      }
+
+      record.isEmpty = isEmptyReference;
+    });
+
+    // We need to determine the starting node.
+    // To do that, we need to find the empty record which no other empty record points to.
+    const unreachableRecords = this.records.filter((record) => { return record.isEmpty; }).filter((record) => {
+      return emptyRecordReferenceIndicies.indexOf(record.index) === -1;
+    });
+
+    // If there are more than 1 nodes which are not referenced, there is an issue
+    if (unreachableRecords.length > 1) {
+      const unreachableIndicies = unreachableRecords.map((record) => {
+        return record.index;
+      });
+
+      console.warn(`(${this.header.tableId}) ${this.name} - More than one unreachable records found: `
+      + `(${unreachableIndicies.join(', ')}). The game will most likely crash if you do not fix this problem. `
+      + `The nextRecordToUse has NOT been updated.`);
+    }
+    else {
+      const nextRecordToUse = unreachableRecords[0];
+      this._setNextRecordToUseBuffer(nextRecordToUse.index);
+      this.emptyRecords = this._parseEmptyRecords();
+    }
   };
 
   // attribsToLoad is an array of attribute names (strings) to load. It is optional - if nothing is provided to the function it will load all attributes.
@@ -144,8 +197,7 @@ class FranchiseFileTable extends EventEmitter {
           reject('Cannot read records: Schema is not defined.');
         }
         
-        this.emptyRecords = this._parseEmptyRecords();
-
+        
         let offsetTableToUse = this.offsetTable;
         const mandatoryOffsetsToLoad = this.strategy.getMandatoryOffsets(this.offsetTable);
         
@@ -153,17 +205,19 @@ class FranchiseFileTable extends EventEmitter {
           // get any new attributes to load plus the existing loaded offsets
           offsetTableToUse = offsetTableToUse.filter((attrib) => { 
             return mandatoryOffsetsToLoad.includes(attrib.name)
-              || attribsToLoad.includes(attrib.name) 
-              || this.loadedOffsets.find((offset) => { return offset.name === attrib.name; }); 
+            || attribsToLoad.includes(attrib.name) 
+            || this.loadedOffsets.find((offset) => { return offset.name === attrib.name; }); 
           });
         }
-
+        
         this.loadedOffsets = offsetTableToUse;
         this.records = readRecords(this.data, this.header, offsetTableToUse);
-
+        
         if (this.header.hasSecondTable) {
           this._parseTable2Values(this.data, this.header, this.records);
         }
+
+        this.emptyRecords = this._parseEmptyRecords();
 
         this.records.forEach((record, index) => {
           if (this.isArray) {
@@ -246,27 +300,6 @@ class FranchiseFileTable extends EventEmitter {
                   // Update the table header nextRecordToUse back to the table record capacity
                   if (!previousEmptyReference && !nextEmptyReference) {
                     that.setNextRecordToUse(that.header.recordCapacity);
-                  }
-                }
-              }
-              else {
-                // The field was not empty, let's check if it is now
-                const referenceData = utilService.getReferenceData(this._data.slice(0, 32));
-                if (referenceData.tableId === 0) {
-                  // The record has a reference to table id 0, now we need to see if its referencing the 0th record or not
-                  // We have to be careful not to mistake a null reference for an empty reference to record 0
-                  if (referenceData.rowNumber !== 0) {
-                    // If the value is referencing a row number greater than 0, we need to treat this record as an empty reference.
-                    // onRecordEmpty(record);
-                  }
-                  else {
-                    // The record was updated to either be a null reference or an empty record reference to row 0.
-                    // First let's make sure we aren't editing row 0...if we are, then the value is a null reference
-                    // because a record cannot point to itself.
-                    if (this.index > 0) {
-                      // Now that we know that the edit isn't coming from row 0, let's check if row 0 is an empty reference.
-                      // If it is NOT an empty reference, then the updated value is not an empty reference.
-                    }
                   }
                 }
               }
@@ -379,9 +412,10 @@ class FranchiseFileTable extends EventEmitter {
     let previousEmptyRecordIndex = null;
     let currentEmptyRecordIndex = firstEmptyRecord;
 
-    if (this.header.nextRecordToUse !== this.header.recordCapacity) {
+    if (firstEmptyRecord !== this.header.recordCapacity) {
       while (currentEmptyRecordIndex !== this.header.recordCapacity) {
-        let nextEmptyRecordIndex = this.data.readUInt32BE(this.header.table1StartIndex + (currentEmptyRecordIndex * sizeOfEachRecord));
+        // let nextEmptyRecordIndex = this.data.readUInt32BE(this.header.table1StartIndex + (currentEmptyRecordIndex * sizeOfEachRecord));
+        let nextEmptyRecordIndex = utilService.getReferenceData(this.records[currentEmptyRecordIndex]._data.slice(0, 32)).rowNumber;
 
         emptyRecords.set(currentEmptyRecordIndex, {
           previous: previousEmptyRecordIndex,

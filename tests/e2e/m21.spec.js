@@ -1377,33 +1377,76 @@ describe('Madden 21 end to end tests', function () {
           expect(table.data.readUInt32BE(table.header.headerOffset - 4)).to.equal(5);
         });
 
-        // it('empty record reference is set automatically when value changes', () => {
-        //   table.records[7].PercentageSpline = '00000000000000000000000000000110';
+        describe('can automatically determine empty record references', () => {
+          it('updates the nextRecordToUse', async () => {
+            table.records[10].PercentageSpline = '10000000000000000000000000000101'
+            table.records[7].PercentageSpline = '00000000000000000000000000000101';
+            table.recalculateEmptyRecordReferences();
+  
+            // Adds empty record to map
+            expect(table.emptyRecords.size).to.equal(3);
+            expect(table.emptyRecords.get(5)).to.eql({
+              previous: 7,
+              next: 6
+            });
+            expect(table.emptyRecords.get(7)).to.eql({
+              previous: null,
+              next: 5
+            });
+            expect(table.emptyRecords.get(6)).to.eql({
+              previous: 5,
+              next: 21
+            });
+  
+            // Next record to use should now be updated to 7.
+            expect(table.header.nextRecordToUse).to.equal(7);
+  
+            // Buffer should be updated to 7 as well.
+            expect(table.data.readUInt32BE(table.header.headerOffset - 4)).to.equal(7);
 
-        //   // Adds empty record to map
-        //   expect(table.emptyRecords.size).to.equal(3);
-        //   expect(table.emptyRecords.get(5)).to.eql({
-        //     previous: null,
-        //     next: 7
-        //   });
-        //   expect(table.emptyRecords.get(7)).to.eql({
-        //     previous: 5,
-        //     next: 6
-        //   });
-        //   expect(table.emptyRecords.get(6)).to.eql({
-        //     previous: 7,
-        //     next: 21
-        //   });
+            // Save test
+            await file.save(filePaths.saveTest.m21);
+            
+            let file2 = new FranchiseFile(filePaths.saveTest.m21);
 
-        //   // Next record to use should now be updated to 5.
-        //   expect(table.header.nextRecordToUse).to.equal(5);
+            let readyPromise = new Promise((resolve, reject) => {
+              file2.on('ready', () => {
+                resolve();
+              });
+            });
 
-        //   // Buffer should be updated to 5 as well.
-        //   expect(table.data.readUInt32BE(table.header.headerOffset - 4)).to.equal(5);
+            await readyPromise;
 
-        //   // Record 5 should now point to 7
-        //   expect(table.records[5]._data).to.equal('00000000000000000000000000000111');
-        // });
+            let table2 = file2.getTableByName('OverallPercentage');
+            await table2.readRecords();
+
+            expect(table2.header.nextRecordToUse).to.eql(7);
+          });
+
+          it('updates the empty record reference map if a value changes in the middle of the list', () => {
+            table.records[5].PercentageSpline = '00000000000000000000000000001010';
+            table.records[10].PercentageSpline = '00000000000000000000000000000110';
+            table.recalculateEmptyRecordReferences();
+
+            expect(table.emptyRecords.size).to.equal(4);
+            expect(table.emptyRecords.get(7)).to.eql({
+              previous: null,
+              next: 5
+            });
+            expect(table.emptyRecords.get(5)).to.eql({
+              previous: 7,
+              next: 10
+            });
+            expect(table.emptyRecords.get(10)).to.eql({
+              previous: 5,
+              next: 6
+            });
+            expect(table.emptyRecords.get(6)).to.eql({
+              previous: 10,
+              next: 21
+            });
+          });
+        });
       });
     });
 
