@@ -103,7 +103,7 @@ class FranchiseFileTable extends EventEmitter {
     this.header.nextRecordToUse = index;
 
     // And finally update the buffer to reflect this change
-    this.data.writeUInt32BE(index, this.header.headerOffset - 4);
+    this.data.writeUInt32BE(index, this.header.offsetStart - 4);
   };
 
   recalculateEmptyRecordReferences() {

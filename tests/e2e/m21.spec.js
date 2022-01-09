@@ -872,6 +872,39 @@ describe('Madden 21 end to end tests', function () {
       });
     });
 
+    describe('Player[] with table store', () => {
+      const tableId = 7704;
+
+      before(async () => {
+        table = file.getTableById(tableId);
+        await table.readRecords();
+      });
+
+      describe('can calculate empty references', () => {
+        it('no changes', () => {
+          const nextRecordToUse = table.header.nextRecordToUse;
+          table.recalculateEmptyRecordReferences();
+
+          expect(table.header.nextRecordToUse).to.equal(nextRecordToUse);
+          expect(table.data.readUInt32BE(table.header.offsetStart - 4, 4)).to.equal(nextRecordToUse);
+        });
+
+        it('make one record empty', () => {
+          table.records[19].Player0 = '00000000000000000000000000100000'
+          table.recalculateEmptyRecordReferences();
+
+          expect(table.emptyRecords.size).to.equal(1);
+          expect(table.emptyRecords.get(19)).to.eql({
+            previous: null,
+            next: 32
+          });
+
+          expect(table.header.nextRecordToUse).to.equal(19);
+          expect(table.data.readUInt32BE(table.header.offsetStart - 4, 4)).to.equal(19);
+        });
+      });
+    });
+
     describe('Player table', () => {
       const marcusMayeIndex = 1584;
       const bakerMayfieldIndex = 1585;
