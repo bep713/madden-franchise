@@ -1446,6 +1446,22 @@ describe('Madden 21 end to end tests', function () {
               next: 21
             });
           });
+
+          it('works if there are no more empty references', () => {
+            table.records[7].PercentageSpline = '10000000000000000000000000001010';
+            table.records[5].PercentageSpline = '10000000000000000000000000001010';
+            table.records[10].PercentageSpline = '10000000000000000000000000001010';
+            table.records[6].PercentageSpline = '10000000000000000000000000001010';
+            table.recalculateEmptyRecordReferences();
+
+            expect(table.emptyRecords.size).to.equal(0);
+
+            // Next record to use should now be updated to 7.
+            expect(table.header.nextRecordToUse).to.equal(21);
+  
+            // Buffer should be updated to 7 as well.
+            expect(table.data.readUInt32BE(table.header.headerOffset - 4)).to.equal(21);
+          });
         });
       });
     });

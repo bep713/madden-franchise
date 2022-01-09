@@ -149,8 +149,13 @@ class FranchiseFileTable extends EventEmitter {
       + `The nextRecordToUse has NOT been updated.`);
     }
     else {
-      const nextRecordToUse = unreachableRecords[0];
-      this._setNextRecordToUseBuffer(nextRecordToUse.index);
+      let nextRecordToUse = this.header.recordCapacity;
+
+      if (unreachableRecords.length === 1) {
+        nextRecordToUse = unreachableRecords[0].index;
+      }
+
+      this._setNextRecordToUseBuffer(nextRecordToUse);
       this.emptyRecords = this._parseEmptyRecords();
     }
   };
