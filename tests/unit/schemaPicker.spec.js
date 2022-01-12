@@ -83,4 +83,18 @@ describe('schema picker service unit tests', () => {
     expect(schema.minor).to.equal(16);
     expect(schema.path).to.equal('C:\\Projects\\madden-franchise\\tests\\data\\test-schemas\\M21_202_16.gz');
   });
+
+  it('ignores game year if null', () => {
+    const schema = schemaPicker.pick(null, 328, 1, schemaPickerSettings);
+    expect(schema.major).to.equal(328);
+    expect(schema.minor).to.equal(1);
+    expect(schema.path).to.equal('C:\\Projects\\madden-franchise\\data\\schemas\\22\\M22_328_1.gz')
+  });
+
+  it('picks closest match if game year is null', () => {
+    const schema = schemaPicker.pick(null, 319, 1, schemaPickerSettings);
+    expect(schema.major).to.equal(328);
+    expect(schema.minor).to.equal(1);
+    expect(schema.path).to.equal('C:\\Projects\\madden-franchise\\data\\schemas\\22\\M22_328_1.gz')
+  });
 });

@@ -8,20 +8,20 @@ FranchiseTableStrategy.getTable2BinaryData = (table2Records, fullTable2Buffer) =
     let currentOffset = 0;
 
     for (let i = 0; i < changedTable2Records.length; i++) {
-      let record = changedTable2Records[i];
-      record.isChanged = false;
-      const recordOffset = record.index;
+        let record = changedTable2Records[i];
+        record.isChanged = false;
+        const recordOffset = record.index;
 
-      if (i > 0 && recordOffset === 0) {
-        // this case is true for the last few rows with no data in them. They reference the first table2 value.
-        break;
-      }
+        if (i > 0 && recordOffset === 0) {
+            // this case is true for the last few rows with no data in them. They reference the first table2 value.
+            break;
+        }
 
-      table2Data.push(fullTable2Buffer.slice(currentOffset, recordOffset));
-      const recordHexData = record.hexData;
-      table2Data.push(recordHexData);
+        table2Data.push(fullTable2Buffer.slice(currentOffset, recordOffset));
+        const recordHexData = record.hexData;
+        table2Data.push(recordHexData);
 
-      currentOffset = recordOffset + recordHexData.length;
+        currentOffset = recordOffset + recordHexData.length;
     }
 
     table2Data.push(fullTable2Buffer.slice(currentOffset));

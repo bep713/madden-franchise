@@ -379,7 +379,7 @@ function getGameYear(data, isCompressed, format) {
       'max': 95
     },
     {
-      'year': 20,
+      'year': 22,
       'max': 999
     }
   ];
@@ -431,7 +431,7 @@ function getGameYear(data, isCompressed, format) {
         return 21;
       }
       else {
-        return 20;
+        return null;
       }
     }
   }

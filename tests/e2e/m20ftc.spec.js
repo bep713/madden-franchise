@@ -4,10 +4,12 @@ const FranchiseFile = require('../../FranchiseFile');
 const FranchiseFileTable = require('../../FranchiseFileTable');
 const filePaths = {
   'compressed': {
-    'ftc': 'tests/data/FTC_COMPRESS.FTC'
+    'ftc': 'tests/data/FTC_COMPRESS.FTC',
+    'm22': 'tests/data/M22_FTC_COMPRESS.FTC'
   },
   'uncompressed': {
-    'ftc': 'tests/data/FTC_UNCOMPRESS'
+    'ftc': 'tests/data/FTC_UNCOMPRESS',
+    'm22': 'tests/data/M22_FTC_UNCOMPRESS.frt'
   },
   'saveTest': {
     'ftc': 'tests/data/CAREER-TESTSAVE'

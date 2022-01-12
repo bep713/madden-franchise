@@ -85,7 +85,7 @@ describe('Franchise File unit tests', () => {
             expect(file.type).to.eql({
                 'format': Constants.FORMAT.FRANCHISE,
                 'compressed': false,
-                'year': 20
+                'year': null
             });
         });
 
@@ -121,7 +121,7 @@ describe('Franchise File unit tests', () => {
             expect(file.type).to.eql({
                 'format': Constants.FORMAT.FRANCHISE_COMMON,
                 'compressed': true,
-                'year': 20
+                'year': null
             });
         });
 
@@ -130,7 +130,7 @@ describe('Franchise File unit tests', () => {
             expect(file.type).to.eql({
                 'format': Constants.FORMAT.FRANCHISE_COMMON,
                 'compressed': false,
-                'year': 20
+                'year': null
             });
         });
     });
@@ -159,7 +159,7 @@ describe('Franchise File unit tests', () => {
             expect(file.expectedSchemaVersion).to.eql({
                 'major': 342,
                 'minor': 1,
-                'gameYear': 20
+                'gameYear': null
             });
         });
 
@@ -195,7 +195,7 @@ describe('Franchise File unit tests', () => {
             expect(file.expectedSchemaVersion).to.eql({
                 'major': 371,
                 'minor': 2,
-                'gameYear': 20
+                'gameYear': null
             });
         });
 
@@ -204,7 +204,7 @@ describe('Franchise File unit tests', () => {
             expect(file.expectedSchemaVersion).to.eql({
                 'major': 371,
                 'minor': 2,
-                'gameYear': 20
+                'gameYear': null
             });
         });
     });

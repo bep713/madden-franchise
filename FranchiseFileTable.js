@@ -48,6 +48,22 @@ class FranchiseFileTable extends EventEmitter {
   updateBuffer() {
     // need to check table2 data first because it may change offsets of the legit records.
     const table2Data = this.strategy.getTable2BinaryData(this.table2Records, this.data.slice(this.header.table2StartIndex));
+    
+    // update table2 length and table total length in table header (only if records have been read)
+    if (this.recordsRead) {
+      let table2DataLength = 0;
+
+      // Get length of all table2Data sub arrays
+      table2Data.forEach((arr) => {
+        table2DataLength += arr.length;
+      });
+
+      this.header.table2Length = table2DataLength;
+      this.header.tableTotalLength = this.header.table1Length + this.header.table2Length;
+
+      this.data.writeUInt32BE(this.header.table2Length , this.header.offsetStart - 44);
+      this.data.writeUInt32BE(this.header.tableTotalLength, this.header.offsetStart - 24);
+    }
 
     const changedRecords = this.records.filter((record) => { return record.isChanged; });
     let currentOffset = 0;

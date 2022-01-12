@@ -31,8 +31,8 @@ describe('FTC Table Strategy unit tests', () => {
 
             const result = FTCTableStrategy.getTable2BinaryData(table2Records, oldData);
 
-            const expectedResult = Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00, 0x68, 0x65, 0x6C, 0x6C, 0x6F, 
-                0x00, 0x74, 0x65, 0x73, 0x74, 0x31, 0x32])
+            const expectedResult = [Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00, 0x68, 0x65, 0x6C, 0x6C, 0x6F, 
+                0x00, 0x74, 0x65, 0x73, 0x74, 0x31, 0x32])]
 
             expect(result).to.eql(expectedResult);
         });
@@ -68,7 +68,7 @@ describe('FTC Table Strategy unit tests', () => {
 
             const result = FTCTableStrategy.getTable2BinaryData(table2Records, oldData);
             
-            expect(result).to.eql(expectedResult);
+            expect(result).to.eql([expectedResult]);
             expect(table2Records[0].offset).to.equal(0);
             expect(table2Records[1].offset).to.equal(6);
             expect(table2Records[2].offset).to.equal(10);
@@ -106,7 +106,7 @@ describe('FTC Table Strategy unit tests', () => {
 
             const result = FTCTableStrategy.getTable2BinaryData(table2Records, oldData);
             
-            expect(result).to.eql(expectedResult);
+            expect(result).to.eql([expectedResult]);
             expect(table2Records[0].offset).to.equal(0);
             expect(table2Records[1].offset).to.equal(6);
             expect(table2Records[2].offset).to.equal(16);
