@@ -77,6 +77,11 @@ describe('util service unit tests', () => {
         'rowNumber': 11
       });
     });
+
+    it('can get binary from table ID and record number', () => {
+      const binary = utilService.getBinaryReferenceData(7906, 11);
+      expect(binary).to.eql('00111101110001000000000000001011')
+    });
   });
 });
 

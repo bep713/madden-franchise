@@ -223,4 +223,10 @@ utilService.getReferenceData = function (value) {
   }
 };
 
+utilService.getBinaryReferenceData = function (tableId, rowNumber) {
+  const referenceBinary = utilService.dec2bin(tableId, 15);
+  const recordIndexBinary = utilService.dec2bin(rowNumber, 17);
+  return referenceBinary + recordIndexBinary;
+};
+
 module.exports = utilService;
