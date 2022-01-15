@@ -44,6 +44,10 @@ class FranchiseFileTable extends EventEmitter {
   get schema () {
     return this._schema;
   };
+
+  getBinaryReferenceToRecord(index) {
+    return utilService.getBinaryReferenceData(this.header.tableId, index);
+  };
   
   updateBuffer() {
     // need to check table2 data first because it may change offsets of the legit records.
@@ -592,7 +596,7 @@ function readOffsetTable(data, schema, header) {
         'originalIndex': parseInt(attribute.index),
         'name': attribute.name,
         'type': (minValue < 0 || maxValue < 0) ? 's_' + attribute.type : attribute.type,
-        'isReference': !attribute.enum && (attribute.type[0] == attribute.type[0].toUpperCase() || attribute.type.includes('[]')) ? true : false,
+        'isReference': !attribute.enum && (attribute.type[0] == attribute.type[0].toUpperCase() || attribute.type.includes('[]') || attribute.type === 'record') ? true : false,
         'valueInSecondTable': header.hasSecondTable && attribute.type === 'string',
         'isSigned': minValue < 0 || maxValue < 0,
         'minValue': minValue,

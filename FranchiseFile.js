@@ -286,6 +286,29 @@ class FranchiseFile extends EventEmitter {
       return null;
     }
   };
+
+  getReferencesToRecord(tableId, recordIndex) {
+    const referencedTable = this.getTableById(tableId);
+
+    if (referencedTable) {
+      const fullBinary = utilService.getBinaryReferenceData(tableId, recordIndex);
+      const hex = utilService.bin2hex(fullBinary);
+  
+      return this.tables.filter((table) => {
+        return table.schema && table.schema.attributes.find((attribute) => {
+          return attribute.type === referencedTable.name;
+        });
+      }).filter((table) => {
+        return table.data.indexOf(hex, 0, 'hex') !== -1;
+      }).map((table) => {
+        return {
+          tableId: table.header.tableId,
+          name: table.name,
+          table: table
+        }
+      });
+    }
+  };
 };
 
 module.exports = FranchiseFile;

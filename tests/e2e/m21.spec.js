@@ -453,6 +453,11 @@ describe('Madden 21 end to end tests', function () {
           expect(table.schema.attributes[2].name).to.equal('RegionalPopularity')
         });
 
+        it('can get a binary reference to a record', () => {
+          const reference = table.getBinaryReferenceToRecord(6);
+          expect(reference).to.eql('00100000101011100000000000000110');
+        });
+
         describe('read records', () => {
           beforeEach((done) => {
             table.readRecords().then(() => {
@@ -1596,6 +1601,26 @@ describe('Madden 21 end to end tests', function () {
       });
     });
 
+    describe('PlayerPositionLookupTable', () => {
+      const tableId = 6445;
+
+      before(async () => {
+        table = file.getTableById(tableId);
+        await table.readRecords();
+      });
+
+      it('recognizes type `record` as a reference', () => {
+        expect(table.records[0].fields[0].isReference).to.be.true;
+      });
+
+      it('contains correct reference', () => {
+        expect(table.records[0].getReferenceDataByKey('WR')).to.eql({
+          tableId: 7308,
+          rowNumber: 14
+        });
+      });
+    });
+
     describe('can follow references', () => {
       it('can follow reference data correctly', () => {
         const playerArrayTable = file.getTableByName('Player[]');
@@ -1704,6 +1729,35 @@ describe('Madden 21 end to end tests', function () {
           expect(table.records[1].Tweet).to.equal('Jesus, Tony');
           expect(table.records[1].AuthorName).to.equal('Baker Mayfield');
         });
+      });
+    });
+
+    describe('can get references to a specific record', () => {
+      it('expected result', () => {
+        const references = file.getReferencesToRecord(7290, 0);
+        const overallPercentageTable = file.getTableById(4097);
+
+        expect(references.length).to.equal(1);
+        expect(references[0].tableId).to.eql(4097);
+        expect(references[0].name).to.eql('OverallPercentage');
+        expect(references[0].table).to.eql(overallPercentageTable);
+      });
+
+      it('expected result - Team', () => {
+        const references = file.getReferencesToRecord(7708, 0);
+
+        const seasonGameTable = file.getTableById(4148);
+        const playerStatRecord = file.getTableById(7698);
+
+        expect(references.length).to.equal(8);
+
+        expect(references[0].tableId).to.eql(4148);
+        expect(references[0].name).to.eql('SeasonGame');
+        expect(references[0].table).to.eql(seasonGameTable);
+
+        expect(references[5].tableId).to.eql(7698);
+        expect(references[5].name).to.eql('PlayerStatRecord');
+        expect(references[5].table).to.eql(playerStatRecord);
       });
     });
 
