@@ -1747,17 +1747,22 @@ describe('Madden 21 end to end tests', function () {
         const references = file.getReferencesToRecord(7708, 0);
 
         const seasonGameTable = file.getTableById(4148);
+        const teamArrayTable = file.getTableById(4675);
         const playerStatRecord = file.getTableById(7698);
 
-        expect(references.length).to.equal(8);
+        expect(references.length).to.equal(13);
 
         expect(references[0].tableId).to.eql(4148);
         expect(references[0].name).to.eql('SeasonGame');
         expect(references[0].table).to.eql(seasonGameTable);
 
-        expect(references[5].tableId).to.eql(7698);
-        expect(references[5].name).to.eql('PlayerStatRecord');
-        expect(references[5].table).to.eql(playerStatRecord);
+        expect(references[4].tableId).to.eql(4675);
+        expect(references[4].name).to.eql('Team[]');
+        expect(references[4].table).to.eql(teamArrayTable);
+
+        expect(references[10].tableId).to.eql(7698);
+        expect(references[10].name).to.eql('PlayerStatRecord');
+        expect(references[10].table).to.eql(playerStatRecord);
       });
     });
 

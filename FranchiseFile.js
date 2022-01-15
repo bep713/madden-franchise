@@ -295,9 +295,14 @@ class FranchiseFile extends EventEmitter {
       const hex = utilService.bin2hex(fullBinary);
   
       return this.tables.filter((table) => {
-        return table.schema && table.schema.attributes.find((attribute) => {
-          return attribute.type === referencedTable.name;
-        });
+        if (table.schema) {
+          return table.schema && table.schema.attributes.find((attribute) => {
+            return attribute.type === referencedTable.name;
+          });
+        }
+        else if (table.isArray) {
+          return table.name.slice(0, table.name.length - 2) === referencedTable.name;
+        }
       }).filter((table) => {
         return table.data.indexOf(hex, 0, 'hex') !== -1;
       }).map((table) => {
