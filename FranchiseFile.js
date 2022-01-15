@@ -292,13 +292,20 @@ class FranchiseFile extends EventEmitter {
 
     if (referencedTable) {
       const fullBinary = utilService.getBinaryReferenceData(tableId, recordIndex);
-      const hex = utilService.bin2hex(fullBinary);
+      const hex = utilService.bin2hex(fullBinary).padStart(8, '0');
   
       return this.tables.filter((table) => {
         if (table.schema) {
           return table.schema && table.schema.attributes.find((attribute) => {
             return attribute.type === referencedTable.name;
           });
+        }
+        else if (table.isArray && referencedTable.schema) {
+          // If the referenced table has a schema, we can check its base name.
+          // Some array table names are by the base name like EnumTable[] can contain AwardTypeEnumTableEntry
+
+          return table.name.slice(0, table.name.length - 2) === referencedTable.name
+            || table.name.slice(0, table.name.length - 2) === referencedTable.schema.base;
         }
         else if (table.isArray) {
           return table.name.slice(0, table.name.length - 2) === referencedTable.name;

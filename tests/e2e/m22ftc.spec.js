@@ -17,20 +17,34 @@ const filePaths = {
   }
 };
 
-let file;
+let file, tuningFile;
 
 describe('Madden 20 FTC end to end tests', function () {
     this.timeout(7000);
 
     describe('post-open tests', () => {
-        before((done) => {
+        before(async () => {
             file = new FranchiseFile(filePaths.compressed.m22, {
                 'schemaDirectory': path.join(__dirname, '../data/test-schemas')
             });
     
-            file.on('ready', () => {
-                done();
+            const franchiseFTCPromise = await new Promise((resolve) => {
+                file.on('ready', () => {
+                    resolve();
+                });
             });
+
+            tuningFile = new FranchiseFile(filePaths.compressed.tuning, {
+                'schemaDirectory': path.join(__dirname, '../data/test-schemas')
+            });
+
+            const tuningPromise = await new Promise((resolve) => {
+                tuningFile.on('ready', () => {
+                    resolve();
+                });
+            });
+
+            await Promise.all([franchiseFTCPromise, tuningPromise]);
         });
 
         describe('general', () => {
@@ -78,20 +92,6 @@ describe('Madden 20 FTC end to end tests', function () {
         });
 
         describe('Tuning dash issue', () => {
-            let tuningFile;
-
-            before(async () => {
-                tuningFile = new FranchiseFile(filePaths.compressed.tuning, {
-                    'schemaDirectory': path.join(__dirname, '../data/test-schemas')
-                });
-
-                await new Promise((resolve) => {
-                    tuningFile.on('ready', () => {
-                        resolve();
-                    });
-                });
-            });
-
             it('can edit ScoutTierEnumTableEntry fields', async () => {
                 const tableId = 825;
 
@@ -118,6 +118,30 @@ describe('Madden 20 FTC end to end tests', function () {
 
                 expect(table2.records[2].ShortName).to.equal('TestTest');
                 expect(table2.records[3].ShortName).to.equal('-');
+            });
+        });
+
+        describe('can find references correctly', () => {
+            it('EnumTableEntry[]', () => {
+                const refs = tuningFile.getReferencesToRecord(1871, 0);
+                const table = tuningFile.getTableById(507);
+
+                expect(refs.length).to.equal(1);
+
+                expect(refs[0].tableId).to.equal(507);
+                expect(refs[0].name).to.equal('EnumTable');
+                expect(refs[0].table).to.equal(table);
+            });
+
+            it('AwardTypeEnumTableEntry', () => {
+                const refs = tuningFile.getReferencesToRecord(575, 21);
+                const table = tuningFile.getTableById(1871);
+
+                expect(refs.length).to.equal(1);
+
+                expect(refs[0].tableId).to.equal(1871);
+                expect(refs[0].name).to.equal('EnumTableEntry[]');
+                expect(refs[0].table).to.equal(table);
             });
         });
     });
