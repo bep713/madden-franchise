@@ -1,14 +1,12 @@
-// USAGE:
-//  node schema-generator.js [input file path] [output file folder]
-
 const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
-const XmlStream = require('xml-stream');
+const { pipeline } = require('stream');
 const utilService = require('./utilService');
 const FranchiseEnum = require('../FranchiseEnum');
+const XmlParser = require('node-xml-stream-parser');
 const EventEmitter = require('events').EventEmitter;
-const extraSchemas = require('../data/schemas/extra-schemas.json');
+const extraSchemas = JSON.parse(JSON.stringify(require(path.join(__dirname, '../data/schemas/extra-schemas.json'))));
 
 let schemaGenerator = {};
 schemaGenerator.eventEmitter = new EventEmitter();
@@ -22,101 +20,144 @@ schemaGenerator.generateFromStream = (stream, showOutput, outputFile) => {
   schemaGenerator.root = {}
   schemaGenerator.schemas = [];
   schemaGenerator.schemaMap = {};
+  schemaGenerator.schemaMeta = {};
   schemaGenerator.enums = [];
 
-  schemaGenerator.xml = new XmlStream(stream);
+  schemaGenerator.xml = new XmlParser();
 
-  schemaGenerator.xml.collect('attribute');
+  pipeline(
+    stream,
+    schemaGenerator.xml,
+    (err) => {
+      if (err) {
+        console.error(err);
+        throw err;
+      }
 
-  schemaGenerator.xml.on('endElement: FranTkData', function (data) {
-    const majorVersion = data.$.dataMajorVersion;
-    const minorVersion = data.$.dataMinorVersion;
-    const databaseName = data.$.databaseName;
-    const gameYear = /Madden(\d{2})/.exec(databaseName)[1];
+      schemaGenerator.enums.forEach((theEnum) => {
+        theEnum.setMemberLength();
+      });
 
-    addExtraSchemas();
-    calculateInheritedSchemas();
+      const majorVersion = schemaGenerator.schemaMeta.dataMajorVersion;
+      const minorVersion = schemaGenerator.schemaMeta.dataMinorVersion;
+      const databaseName = schemaGenerator.schemaMeta.databaseName;
 
-    schemaGenerator.root = {
-      'meta': {
-        'major': parseInt(majorVersion),
-        'minor': parseInt(minorVersion),
-        'gameYear': parseInt(gameYear)
-      },
-      'schemas': schemaGenerator.schemas,
-      'schemaMap': schemaGenerator.schemaMap
+      const gameYear = /Madden(\d{2})/.exec(databaseName)[1];
+
+      addExtraSchemas();
+      calculateInheritedSchemas();
+
+      schemaGenerator.root = {
+        'meta': {
+          'major': parseInt(majorVersion),
+          'minor': parseInt(minorVersion),
+          'gameYear': parseInt(gameYear)
+        },
+        'schemas': schemaGenerator.schemas,
+        'schemaMap': schemaGenerator.schemaMap
+      };
+
+      if (outputFile) {
+        zlib.gzip(JSON.stringify(schemaGenerator.root), function (_, data) {
+          fs.writeFileSync(`${outputFile}\\${majorVersion}_${minorVersion}.gz`, data);
+        });
+      }
+
+      schemaGenerator.eventEmitter.emit('schemas:done', schemaGenerator.root);
+    }
+  );
+
+  let currentParent = {
+    type: '',
+    ref: null
+  };
+
+  schemaGenerator.xml.on('opentag', (name, attrs) => {
+    if (name === 'FranTkData') {
+      schemaGenerator.schemaMeta.databaseName = attrs.databaseName;
+      schemaGenerator.schemaMeta.dataMajorVersion = attrs.dataMajorVersion;
+      schemaGenerator.schemaMeta.dataMinorVersion = attrs.dataMinorVersion;
+    }
+
+    else if (name === 'enum') {
+      let theEnum = parseEnum(attrs);
+      schemaGenerator.enums.push(theEnum);
+
+      currentParent = {
+        type: 'enum',
+        ref: theEnum
+      }
+    }
+
+    else if (name === 'schema') {
+      let schema = parseSchema(attrs);
+      schema.attributes = [];
+
+      schemaGenerator.schemas.push(schema);
+      schemaGenerator.schemaMap[schema.name] = schema;
+      
+      currentParent = {
+        type: 'schema',
+        ref: schema
+      }
+    }
+
+    else if (name === 'attribute') {
+      if (currentParent.type === 'enum') {
+        currentParent.ref.addMember(attrs.name, attrs.idx, attrs.value);
+      }
+      else {
+        const attribute = parseAttribute(attrs);
+        currentParent.ref.attributes.push(attribute);
+      }
+    }
+  });
+
+  function parseEnum(enumAttributes) {
+    return new FranchiseEnum(enumAttributes.name, enumAttributes.assetId, enumAttributes.isRecordPersistent);
+  };
+
+  function parseSchema(schemaAttributes) {
+    return {
+      'assetId': schemaAttributes.assetId,
+      'ownerAssetId': schemaAttributes.ownerAssetId,
+      'numMembers': schemaAttributes.numMembers,
+      'name': schemaAttributes.name,
+      'base': schemaAttributes.base
     };
+  };
 
-    if (outputFile) {
-      zlib.gzip(JSON.stringify(schemaGenerator.root), function (_, data) {
-        fs.writeFileSync(`${outputFile}\\${majorVersion}_${minorVersion}.gz`, data);
-      });
+  function parseAttribute(attributeAttributes) {
+    return {
+      'index': attributeAttributes.idx,
+      'name': attributeAttributes.name,
+      'type': attributeAttributes.type,
+      'minValue': attributeAttributes.minValue,
+      'maxValue': attributeAttributes.maxValue,
+      'maxLength': attributeAttributes.maxLen,
+      'default': getDefaultValue(attributeAttributes.default),
+      'final': attributeAttributes.final,
+      'enum': getEnum(attributeAttributes.type),
+      'const': attributeAttributes.const
     }
 
-    schemaGenerator.eventEmitter.emit('schemas:done', schemaGenerator.root);
-  });
+    function getDefaultValue(defaultVal) {
+      if (!defaultVal) { return undefined; }
 
-  schemaGenerator.xml.on('endElement: enum', function (theEnum) {
-    if (showOutput) console.log(`Adding enum ${theEnum.$.name}`);
+      defaultVal = defaultVal
+        .replace(new RegExp('&#xD;', 'g'), '\r')
+        .replace(new RegExp('&#xA;', 'g'), '\n')
+        .replace(new RegExp('&amp;', 'g'), '&')
+        .replace(new RegExp('&gt;', 'g'), '>')
+        .replace(new RegExp('&lt;', 'g'), '<')
+        .replace(new RegExp('&quot;', 'g'), '\"')
 
-    let newEnum = new FranchiseEnum(theEnum.$.name, theEnum.$.assetId, theEnum.$.isRecordPersistent);
-
-    if (theEnum.attribute) {
-      theEnum.attribute.forEach((attribute) => {
-        newEnum.addMember(attribute.$.name, attribute.$.idx, attribute.$.value);
-      });
+      return defaultVal;
     }
-
-    newEnum.setMemberLength();
-    schemaGenerator.enums.push(newEnum);
-  });
-
-  schemaGenerator.xml.on('endElement: schema', function (schema) {
-    if (showOutput) console.log(`Adding schema ${schema.$.name}`);
-    let attributes = [];
-    
-    if (schema.attribute) {
-      attributes = schema.attribute.map((attribute) => {
-        return {
-          'index': attribute.$.idx,
-          'name': attribute.$.name,
-          'type': attribute.$.type,
-          'minValue': attribute.$.minValue,
-          'maxValue': attribute.$.maxValue,
-          'maxLength': attribute.$.maxLen,
-          'default': attribute.$.default,
-          'final': attribute.$.final,
-          'enum': getEnum(attribute.$.type),
-          'const': attribute.$.const
-        }
-      });
-    }
-
-    const element = {
-      'assetId': schema.$.assetId,
-      'ownerAssetId': schema.$.ownerAssetId,
-      'numMembers': schema.$.numMembers,
-      'name': schema.$.name,
-      'base': schema.$.base,
-      'attributes': attributes
-    };
-
-    schemaGenerator.schemas.push(element);
-    schemaGenerator.schemaMap[element.name] = element;
-
-    if (element.name === 'WinLossStreakPlayerGoal') {
-      // calculateInheritedSchemas();
-      // // fs.writeFileSync(outputFile, JSON.stringify(schemaGenerator.schemas));
-      // zlib.gzip(JSON.stringify(schemaGenerator.schemas), function (_, data) {
-      //   fs.writeFileSync(outputFile, data);
-      // });
-      // schemaGenerator.emit('schemas:done', schemaGenerator.schemas);
-    }
-  });
+  };
 
   function addExtraSchemas() {
     extraSchemas.forEach((schema) => {
-
       if (!schemaGenerator.schemaMap[schema.name]) {
         schema.attributes.filter((attrib) => { 
           return attrib.enum && !(attrib.enum instanceof FranchiseEnum);
