@@ -6,7 +6,6 @@ const utilService = require('./utilService');
 const FranchiseEnum = require('../FranchiseEnum');
 const XmlParser = require('node-xml-stream-parser');
 const EventEmitter = require('events').EventEmitter;
-const extraSchemas = JSON.parse(JSON.stringify(require(path.join(__dirname, '../data/schemas/extra-schemas.json'))));
 
 let schemaGenerator = {};
 schemaGenerator.eventEmitter = new EventEmitter();
@@ -22,6 +21,7 @@ schemaGenerator.generateFromStream = (stream, showOutput, outputFile) => {
   schemaGenerator.schemaMap = {};
   schemaGenerator.schemaMeta = {};
   schemaGenerator.enums = [];
+  const extraSchemas = schemaGenerator.getExtraSchemas();
 
   schemaGenerator.xml = new XmlParser();
 
@@ -33,7 +33,7 @@ schemaGenerator.generateFromStream = (stream, showOutput, outputFile) => {
         console.error(err);
         throw err;
       }
-
+      
       schemaGenerator.enums.forEach((theEnum) => {
         theEnum.setMemberLength();
       });
@@ -159,7 +159,7 @@ schemaGenerator.generateFromStream = (stream, showOutput, outputFile) => {
   function addExtraSchemas() {
     extraSchemas.forEach((schema) => {
       if (!schemaGenerator.schemaMap[schema.name]) {
-        schema.attributes.filter((attrib) => { 
+        schema.attributes.filter((attrib) => {
           return attrib.enum && !(attrib.enum instanceof FranchiseEnum);
         }).forEach((attrib) => {
           attrib.enum = getEnum(attrib.enum);
@@ -184,19 +184,7 @@ schemaGenerator.generateFromStream = (stream, showOutput, outputFile) => {
 };
 
 schemaGenerator.getExtraSchemas = () => {
-  let newSchemas = [];
-
-  extraSchemas.forEach((schema) => {
-    schema.attributes.filter((attrib) => { 
-      return attrib.enum && !(attrib.enum instanceof FranchiseEnum);
-    }).forEach((attrib) => {
-      attrib.enum = new FranchiseEnum(attrib.enum);
-    });
-
-    newSchemas.push(schema);
-  });
-
-  return newSchemas;
+  return JSON.parse(JSON.stringify(require(path.join(__dirname, '../data/schemas/extra-schemas.json'))));
 };
 
 schemaGenerator.calculateInheritedSchemas = (schemaList) => {

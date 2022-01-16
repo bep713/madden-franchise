@@ -46,6 +46,7 @@ class FranchiseSchema extends EventEmitter {
     this.meta = this.schema.meta;
     this.schemas = this.schema.schemas;
     this.schemaMap = {};
+    this.enumMap = {};
   
     for (let i = 0; i < this.schemas.length; i++) {
       const schema = this.schemas[i];
@@ -56,6 +57,7 @@ class FranchiseSchema extends EventEmitter {
   
         if (attribute.enum) {
           attribute.enum = new FranchiseEnum(attribute.enum);
+          this.enumMap[attribute.enum.name] = attribute.enum;
         } 
       }
     }
@@ -64,6 +66,11 @@ class FranchiseSchema extends EventEmitter {
     const extraSchemas = schemaGenerator.getExtraSchemas();
     extraSchemas.forEach((schema) => {
       if (!this.schemaMap[schema.name]) {
+        schema.attributes.forEach((attrib) => {
+          if (attrib.enum) {
+            attrib.enum = new FranchiseEnum(this.enumMap[attrib.enum]);
+          }
+        })
         this.schemas.unshift(schema);
         this.schemaMap[schema.name] = schema;
         addedExtraSchema = true;

@@ -13,7 +13,7 @@ const SCHEMA_PATHS = {
     m22: {
         xml: path.join(TEST_SCHEMA_FOLDER, 'M22_328_1.FTX'),
         gz: path.join(TEST_SCHEMA_FOLDER, 'M22_328_1.gz'),
-        outputTest: path.join(TEST_SCHEMA_FOLDER, 'output-test/328_1.gz')
+        outputTest: path.join(TEST_SCHEMA_FOLDER, 'output-test/M22_328_1.gz')
     }
 };
 

@@ -13,6 +13,66 @@ describe('FranchiseSchema unit tests', () => {
         // will add extra schemas if they don't already exist
         expect(schema.schemas.length).to.equal(2636);
         expect(schema.schemas.find((schema) => { return schema.name === 'Scheduler'})).to.not.be.undefined;
+
+        // will add correct enums to the extra schemas
+        const relativeAppt = schema.schemas.find((schema) => { return schema.name === 'Scheduler.RelativeApptDateTime'});
+        expect(relativeAppt.attributes[2].enum).to.eql({
+          _name: 'DayOfWeek',
+          _assetId: '1592',
+          _isRecordPersistent: 'true',
+          _maxLength: 4,
+          _members: [
+            {
+              _index: 0,
+              _name: 'Sunday',
+              _unformattedValue: '0000',
+              _value: 0
+            },
+            {
+              _index: 1,
+              _name: 'Monday',
+              _unformattedValue: '0001',
+              _value: 1
+            },
+            {
+              _index: 2,
+              _name: 'Tuesday',
+              _unformattedValue: '0010',
+              _value: 2
+            },
+            {
+              _index: 3,
+              _name: 'Wednesday',
+              _unformattedValue: '0011',
+              _value: 3
+            },
+            {
+              _index: 4,
+              _name: 'Thursday',
+              _unformattedValue: '0100',
+              _value: 4
+            },
+            {
+              _index: 5,
+              _name: 'Friday',
+              _unformattedValue: '0101',
+              _value: 5
+            },
+            {
+              _index: 6,
+              _name: 'Saturday',
+              _unformattedValue: '0110',
+              _value: 6
+            },
+            {
+              _index: 7,
+              _name: 'Invalid_',
+              _unformattedValue: '1000',
+              _value: 8
+            },
+          ]
+        });
+
         done();
       });
 
