@@ -175,30 +175,20 @@ class FranchiseFile extends EventEmitter {
     });
   };
 
-  save(outputFilePath) {
-    return this.packFile(outputFilePath);
+  save(outputFilePath, options) {
+    return this.packFile(outputFilePath, options);
   };
 
-  packFile(outputFilePath) {
+  packFile(outputFilePath, options) {
     const that = this;
     this.emit('saving');
 
     return new Promise((resolve, reject) => {
       this.unpackedFileContents = this.strategy.file.generateUnpackedContents(this.tables, this.unpackedFileContents);
-      // const changedTables = this.tables.filter((table) => { return table.isChanged; });
-  
-      //   for (let i = 0; i < changedTables.length; i++) {
-      //     let table = changedTables[i];
-      //     const header = that.unpackedFileContents.slice(0, table.offset);
-      //     const trailer = that.unpackedFileContents.slice(table.offset + table.data.length);
-      //     that.unpackedFileContents = Buffer.concat([header, table.hexData, trailer]);
-
-      //     table.isChanged = false;
-      //   }
 
       let destination = outputFilePath ? outputFilePath : this.filePath;
   
-      _packFile(this.unpackedFileContents).then((data) => {
+      _packFile(this.unpackedFileContents, options).then((data) => {
         const dataToSave = this.strategy.file.postPackFile(this.packedFileContents, data);
         _save(destination, dataToSave, (err) => {
           if (err) {
@@ -346,15 +336,24 @@ function unpackFile (data, type) {
   return zlib.inflateSync(data.slice(offset));
 };
 
-function _packFile (data) {
+function _packFile (data, options) {
   return new Promise((resolve, reject) => {
-    zlib.deflate(data, {
-      windowBits: 15
-    }, function (err, newData) {
-      if (err) reject(err);
-
-      resolve(newData);
-    });
+    if (options && options.sync) {
+      const data = zlib.deflateSync(data, {
+        windowBits: 15
+      });
+      
+      resolve(data);
+    }
+    else {
+      zlib.deflate(data, {
+        windowBits: 15
+      }, function (err, newData) {
+        if (err) reject(err);
+  
+        resolve(newData);
+      });
+    }
   });
 };
 
