@@ -339,11 +339,11 @@ function unpackFile (data, type) {
 function _packFile (data, options) {
   return new Promise((resolve, reject) => {
     if (options && options.sync) {
-      const data = zlib.deflateSync(data, {
+      const newData = zlib.deflateSync(data, {
         windowBits: 15
       });
       
-      resolve(data);
+      resolve(newData);
     }
     else {
       zlib.deflate(data, {
