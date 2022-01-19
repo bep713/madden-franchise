@@ -190,14 +190,26 @@ class FranchiseFile extends EventEmitter {
   
       _packFile(this.unpackedFileContents, options).then((data) => {
         const dataToSave = this.strategy.file.postPackFile(this.packedFileContents, data);
-        _save(destination, dataToSave, (err) => {
+
+        if (options && options.sync) {
+          _saveSync(destination, dataToSave);
+          postSaveActions();
+        }
+        else {
+          _save(destination, dataToSave, (err) => {
+            postSaveActions(err);
+          });
+        }
+
+        function postSaveActions(err) {
           if (err) {
             reject(err);
             that.emit('save-error');
           }
+
           resolve('saved');
           that.emit('saved');
-        });
+        }
       });
     });
   };
@@ -359,6 +371,10 @@ function _packFile (data, options) {
 
 function _save (destination, packedContents, callback) {
   fs.writeFile(destination, packedContents, callback);
+};
+
+function _saveSync (destination, packedContents) {
+  fs.writeFileSync(destination, packedContents);
 };
 
 function getFileType(data) {
