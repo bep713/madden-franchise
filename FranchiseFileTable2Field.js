@@ -1,9 +1,8 @@
 const EventEmitter = require('events').EventEmitter;
 const utilService = require('./services/utilService');
 
-class FranchiseFileTable2Field extends EventEmitter {
-  constructor (index, maxLength) {
-    super();
+class FranchiseFileTable2Field {
+  constructor (index, maxLength, parent) {
     this._value = '';
     this.rawIndex = index;
     this.isChanged = false;
@@ -13,6 +12,7 @@ class FranchiseFileTable2Field extends EventEmitter {
     this._unformattedValue = null;
     this.index = utilService.bin2dec(index);
     this._offset = this.index;
+    this._parent = parent;
   };
 
   get unformattedValue () {
@@ -26,18 +26,27 @@ class FranchiseFileTable2Field extends EventEmitter {
       this.lengthAtLastSave = getLengthOfUnformattedValue(this._unformattedValue);
     }
     
+    // let formattedValue = '';
+    // const chunked = utilService.chunk(this._unformattedValue, 8);
+    // chunked.forEach((chunk) => {
+    //   formattedValue += String.fromCharCode(parseInt(chunk,2));
+    // });
+
+    // this._value = formattedValue.replace(/\0.*$/g,'');
+    // this.emit('change');
+    if (this._parent) {
+      this._parent.onEvent('change', this);
+    }
+  };
+
+  get value () {
     let formattedValue = '';
     const chunked = utilService.chunk(this._unformattedValue, 8);
     chunked.forEach((chunk) => {
       formattedValue += String.fromCharCode(parseInt(chunk,2));
     });
 
-    this._value = formattedValue.replace(/\0.*$/g,'');
-    this.emit('change');
-  };
-
-  get value () {
-    return this._value;
+    return formattedValue.replace(/\0.*$/g,'');
   };
 
   set value (value) {
@@ -45,14 +54,15 @@ class FranchiseFileTable2Field extends EventEmitter {
       value = value.substring(0, this.maxLength);
     }
     
-    this._value = value;
+    // this._value = value;
     this._unformattedValue = this._strategy.setUnformattedValueFromFormatted(value, this.maxLength);
 
     if (this.lengthAtLastSave === null) {
       this.lengthAtLastSave = getLengthOfUnformattedValue(this._unformattedValue);
     }
     
-    this.emit('change');
+    // this.emit('change');
+    this._parent.onEvent('change', this);
   };
 
   get hexData () {
@@ -78,6 +88,14 @@ class FranchiseFileTable2Field extends EventEmitter {
     if (this.fieldReference) {
       this.fieldReference.unformattedValue = utilService.dec2bin(offset, 32);
     }
+  };
+
+  get parent() {
+    return this._parent;
+  };
+
+  set parent(parent) {
+    this._parent = parent;
   };
 };
 

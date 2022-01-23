@@ -233,23 +233,23 @@ describe('Madden 19 end to end tests', function () {
                 expect(record.NationalPopularity).to.equal(0);
               });
   
-              it('getValueByKey()', () => {
-                expect(record.getValueByKey('LocalPopularity')).to.equal(0); 
-                expect(record.getValueByKey('RegionalPopularity')).to.equal(0);
-                expect(record.getValueByKey('NationalPopularity')).to.equal(0);
-              });
+              // it('getValueByKey()', () => {
+              //   expect(record.getValueByKey('LocalPopularity')).to.equal(0); 
+              //   expect(record.getValueByKey('RegionalPopularity')).to.equal(0);
+              //   expect(record.getValueByKey('NationalPopularity')).to.equal(0);
+              // });
 
-              it('getFieldByKey()', () => {
-                let localPopField = record.getFieldByKey('LocalPopularity');
-                expect(localPopField).to.not.be.undefined;
-                expect(localPopField.value).to.equal(0);
-                expect(localPopField.unformattedValue).to.equal('000000000000000000');
+              // it('getFieldByKey()', () => {
+              //   let localPopField = record.getFieldByKey('LocalPopularity');
+              //   expect(localPopField).to.not.be.undefined;
+              //   expect(localPopField.value).to.equal(0);
+              //   expect(localPopField.unformattedValue).to.equal('000000000000000000');
 
-                let regionalPopField = record.getFieldByKey('RegionalPopularity');
-                expect(regionalPopField).to.not.be.undefined;
-                expect(regionalPopField.value).to.equal(0);
-                expect(regionalPopField.unformattedValue).to.equal('0000000');
-              });
+              //   let regionalPopField = record.getFieldByKey('RegionalPopularity');
+              //   expect(regionalPopField).to.not.be.undefined;
+              //   expect(regionalPopField.value).to.equal(0);
+              //   expect(regionalPopField.unformattedValue).to.equal('0000000');
+              // });
             });
 
             describe('second record', () => {
@@ -266,9 +266,9 @@ describe('Madden 19 end to end tests', function () {
               });
 
               it('has expected unformatted values', () => {
-                expect(record.getFieldByKey('LocalPopularity').unformattedValue).to.equal('000000000001010101');
-                expect(record.getFieldByKey('NationalPopularity').unformattedValue).to.equal('1010101');
-                expect(record.getFieldByKey('RegionalPopularity').unformattedValue).to.equal('1011010');
+                expect(record.fields.LocalPopularity.unformattedValue).to.equal('000000000001010101');
+                expect(record.fields.NationalPopularity.unformattedValue).to.equal('1010101');
+                expect(record.fields.RegionalPopularity.unformattedValue).to.equal('1011010');
               });
             });
           });
@@ -471,7 +471,7 @@ describe('Madden 19 end to end tests', function () {
         describe('records have expected values', () => {
           it('first record', () => {
             let record = table.records[0];
-            expect(record.GameStats).to.be.undefined;
+            expect(record.GameStats).to.be.null;
             expect(record.SeasonStats).to.equal('00000000000000000000000000000000');
             expect(record.FirstName).to.equal('');
             expect(record.LastName).to.equal('C');
@@ -483,7 +483,7 @@ describe('Madden 19 end to end tests', function () {
 
           it('Marcus Maye', () => {
             let record = table.records[1700];
-            expect(record.GameStats).to.be.undefined;
+            expect(record.GameStats).to.be.null;
             expect(record.SeasonStats).to.equal('00101110100000000000010000101010');
             expect(record.FirstName).to.equal('Marcus');
             expect(record.LastName).to.equal('Maye');
@@ -494,7 +494,7 @@ describe('Madden 19 end to end tests', function () {
 
           it('Baker Mayfield', () => {
             let record = table.records[1701];
-            expect(record.GameStats).to.be.undefined;
+            expect(record.GameStats).to.be.null;
             expect(record.SeasonStats).to.equal('00000000000000000000000000000000');
             expect(record.FirstName).to.equal('Baker');
             expect(record.LastName).to.equal('Mayfield');
@@ -532,9 +532,9 @@ describe('Madden 19 end to end tests', function () {
 
           expect(record.FirstName).to.equal('Clark');
           expect(record.LastName).to.equal('Kent');
-          expect(record.MetaMorph_GutBase).to.equal(0.49494949494);
+          expect(record.MetaMorph_GutBase.toFixed(6)).to.equal('0.494949'); // string value because of toFixed()
           
-          const secondTableField = record.getFieldByKey('FirstName').secondTableField;
+          const secondTableField = record.fields.FirstName.secondTableField;
           expect(secondTableField.value).to.equal('Clark');
           expect(secondTableField.unformattedValue).to.eql('0100001101101100011000010111001001101011000000000000000000000000000000000000000000000000000000000000000000000000');
         });
@@ -543,7 +543,7 @@ describe('Madden 19 end to end tests', function () {
           let record = table.records[1701];
 
           expect(() => {
-            record.getFieldByKey('FirstName').unformattedValue = '30101010101';
+            record.fields.FirstName.unformattedValue = '30101010101';
           }).to.throw(Error);
         });
 
@@ -651,35 +651,35 @@ describe('Madden 19 end to end tests', function () {
       });
 
       it('reads enum correctly if it has leading zeroes', () => {
-        let first = table.records[0].getFieldByKey('PlayerPosition');
+        let first = table.records[0].fields.PlayerPosition;
         expect(first.offset.enum).to.not.be.undefined;
         expect(first.unformattedValue).to.equal('00000000000000000000000000010000');
         expect(first.value).to.equal('CB');
       });
 
       it('sets enum correctly if it has leading zeroes', () => {
-        let first = table.records[0].getFieldByKey('PlayerPosition');
+        let first = table.records[0].fields.PlayerPosition;
         first.value = 'WR';
         expect(first.value).to.equal('WR');
         expect(first.unformattedValue).to.equal('00000000000000000000000000000011');
       });
 
       it('sets unformatted value correctly if the length is correctly passed in', () => {
-        let first = table.records[0].getFieldByKey('PlayerPosition');
+        let first = table.records[0].fields.PlayerPosition;
         first.unformattedValue = '00000000000000000000000000000011';
         expect(first.value).to.equal('WR');
         expect(first.unformattedValue).to.equal('00000000000000000000000000000011');
       });
 
       it('sets unformatted value correctly if the length isnt correctly passed in', () => {
-        let first = table.records[0].getFieldByKey('PlayerPosition');
+        let first = table.records[0].fields.PlayerPosition;
         first.unformattedValue = '11';
         expect(first.value).to.equal('WR');
         expect(first.unformattedValue).to.equal('00000000000000000000000000000011');
       });
 
       it('throws an error if unformatted enum value is set to an invalid value', () => {
-        let first = table.records[0].getFieldByKey('PlayerPosition');
+        let first = table.records[0].fields.PlayerPosition;
 
         expect(() => {
           first.unformattedValue = '1000000';
@@ -690,7 +690,7 @@ describe('Madden 19 end to end tests', function () {
       });
 
       it('throws an error if enum value is set to an invalid value', () => {
-        let first = table.records[0].getFieldByKey('PlayerPosition');
+        let first = table.records[0].fields.PlayerPosition;
 
         expect(() => {
           first.value = 'Coach';
@@ -701,7 +701,7 @@ describe('Madden 19 end to end tests', function () {
       });
 
       it('sets enum values as values without an underscore if possible', () => {
-        let seventh = table.records[6].getFieldByKey('PlayerPosition');
+        let seventh = table.records[6].fields.PlayerPosition;
         expect(seventh.value).to.equal('K');
       });
     });

@@ -2,21 +2,23 @@ const EventEmitter = require('events').EventEmitter;
 const utilService = require('./services/utilService');
 const FranchiseFileTable2Field = require('./FranchiseFileTable2Field');
 
-class FranchiseFileField extends EventEmitter {
-  constructor(key, value, offset) {
-    super();
+class FranchiseFileField {
+  constructor(key, value, offset, parent) {
+    // super();
     this._key = key;
     this._unformattedValue = value;
-    this._value = parseFieldValue(value, offset);
+    // this._value = parseFieldValue(value, offset);
     this._offset = offset;
+    // console.log(parent);
+    this._parent = parent;
 
     if (offset.valueInSecondTable) {
       this.secondTableField = new FranchiseFileTable2Field(value, offset.maxLength);
       this.secondTableField.fieldReference = this;
 
-      this.secondTableField.on('change', function () {
-        this._value = this.secondTableField.value;
-      }.bind(this));
+      // this.secondTableField.on('change', function () {
+      //   this._value = this.secondTableField.value;
+      // }.bind(this));
     }
   };
 
@@ -29,7 +31,7 @@ class FranchiseFileField extends EventEmitter {
   };
 
   get value () {
-    return this._value;
+    return this._parseFieldValue(this._unformattedValue, this._offset);
   };
 
   get isReference () {
@@ -55,7 +57,8 @@ class FranchiseFileField extends EventEmitter {
 
       this._value = setFormattedValue(value, this._offset);
       this._unformattedValue = parseFormattedValue(value, this._offset);
-      this.emit('change');
+      // this.emit('change');
+      this._parent.onEvent('change', this);
     }
   };
 
@@ -65,7 +68,8 @@ class FranchiseFileField extends EventEmitter {
 
   set unformattedValue (unformattedValue) {
     this.setUnformattedValueWithoutChangeEvent(unformattedValue);
-    this.emit('change');
+    // this.emit('change');
+    this._parent.onEvent('change', this);
   };
 
   setUnformattedValueWithoutChangeEvent(unformattedValue, suppressErrors) {
@@ -78,7 +82,7 @@ class FranchiseFileField extends EventEmitter {
         value = this.secondTableField.value;
       }
       else {
-        value = parseFieldValue(unformattedValue.padStart(this._offset.length, '0'), this._offset);
+        value = this._parseFieldValue(unformattedValue.padStart(this._offset.length, '0'), this._offset);
       }
 
       // check for 'allowed' error - this will be true if the unformatted value is invalid.
@@ -96,6 +100,54 @@ class FranchiseFileField extends EventEmitter {
       }
     }
   }
+
+  _parseFieldValue(unformatted, offset) {
+    if (offset.valueInSecondTable) {
+      return this.secondTableField.value;
+    }
+    else if (offset.enum) {
+      try {
+        const theEnum = offset.enum.getMemberByUnformattedValue(unformatted);
+  
+        if (theEnum) {
+          return theEnum.name;
+        }
+      }
+      catch (err) {
+        // console.log(err);
+      }
+      
+      return unformatted;
+    }
+    else {
+      switch (offset.type) {
+        case 's_int':
+          return utilService.bin2dec(unformatted) + offset.minValue;
+        case 'int':
+          if (offset.minValue || offset.maxValue) {
+            return utilService.bin2dec(unformatted);
+          }
+          else {
+            const maxValueBinary = getMaxValueBinary(offset);
+            const maxValue = utilService.bin2dec(maxValueBinary);
+            const newValue = utilService.bin2dec(unformatted);
+            
+            if (newValue === 0) {
+              return 0;
+            }
+            else {
+              return newValue - maxValue;
+            }
+          }
+        case 'bool':
+          return unformatted[0] === '1' ? true : false;
+        case 'float':
+          return utilService.bin2Float(unformatted);
+        default:
+          return unformatted;
+      }
+    }
+  };
 };
 
 module.exports = FranchiseFileField;
@@ -127,51 +179,6 @@ function setFormattedValue(value, offset) {
       return parseFloat(value);
     default:
       return value.toString();
-  }
-};
-
-function parseFieldValue(unformatted, offset) {
-  if (offset.enum) {
-    try {
-      const theEnum = offset.enum.getMemberByUnformattedValue(unformatted);
-
-      if (theEnum) {
-        return theEnum.name;
-      }
-    }
-    catch (err) {
-      // console.log(err);
-    }
-    
-    return unformatted;
-  }
-  else {
-    switch (offset.type) {
-      case 's_int':
-        return utilService.bin2dec(unformatted) + offset.minValue;
-      case 'int':
-        if (offset.minValue || offset.maxValue) {
-          return utilService.bin2dec(unformatted);
-        }
-        else {
-          const maxValueBinary = getMaxValueBinary(offset);
-          const maxValue = utilService.bin2dec(maxValueBinary);
-          const newValue = utilService.bin2dec(unformatted);
-          
-          if (newValue === 0) {
-            return 0;
-          }
-          else {
-            return newValue - maxValue;
-          }
-        }
-      case 'bool':
-        return unformatted[0] === '1' ? true : false;
-      case 'float':
-        return utilService.bin2Float(unformatted);
-      default:
-        return unformatted;
-    }
   }
 };
 

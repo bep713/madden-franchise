@@ -13,6 +13,7 @@
   "author": "matthewpanetta",
   "license": "MIT",
   "dependencies": {
+    "bit-buffer": "^0.2.5",
     "node-xml-stream-parser": "^1.0.12"
   },
   "repository": {
