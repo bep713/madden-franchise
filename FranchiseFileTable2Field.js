@@ -10,7 +10,7 @@ class FranchiseFileTable2Field {
     this.fieldReference = null;
     this.lengthAtLastSave = null;
     this._unformattedValue = null;
-    this.index = utilService.bin2dec(index);
+    this.index = index;
     this._offset = this.index;
     this._parent = parent;
   };
@@ -40,13 +40,15 @@ class FranchiseFileTable2Field {
   };
 
   get value () {
-    let formattedValue = '';
-    const chunked = utilService.chunk(this._unformattedValue, 8);
-    chunked.forEach((chunk) => {
-      formattedValue += String.fromCharCode(parseInt(chunk,2));
-    });
+    // let formattedValue = '';
+    // const chunked = utilService.chunk(this._unformattedValue, 8);
+    // chunked.forEach((chunk) => {
+    //   formattedValue += String.fromCharCode(parseInt(chunk,2));
+    // });
 
-    return formattedValue.replace(/\0.*$/g,'');
+    // return formattedValue.replace(/\0.*$/g,'');
+
+    return this._unformattedValue.toString().replace(/\0.*$/g,'');
   };
 
   set value (value) {
@@ -66,7 +68,7 @@ class FranchiseFileTable2Field {
   };
 
   get hexData () {
-    return Buffer.from(utilService.binaryBlockToDecimalBlock(this.unformattedValue));
+    return this._unformattedValue;
   };
 
   get strategy () {

@@ -1,6 +1,5 @@
-const { expect } = require('chai');
-const { resolve } = require('path');
 const path = require('path');
+const { expect } = require('chai');
 
 const FranchiseFile = require('../../FranchiseFile');
 const filePaths = {
@@ -102,6 +101,45 @@ describe('madden franchise performance tests', function () {
             it('get from field explicitly', () => {
                 let value = table.records[0].CareerStats.value;
             });
+        });
+    });
+
+    describe('quick validation', () => {
+        
+        describe('overall percentage', () => {
+            before(() => {
+                table = file.getTableById(4097);
+            });
+
+            it('read', () => {
+                console.time('read');
+                let test = table.records[0].PlayerPosition;
+                console.timeEnd('read');
+    
+                expect(table.records[0].PlayerPosition).to.equal('CB');
+            });
+
+            it('write enum', () => {
+                console.time('write');
+                table.records[0].PlayerPosition = 'WR';
+                console.timeEnd('write');
+
+                expect(table.records[0].PlayerPosition).to.equal('WR');
+            });
+        });
+
+        describe('player', () => {
+            before(() => {
+                table = file.getTableById(4226);
+            });
+
+            it('write string', () => {
+                console.time('write');
+                table.records[20].FirstName = 'Test';
+                console.timeEnd('write');
+
+                expect(table.records[20].FirstName).to.equal('Test');
+            }); 
         });
     });
 });

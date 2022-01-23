@@ -223,6 +223,13 @@ utilService.getReferenceData = function (value) {
   }
 };
 
+utilService.getReferenceDataFromBuffer = (buf) => {
+  return {
+    tableId: buf.readUInt16BE(0),
+    rowNumber: buf.readUInt16BE(2)
+  }
+};
+
 utilService.getBinaryReferenceData = function (tableId, rowNumber) {
   const referenceBinary = utilService.dec2bin(tableId, 15);
   const recordIndexBinary = utilService.dec2bin(rowNumber, 17);

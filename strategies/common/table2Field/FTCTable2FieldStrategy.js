@@ -21,9 +21,11 @@ FTCTable2FieldStrategy.setUnformattedValueFromFormatted = (formattedValue, maxLe
         formattedValue = formattedValue.substring(0, maxLength - 1);
     }
     
-    return formattedValue.split('').map((char) => {
-        return char.charCodeAt(0).toString(2).padStart(8, '0');
-    }).join('') + '00000000';
+    // return formattedValue.split('').map((char) => {
+    //     return char.charCodeAt(0).toString(2).padStart(8, '0');
+    // }).join('') + '00000000';
+
+    return Buffer.from(formattedValue);
 };
 
 module.exports = FTCTable2FieldStrategy;

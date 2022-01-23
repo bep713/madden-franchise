@@ -1,24 +1,23 @@
-const EventEmitter = require('events').EventEmitter;
+const { BitView } = require('bit-buffer');
+
 const utilService = require('./services/utilService');
 const FranchiseFileTable2Field = require('./FranchiseFileTable2Field');
 
 class FranchiseFileField {
   constructor(key, value, offset, parent) {
-    // super();
     this._key = key;
-    this._unformattedValue = value;
+    this._recordBuffer = value;
+    this._unformattedValue = null;
+    // this._unformattedValue = value;
     // this._value = parseFieldValue(value, offset);
     this._offset = offset;
     // console.log(parent);
     this._parent = parent;
 
     if (offset.valueInSecondTable) {
-      this.secondTableField = new FranchiseFileTable2Field(value, offset.maxLength);
+      // console.log(this._recordBuffer.length, offset.offset / 8);
+      this.secondTableField = new FranchiseFileTable2Field(this._recordBuffer.readUInt32BE(offset.offset / 8), offset.maxLength);
       this.secondTableField.fieldReference = this;
-
-      // this.secondTableField.on('change', function () {
-      //   this._value = this.secondTableField.value;
-      // }.bind(this));
     }
   };
 
@@ -31,6 +30,10 @@ class FranchiseFileField {
   };
 
   get value () {
+    if (this._unformattedValue === null) {
+      this._setUnformattedValue();
+    }
+
     return this._parseFieldValue(this._unformattedValue, this._offset);
   };
 
@@ -47,6 +50,10 @@ class FranchiseFileField {
   };
 
   set value (value) {
+    if (this._unformattedValue === null) {
+      this._setUnformattedValue();
+    }
+
     if (this.offset.valueInSecondTable) {
       this.secondTableField.value = value.toString();
     } else {
@@ -55,8 +62,47 @@ class FranchiseFileField {
         else if (!utilService.stringOnlyContainsBinaryDigits(value)) { throw new Error(`Argument must only contain binary digits 1 and 0. If you would like to set the value, please set the 'value' attribute instead.`)}
       }
 
-      this._value = setFormattedValue(value, this._offset);
-      this._unformattedValue = parseFormattedValue(value, this._offset);
+      let actualValue;
+
+      if (this.offset.enum) {
+        actualValue = this._getEnumFromValue(value);
+        this._unformattedValue.setBits(this.offset.offset, actualValue, this.offset.length);
+      }
+      else {
+        switch (this.offset.type) {
+          case 's_int':
+            actualValue = parseInt(value);
+            this._unformattedValue.setBits(this.offset.offset, actualValue, this.offset.length);
+            break;
+          default:
+          case 'int':
+            if (this.offset.minValue || this.offset.maxValue) {
+              // return utilService.dec2bin(formatted, offset.length);
+              this._unformattedValue.setBits(this.offset.offset, value, this.offset.length);
+            }
+            else {
+              const maxValueBinary = getMaxValueBinary(this.offset);
+              const maxValue = utilService.bin2dec(maxValueBinary);
+              // return utilService.dec2bin(formatted + maxValue, offset.length);
+              this._unformattedValue.setBits(this.offset.offset, value + maxValue, this.offset.length);
+            }
+            break;
+          case 'bool':
+            // return (formatted == 1 || (formatted.toString().toLowerCase() == 'true')) ? '1' : '0';
+            actualValue = (formatted == 1 || (formatted.toString().toLowerCase() == 'true'));
+            this._unformattedValue.setBits(this.offset.offset, actualValue, 1);
+            break;
+          case 'float':
+            // return utilService.float2Bin(formatted);
+            this._unformattedValue.setBits(this.offset.offset, value, this.offset.length);
+            break;
+        }
+      }
+
+      // this._value = setFormattedValue(value, this._offset);
+      // this._unformattedValue = parseFormattedValue(value, this._offset);
+
+
       // this.emit('change');
       this._parent.onEvent('change', this);
     }
@@ -70,6 +116,11 @@ class FranchiseFileField {
     this.setUnformattedValueWithoutChangeEvent(unformattedValue);
     // this.emit('change');
     this._parent.onEvent('change', this);
+  };
+
+  _setUnformattedValue() {
+    this._unformattedValue = new BitView(this._recordBuffer, this._recordBuffer.byteOffset);
+    this._unformattedValue.bigEndian = true;
   };
 
   setUnformattedValueWithoutChangeEvent(unformattedValue, suppressErrors) {
@@ -101,20 +152,46 @@ class FranchiseFileField {
     }
   }
 
+  _getEnumFromValue(value) {
+    const enumName = this.offset.enum.getMemberByName(value);
+    
+    if (enumName) {
+      return enumName._value;
+    } 
+    else {
+      const formattedEnum = this.offset.enum.getMemberByValue(value)
+
+      if (formattedEnum) {
+        return formattedEnum._value;
+      } 
+      else {
+        const unformattedEnum = this.offset.enum.getMemberByUnformattedValue(value);
+
+        if (unformattedEnum) {
+          return unformattedEnum._value;
+        } 
+        else {
+          return this.offset.enum.members[0]._value;
+        }
+      }
+    }
+  };
+
   _parseFieldValue(unformatted, offset) {
     if (offset.valueInSecondTable) {
       return this.secondTableField.value;
     }
     else if (offset.enum) {
       try {
-        const theEnum = offset.enum.getMemberByUnformattedValue(unformatted);
+        const enumUnformattedValue = this._recordBuffer.readUInt32BE(offset.offset / 8);
+        const theEnum = offset.enum.getMemberByValue(enumUnformattedValue);
   
         if (theEnum) {
           return theEnum.name;
         }
       }
       catch (err) {
-        // console.log(err);
+        console.log(err);
       }
       
       return unformatted;
@@ -122,15 +199,16 @@ class FranchiseFileField {
     else {
       switch (offset.type) {
         case 's_int':
-          return utilService.bin2dec(unformatted) + offset.minValue;
+          // return utilService.bin2dec(unformatted) + offset.minValue;
+          return unformatted.getBits(offset.offset, offset.length, true) + offset.minValue;
         case 'int':
           if (offset.minValue || offset.maxValue) {
-            return utilService.bin2dec(unformatted);
+            return unformatted.getBits(offset.offset, offset.length);
           }
           else {
             const maxValueBinary = getMaxValueBinary(offset);
             const maxValue = utilService.bin2dec(maxValueBinary);
-            const newValue = utilService.bin2dec(unformatted);
+            const newValue = unformatted.getBits(offset.offset, offset.length);
             
             if (newValue === 0) {
               return 0;
@@ -140,9 +218,10 @@ class FranchiseFileField {
             }
           }
         case 'bool':
-          return unformatted[0] === '1' ? true : false;
+          return unformatted.getBits(0, 1) ? true : false;
         case 'float':
-          return utilService.bin2Float(unformatted);
+          // return utilService.bin2Float(unformatted);
+          return unformatted.getFloat32(offset.offset, offset.length);
         default:
           return unformatted;
       }
