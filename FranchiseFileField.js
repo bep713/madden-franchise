@@ -31,7 +31,7 @@ class FranchiseFileField {
 
   get value () {
     if (this._unformattedValue === null) {
-      this._setUnformattedValue();
+      this._setUnformattedValueIfEmpty();
     }
 
     return this._parseFieldValue(this._unformattedValue, this._offset);
@@ -42,8 +42,12 @@ class FranchiseFileField {
   };
 
   get referenceData () {
+    if (this._unformattedValue === null) {
+      this._setUnformattedValueIfEmpty();
+    }
+
     if (this.isReference) {
-      return utilService.getReferenceData(this.value);
+      return utilService.getReferenceDataFromBitview(this._unformattedValue, this.offset.offset);
     }
     
     return null;
@@ -51,22 +55,28 @@ class FranchiseFileField {
 
   set value (value) {
     if (this._unformattedValue === null) {
-      this._setUnformattedValue();
+      this._setUnformattedValueIfEmpty();
     }
 
     if (this.offset.valueInSecondTable) {
       this.secondTableField.value = value.toString();
     } else {
+      let actualValue;
+
       if (this.offset.isReference) {
         if (!utilService.isString(value)) { throw new Error(`Argument must be of type string. You passed in a ${typeof unformattedValue}.`); }
         else if (!utilService.stringOnlyContainsBinaryDigits(value)) { throw new Error(`Argument must only contain binary digits 1 and 0. If you would like to set the value, please set the 'value' attribute instead.`)}
+        const referenceData = utilService.getReferenceData(value);
+        this._unformattedValue.setBits(this.offset.offset, referenceData.tableId, 15);
+        this._unformattedValue.setBits((this.offset.offset + 15), referenceData.rowNumber, 17);
       }
+      else if (this.offset.enum) {
+        let theEnum = this._getEnumFromValue(value);
 
-      let actualValue;
-
-      if (this.offset.enum) {
-        actualValue = this._getEnumFromValue(value);
-        this._unformattedValue.setBits(this.offset.offset, actualValue, this.offset.length);
+        // Enums can have negative values and Madden negative numbers are not standard. We need to convert it here.
+        // Ex: In Madden, binary "1000" = -1 for an enum with a max length of 4. But for everything else, "1000" = 8, so we need to get the "real" value here.
+        const decimalEquivalent = utilService.bin2dec(theEnum.unformattedValue);
+        this._unformattedValue.setBits(this.offset.offset, decimalEquivalent, this.offset.length);
       }
       else {
         switch (this.offset.type) {
@@ -89,12 +99,13 @@ class FranchiseFileField {
             break;
           case 'bool':
             // return (formatted == 1 || (formatted.toString().toLowerCase() == 'true')) ? '1' : '0';
-            actualValue = (formatted == 1 || (formatted.toString().toLowerCase() == 'true'));
+            actualValue = (value == 1 || (value.toString().toLowerCase() == 'true'));
             this._unformattedValue.setBits(this.offset.offset, actualValue, 1);
             break;
           case 'float':
             // return utilService.float2Bin(formatted);
-            this._unformattedValue.setBits(this.offset.offset, value, this.offset.length);
+            // this._unformattedValue.setBits(this.offset.offset, value, this.offset.length);
+            this._unformattedValue.setFloat32(this.offset.offset, value);
             break;
         }
       }
@@ -109,6 +120,7 @@ class FranchiseFileField {
   };
 
   get unformattedValue () {
+    this._setUnformattedValueIfEmpty();
     return this._unformattedValue;
   };
 
@@ -118,7 +130,7 @@ class FranchiseFileField {
     this._parent.onEvent('change', this);
   };
 
-  _setUnformattedValue() {
+  _setUnformattedValueIfEmpty() {
     this._unformattedValue = new BitView(this._recordBuffer, this._recordBuffer.byteOffset);
     this._unformattedValue.bigEndian = true;
   };
@@ -130,10 +142,10 @@ class FranchiseFileField {
       let value;
 
       if (this.offset.valueInSecondTable) {
-        value = this.secondTableField.value;
+        // value = this.secondTableField.value;
       }
       else {
-        value = this._parseFieldValue(unformattedValue.padStart(this._offset.length, '0'), this._offset);
+        // value = this._parseFieldValue(unformattedValue.padStart(this._offset.length, '0'), this._offset);
       }
 
       // check for 'allowed' error - this will be true if the unformatted value is invalid.
@@ -141,14 +153,14 @@ class FranchiseFileField {
         throw new Error(`Argument is not a valid unformatted value for this field. You passed in ${value}.`)
       }
 
-      this._value = value;
+      // this._value = value;
 
-      if (this._offset.enum) {
-        this._unformattedValue = this._offset.enum.getMemberByName(this._value).unformattedValue.padStart(this._offset.length, '0');
-      } 
-      else {
+      // if (this._offset.enum) {
+        // this._unformattedValue = this._offset.enum.getMemberByName(this._value).unformattedValue.padStart(this._offset.length, '0');
+      // } 
+      // else {
         this._unformattedValue = unformattedValue;
-      }
+      // }
     }
   }
 
@@ -156,22 +168,22 @@ class FranchiseFileField {
     const enumName = this.offset.enum.getMemberByName(value);
     
     if (enumName) {
-      return enumName._value;
+      return enumName;
     } 
     else {
       const formattedEnum = this.offset.enum.getMemberByValue(value)
 
       if (formattedEnum) {
-        return formattedEnum._value;
+        return formattedEnum;
       } 
       else {
         const unformattedEnum = this.offset.enum.getMemberByUnformattedValue(value);
 
         if (unformattedEnum) {
-          return unformattedEnum._value;
+          return unformattedEnum;
         } 
         else {
-          return this.offset.enum.members[0]._value;
+          return this.offset.enum.members[0];
         }
       }
     }
@@ -183,8 +195,8 @@ class FranchiseFileField {
     }
     else if (offset.enum) {
       try {
-        const enumUnformattedValue = this._recordBuffer.readUInt32BE(offset.offset / 8);
-        const theEnum = offset.enum.getMemberByValue(enumUnformattedValue);
+        const enumUnformattedValue = utilService.dec2bin(this.unformattedValue.getBits(this.offset.offset, this.offset.length), offset.enum._maxLength);
+        const theEnum = offset.enum.getMemberByUnformattedValue(enumUnformattedValue);
   
         if (theEnum) {
           return theEnum.name;
@@ -196,11 +208,15 @@ class FranchiseFileField {
       
       return unformatted;
     }
+    else if (offset.isReference) {
+      const referenceData = utilService.getReferenceDataFromBitview(this._unformattedValue, this.offset.offset);
+      return utilService.getBinaryReferenceData(referenceData.tableId, referenceData.rowNumber);
+    }
     else {
       switch (offset.type) {
         case 's_int':
           // return utilService.bin2dec(unformatted) + offset.minValue;
-          return unformatted.getBits(offset.offset, offset.length, true) + offset.minValue;
+          return unformatted.getBits(offset.offset, offset.length) + offset.minValue;
         case 'int':
           if (offset.minValue || offset.maxValue) {
             return unformatted.getBits(offset.offset, offset.length);
@@ -218,7 +234,7 @@ class FranchiseFileField {
             }
           }
         case 'bool':
-          return unformatted.getBits(0, 1) ? true : false;
+          return unformatted.getBits(offset.offset, 1) ? true : false;
         case 'float':
           // return utilService.bin2Float(unformatted);
           return unformatted.getFloat32(offset.offset, offset.length);

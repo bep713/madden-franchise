@@ -1,3 +1,5 @@
+const { BitView } = require("bit-buffer");
+
 let utilService = {};
 
 utilService.intersection = function (arrayOfArrays) {
@@ -224,10 +226,16 @@ utilService.getReferenceData = function (value) {
 };
 
 utilService.getReferenceDataFromBuffer = (buf) => {
+  let bv = new BitView(buf, buf.byteOffset);
+  bv.bigEndian = true;
+  return utilService.getReferenceDataFromBitview(bv);
+};
+
+utilService.getReferenceDataFromBitview = (bv, start = 0) => {
   return {
-    tableId: buf.readUInt16BE(0),
-    rowNumber: buf.readUInt16BE(2)
-  }
+    tableId: bv.getBits(start, 15),
+    rowNumber: bv.getBits(start+15, 17)
+  };
 };
 
 utilService.getBinaryReferenceData = function (tableId, rowNumber) {

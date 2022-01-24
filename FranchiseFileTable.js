@@ -136,7 +136,7 @@ class FranchiseFileTable extends EventEmitter {
 
     this.records.forEach((record) => {
       let isEmptyReference = false;
-      const firstFourBytesReference = utilService.getReferenceData(record._data.slice(0, 32));
+      const firstFourBytesReference = utilService.getReferenceDataFromBuffer(record.data.slice(0, 4));
 
       if (firstFourBytesReference.tableId === 0 && firstFourBytesReference.rowNumber !== 0) {
         // Could be a an empty record reference or a table2 field.
@@ -289,7 +289,7 @@ class FranchiseFileTable extends EventEmitter {
 
   _parseEmptyRecords() {
     let emptyRecords = new Map();
-    const firstEmptyRecord = this.header.nextRecordToUse;    
+    const firstEmptyRecord = this.header.nextRecordToUse;
 
     let previousEmptyRecordIndex = null;
     let currentEmptyRecordIndex = firstEmptyRecord;
@@ -297,7 +297,7 @@ class FranchiseFileTable extends EventEmitter {
     if (firstEmptyRecord !== this.header.recordCapacity) {
       while (currentEmptyRecordIndex !== this.header.recordCapacity) {
         // let nextEmptyRecordIndex = this.data.readUInt32BE(this.header.table1StartIndex + (currentEmptyRecordIndex * sizeOfEachRecord));
-        let nextEmptyRecordIndex = utilService.getReferenceDataFromBuffer(this.records[currentEmptyRecordIndex]._data.slice(0, 4)).rowNumber;
+        let nextEmptyRecordIndex = this.records[currentEmptyRecordIndex].data.readUInt32BE(0);
 
         emptyRecords.set(currentEmptyRecordIndex, {
           previous: previousEmptyRecordIndex,
@@ -391,14 +391,16 @@ class FranchiseFileTable extends EventEmitter {
   };
 
   _setRecordInternalBuffer(index, emptyRecordReference) {
-    let newData = utilService.dec2bin(emptyRecordReference, 32);
+    // let newData = utilService.dec2bin(emptyRecordReference, 32);
 
-    const recordSizeInBits = this.header.record1Size * 8;
-    if (recordSizeInBits > 32) {
-      newData += this.records[index]._data.slice(32);
-    }
+    // const recordSizeInBits = this.header.record1Size * 8;
+    // if (recordSizeInBits > 32) {
+    //   newData += this.records[index]._data.slice(32);
+    // }
 
-    this.records[index].data = newData;
+    // console.log(newData);
+
+    this.records[index]._data.writeUInt32BE(emptyRecordReference, 0);
   };
 
   onEvent(name, object) {
@@ -428,7 +430,7 @@ class FranchiseFileTable extends EventEmitter {
             // If so, then the record is still considered empty.
             
             // We need to check the buffer because the first field is not always a reference.
-            const referenceData = utilService.getReferenceData(object._data.slice(0, 32));
+            const referenceData = utilService.getReferenceDataFromBuffer(object.data.slice(0, 4));
             if (referenceData.tableId !== 0) {
 
               // Delete the empty record entry because it is no longer empty
@@ -615,9 +617,11 @@ function readRecords(data, header, offsetTable, table) {
   let records = [];
 
   if (data) {
+    let index = 0;
+
     for (let i = header.table1StartIndex; i < header.table2StartIndex; i += header.record1Size) {
       // const recordBinary = binaryData.slice(i, i + (header.record1Size * 8));
-      let record = new FranchiseFileRecord(data.slice(i, i + header.record1Size), (i / header.record1Size), offsetTable, table);
+      let record = new FranchiseFileRecord(data.slice(i, i + header.record1Size), index, offsetTable, table);
       
       records.push(new Proxy(record, {
           get: function (target, prop, receiver) {
@@ -634,6 +638,8 @@ function readRecords(data, header, offsetTable, table) {
               return true;
           }
       }));
+
+      index += 1;
     }
   }
 
