@@ -12,7 +12,9 @@ FTCTable2FieldStrategy.getInitialUnformattedValue = (field, data) => {
         fieldData = fieldData.slice(0, endOfFieldIndex + 1);
     }
 
-    return utilService.getBitArray(fieldData);
+    // return utilService.getBitArray(fieldData);
+
+    return fieldData;
 };
 
 FTCTable2FieldStrategy.setUnformattedValueFromFormatted = (formattedValue, maxLength) => {
@@ -25,7 +27,7 @@ FTCTable2FieldStrategy.setUnformattedValueFromFormatted = (formattedValue, maxLe
     //     return char.charCodeAt(0).toString(2).padStart(8, '0');
     // }).join('') + '00000000';
 
-    return Buffer.from(formattedValue);
+    return Buffer.from(formattedValue + '\u0000');
 };
 
 module.exports = FTCTable2FieldStrategy;

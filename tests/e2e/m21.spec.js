@@ -898,7 +898,6 @@ describe('Madden 21 end to end tests', function () {
 
         it('make one record empty', () => {
           table.records[19].Player0 = '00000000000000000000000000100000';
-          console.log(table.records[19].Player0);
           table.recalculateEmptyRecordReferences();
 
           expect(table.emptyRecords.size).to.equal(1);

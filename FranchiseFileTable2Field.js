@@ -47,7 +47,6 @@ class FranchiseFileTable2Field {
     // });
 
     // return formattedValue.replace(/\0.*$/g,'');
-
     return this._unformattedValue.toString().replace(/\0.*$/g,'');
   };
 
@@ -88,7 +87,8 @@ class FranchiseFileTable2Field {
     this.index = offset;
 
     if (this.fieldReference) {
-      this.fieldReference.unformattedValue = utilService.dec2bin(offset, 32);
+      // this.fieldReference.unformattedValue = utilService.dec2bin(offset, 32);
+      this.fieldReference.unformattedValue.setBits(this.fieldReference.offset.offset, offset, 32);
     }
   };
 
@@ -104,5 +104,5 @@ class FranchiseFileTable2Field {
 module.exports = FranchiseFileTable2Field;
 
 function getLengthOfUnformattedValue(value) {
-    return value.length / 8;
+    return value.length;
 };
