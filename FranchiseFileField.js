@@ -203,7 +203,7 @@ class FranchiseFileField {
         }
       }
       catch (err) {
-        console.log(err);
+        // console.log(err);
       }
       
       return unformatted;
