@@ -189,7 +189,7 @@ describe('madden franchise performance tests', function () {
         console.timeEnd('read records');
 
         console.time('get all record values');
-        let tableData = player.records.map((record) => {
+        player.records.map((record) => {
             return record.fieldsArray.map((field) => {
                 return field.value;
             });
@@ -197,7 +197,7 @@ describe('madden franchise performance tests', function () {
         console.timeEnd('get all record values');
 
         console.time('get all record values again');
-        tableData = player.records.map((record) => {
+        player.records.map((record) => {
             return record.fieldsArray.map((field) => {
                 return field.value;
             });

@@ -1079,7 +1079,7 @@ describe('Madden 21 end to end tests', function () {
 
       describe('can set values', () => {
         before((done) => {
-          table.readRecords(['GameStats', 'FirstName', 'LastName', 'MetaMorph_GutBase']).then(() => {
+          table.readRecords(['GameStats', 'FirstName', 'LastName', 'MetaMorph_GutBase', 'CarryingRating']).then(() => {
             done();
           });
         });
@@ -1109,6 +1109,18 @@ describe('Madden 21 end to end tests', function () {
           expect(() => {
             record.GameStats = '222010101';
           }).to.throw(Error);
+        });
+
+        it('can set an integer field with a string', () => {
+          let record = table.records[bakerMayfieldIndex];
+          record.CarryingRating = '50';
+          expect(record.CarryingRating).to.equal(50);
+        });
+
+        it('can set a float field with a string', () => {
+          let record = table.records[bakerMayfieldIndex];
+          record.MetaMorph_GutBase = '0.60';
+          expect(record.MetaMorph_GutBase).to.equal(0.60);
         });
       });
     });
@@ -1521,6 +1533,26 @@ describe('Madden 21 end to end tests', function () {
         expect(record.STADIUM_FLAGBASEBALL).to.be.true;
 
         record.STADIUM_FLAGBASEBALL = false;
+        expect(record.STADIUM_FLAGBASEBALL).to.be.false;
+      });
+
+      it('can set a boolean attribute with a string', () => {
+        let record = table.records[0];
+
+        record.STADIUM_FLAGBASEBALL = 'true';
+        expect(record.STADIUM_FLAGBASEBALL).to.be.true;
+
+        record.STADIUM_FLAGBASEBALL = 'false';
+        expect(record.STADIUM_FLAGBASEBALL).to.be.false;
+      });
+
+      it('can set a boolean attribute with an integer', () => {
+        let record = table.records[0];
+
+        record.STADIUM_FLAGBASEBALL = 1;
+        expect(record.STADIUM_FLAGBASEBALL).to.be.true;
+
+        record.STADIUM_FLAGBASEBALL = 0;
         expect(record.STADIUM_FLAGBASEBALL).to.be.false;
       });
     });

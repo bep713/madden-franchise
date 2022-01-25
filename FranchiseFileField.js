@@ -57,7 +57,7 @@ class FranchiseFileField {
     return null;
   };
 
-  set value (value) {
+  set value (value) {    
     if (this._unformattedValue === null) {
       this._setUnformattedValueIfEmpty();
     }
@@ -94,30 +94,37 @@ class FranchiseFileField {
         switch (this.offset.type) {
           case 's_int':
             actualValue = parseInt(value);
+            this._value = actualValue;
             this._unformattedValue.setBits(this.offset.offset, actualValue, this.offset.length);
             break;
           default:
           case 'int':
+            actualValue = parseInt(value);
+            this._value = actualValue;
+
             if (this.offset.minValue || this.offset.maxValue) {
               // return utilService.dec2bin(formatted, offset.length);
-              this._unformattedValue.setBits(this.offset.offset, value, this.offset.length);
+              this._unformattedValue.setBits(this.offset.offset, actualValue, this.offset.length);
             }
             else {
               const maxValueBinary = getMaxValueBinary(this.offset);
               const maxValue = utilService.bin2dec(maxValueBinary);
               // return utilService.dec2bin(formatted + maxValue, offset.length);
-              this._unformattedValue.setBits(this.offset.offset, value + maxValue, this.offset.length);
+              this._unformattedValue.setBits(this.offset.offset, actualValue + maxValue, this.offset.length);
             }
             break;
           case 'bool':
             // return (formatted == 1 || (formatted.toString().toLowerCase() == 'true')) ? '1' : '0';
             actualValue = (value == 1 || (value.toString().toLowerCase() == 'true'));
+            this._value = actualValue;
             this._unformattedValue.setBits(this.offset.offset, actualValue, 1);
             break;
           case 'float':
+            actualValue = parseFloat(value);
+            this._value = actualValue;
             // return utilService.float2Bin(formatted);
             // this._unformattedValue.setBits(this.offset.offset, value, this.offset.length);
-            this._unformattedValue.setFloat32(this.offset.offset, value);
+            this._unformattedValue.setFloat32(this.offset.offset, actualValue);
             break;
         }
       }
