@@ -32,7 +32,7 @@ class FranchiseFileTable2Field {
     //   formattedValue += String.fromCharCode(parseInt(chunk,2));
     // });
 
-    // this._value = formattedValue.replace(/\0.*$/g,'');
+    this._value = null;
     // this.emit('change');
     if (this._parent) {
       this._parent.onEvent('change', this);
@@ -47,10 +47,17 @@ class FranchiseFileTable2Field {
     // });
 
     // return formattedValue.replace(/\0.*$/g,'');
-    return this._unformattedValue.toString().replace(/\0.*$/g,'');
+
+    if (this._value === null) {
+      this._value = this._unformattedValue.toString().replace(/\0.*$/g,'');
+    }
+
+    return this._value;
   };
 
   set value (value) {
+    this._value = value;
+
     if (value.length > this.maxLength) {
       value = value.substring(0, this.maxLength);
     }

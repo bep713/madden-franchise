@@ -6,7 +6,8 @@ class FranchiseFileRecord {
     this._data = data;
     this._offsetTable = offsetTable;
     this.index = index;
-    this._fields = parseRecordFields(data, offsetTable, this);
+    this._fieldsArray = [];
+    this._fields = this.parseRecordFields(data, offsetTable, this);
     this.isChanged = false;
     this.arraySize = null;
     this.isEmpty = false;
@@ -23,9 +24,7 @@ class FranchiseFileRecord {
   };
 
   get fieldsArray () {
-    return Object.keys(this._fields).map((key) => {
-      return this._fields[key];
-    });
+    return this._fieldsArray;
   };
 
   get data() {
@@ -35,12 +34,30 @@ class FranchiseFileRecord {
   set data (data) {
     this._data = data;
 
-    Object.keys(this._fields).map((key) => {
-      return this._fields[key];
-    }).forEach((field) => {
+    // Object.keys(this._fields).map((key) => {
+    //   return this._fields[key];
+    // }).forEach((field) => {
+    //   const unformattedValue = data.slice(field.offset.offset, field.offset.offset + field.offset.length);
+    //   field.setUnformattedValueWithoutChangeEvent(unformattedValue);
+    // });
+
+    this._fieldsArray.forEach((field) => {
       const unformattedValue = data.slice(field.offset.offset, field.offset.offset + field.offset.length);
       field.setUnformattedValueWithoutChangeEvent(unformattedValue);
     });
+  };
+
+  parseRecordFields(data, offsetTable, record) {
+    let fields = {};
+  
+    for (let j = 0; j < offsetTable.length; j++) {
+      const offset = offsetTable[j];
+      // const unformattedValue = data.slice(offset.offset, offset.offset + offset.length);
+      fields[offset.name] = new FranchiseFileField(offset.name, data, offset, record);
+      this._fieldsArray.push(fields[offset.name]);
+    }
+  
+    return fields;
   };
 
   empty() {
@@ -81,15 +98,3 @@ class FranchiseFileRecord {
 };
 
 module.exports = FranchiseFileRecord;
-
-function parseRecordFields(data, offsetTable, record) {
-  let fields = {};
-
-  for (let j = 0; j < offsetTable.length; j++) {
-    const offset = offsetTable[j];
-    // const unformattedValue = data.slice(offset.offset, offset.offset + offset.length);
-    fields[offset.name] = new FranchiseFileField(offset.name, data, offset, record);
-  }
-
-  return fields;
-};

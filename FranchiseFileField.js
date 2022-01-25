@@ -33,8 +33,12 @@ class FranchiseFileField {
     if (this._unformattedValue === null) {
       this._setUnformattedValueIfEmpty();
     }
+    
+    if (this._value === null) {
+      this._value = this._parseFieldValue(this._unformattedValue, this._offset);
+    }
 
-    return this._parseFieldValue(this._unformattedValue, this._offset);
+    return this._value;
   };
 
   get isReference () {
@@ -58,6 +62,8 @@ class FranchiseFileField {
       this._setUnformattedValueIfEmpty();
     }
 
+    this._value = value;
+
     if (this.offset.valueInSecondTable) {
       this.secondTableField.value = value.toString();
     } else {
@@ -71,12 +77,18 @@ class FranchiseFileField {
         this._unformattedValue.setBits((this.offset.offset + 15), referenceData.rowNumber, 17);
       }
       else if (this.offset.enum) {
-        let theEnum = this._getEnumFromValue(value);
-
-        // Enums can have negative values and Madden negative numbers are not standard. We need to convert it here.
-        // Ex: In Madden, binary "1000" = -1 for an enum with a max length of 4. But for everything else, "1000" = 8, so we need to get the "real" value here.
-        const decimalEquivalent = utilService.bin2dec(theEnum.unformattedValue);
-        this._unformattedValue.setBits(this.offset.offset, decimalEquivalent, this.offset.length);
+        try {
+          let theEnum = this._getEnumFromValue(value);
+  
+          // Enums can have negative values and Madden negative numbers are not standard. We need to convert it here.
+          // Ex: In Madden, binary "1000" = -1 for an enum with a max length of 4. But for everything else, "1000" = 8, so we need to get the "real" value here.
+          const decimalEquivalent = utilService.bin2dec(theEnum.unformattedValue);
+          this._unformattedValue.setBits(this.offset.offset, decimalEquivalent, this.offset.length);
+        }
+        catch (err) {
+          this._value = null;
+          throw err;
+        }
       }
       else {
         switch (this.offset.type) {
@@ -121,16 +133,19 @@ class FranchiseFileField {
 
   get unformattedValue () {
     this._setUnformattedValueIfEmpty();
+
     return this._unformattedValue;
   };
 
   set unformattedValue (unformattedValue) {
     this.setUnformattedValueWithoutChangeEvent(unformattedValue);
+    this._value = null;
     // this.emit('change');
     this._parent.onEvent('change', this);
   };
 
   _setUnformattedValueIfEmpty() {
+    this._value = null;
     this._unformattedValue = new BitView(this._recordBuffer, this._recordBuffer.byteOffset);
     this._unformattedValue.bigEndian = true;
   };
@@ -160,6 +175,7 @@ class FranchiseFileField {
       // } 
       // else {
         this._unformattedValue = unformattedValue;
+        this._value = null;
       // }
     }
   }
