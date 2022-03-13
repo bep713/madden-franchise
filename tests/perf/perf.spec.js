@@ -1,3 +1,4 @@
+const fs = require('fs');
 const path = require('path');
 const { expect } = require('chai');
 
@@ -63,6 +64,58 @@ describe('madden franchise performance tests', function () {
         const memoryAfter = getHeapInMB();
         const memoryUsedInTest = (memoryAfter - memoryBefore).toFixed(2);
         console.log(`Test used approximately ${memoryUsedInTest} MB\n`);
+    });
+
+    describe('control test', () => {
+        it('control 1', () => {
+            let buffer = fs.readFileSync(filePaths.compressed.m21);
+            let fields = [];
+
+            class Record {
+                constructor(buffer, value) {
+                    this._buffer = buffer;
+                }
+            };
+
+            class Field {
+                constructor(buf) {
+                    this._buf = buf;
+                    this._test = 'test';
+                }
+            };
+
+
+            for (let i = 0; i < 4000; i++) {
+                let record = new Record(buffer);
+
+                for (let j = 0; j < 330; j++) {
+                    record[j] = new Field();
+                    // record[j] = new Field();
+                    // let value = null;
+
+                    // if (j % 7 === 0) {
+                    //     value = 'Test';
+                    // }
+                    // else {
+                    //     value = 10 * 5 * j;
+                    // }
+
+                    // record[j] = {
+                    //     buffer: buffer.slice(0, 1),
+                    //     test: 'test',
+                    //     value: 'test2',
+                    //     value2: 'tst3',
+                    //     value3: 'test',
+                    //     value4: 10,
+                    //     value5: 15
+                    // }
+                }
+
+                fields.push(record);
+            }
+
+            console.log(buffer.buffer);
+        });
     });
 
     describe('read records', () => {
