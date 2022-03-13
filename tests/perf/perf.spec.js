@@ -90,7 +90,7 @@ describe('madden franchise performance tests', function () {
             });
     
             it('get from field explicitly', () => {
-                let value = table.records[0].fields.PercentageSpline.value;
+                let value = table.records[0].fields.PercentageSpline;
             });
         });
 

@@ -1766,6 +1766,19 @@ describe('Madden 21 end to end tests', function () {
       });
     });
 
+    describe('ResponseForm[] - last table', () => {
+      const lastTableId = 7789;
+
+      before(async () => {
+        table = file.getTableById(lastTableId);
+        await table.readRecords();
+      });
+
+      it('trailing 8 bytes of file is not included in data', () => {
+        expect(table.data.length).to.equal(0x114);
+      });
+    });
+
     // describe('LeagueSetting', () => {
     //   before((done) => {
     //     table = file.getTableByName('LeagueSetting');
