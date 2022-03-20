@@ -12,10 +12,25 @@ class FranchiseFileRecord {
     this.arraySize = null;
     this.isEmpty = false;
     this._parent = parent;
+
+    return new Proxy(this, {
+      get: function (target, prop, receiver) {
+        return target.fields[prop] !== undefined ? target.fields[prop].value : target[prop] !== undefined ? target[prop] : null;
+      },
+      set: function (target, prop, receiver) {
+        if (target.fields[prop] !== undefined) {
+          target.fields[prop].value = receiver;
+        }
+        else {
+          target[prop] = receiver;
+        }
+
+        return true;
+      }
+    })
   };
 
   get hexData () {
-    // return Buffer.from(utilService.binaryBlockToDecimalBlock(this._data));
     return this._data;
   };
 
@@ -34,17 +49,19 @@ class FranchiseFileRecord {
   set data (data) {
     this._data = data;
 
-    // Object.keys(this._fields).map((key) => {
-    //   return this._fields[key];
-    // }).forEach((field) => {
-    //   const unformattedValue = data.slice(field.offset.offset, field.offset.offset + field.offset.length);
-    //   field.setUnformattedValueWithoutChangeEvent(unformattedValue);
-    // });
-
     this._fieldsArray.forEach((field) => {
       const unformattedValue = data.slice(field.offset.offset, field.offset.offset + field.offset.length);
       field.setUnformattedValueWithoutChangeEvent(unformattedValue);
     });
+  };
+
+  getFieldByKey(key) {
+    return this._fields[key];
+  };
+
+  getValueByKey(key) {
+    let field = this.getFieldByKey(key);
+    return field ? field.value : null;
   };
 
   parseRecordFields(data, offsetTable, record) {
@@ -52,8 +69,11 @@ class FranchiseFileRecord {
   
     for (let j = 0; j < offsetTable.length; j++) {
       const offset = offsetTable[j];
-      // const unformattedValue = data.slice(offset.offset, offset.offset + offset.length);
+
+      // Push the entire record buffer to the field. No need to perform a calculation
+      // to subarray the buffer, BitView will take care of it in the Field.
       fields[offset.name] = new FranchiseFileField(offset.name, data, offset, record);
+
       this._fieldsArray.push(fields[offset.name]);
     }
   

@@ -2,6 +2,7 @@ const sinon = require('sinon');
 const proxyquire = require('proxyquire');
 
 const chai = require('chai');
+const { BitView } = require('bit-buffer');
 const expect = chai.expect;
 chai.use(require('chai-eventemitter'));
 
@@ -32,16 +33,20 @@ let FranchiseFileTable2Field = sinon.stub().callsFake(() => {
 });
 
 const FranchiseFileField = proxyquire('../../FranchiseFileField', {
-  './services/utilService': utilService,
+  // './services/utilService': utilService,
   './FranchiseFileTable2Field': FranchiseFileTable2Field
 });
 
 describe('FranchiseFileField unit tests', () => {
   let field;
   let key = 'test';
-  let unformattedValue = '01101011';
+  let unformattedValue = Buffer.from([0x6B]);
   let offset = {
     'type': 'int'
+  };
+
+  let parent = {
+    onEvent: sinon.spy(() => {})
   };
 
   beforeEach(() => {
@@ -54,13 +59,16 @@ describe('FranchiseFileField unit tests', () => {
     onSpy.resetHistory();
 
     key = 'test';
-    unformattedValue = '01101011';
+    unformattedValue = Buffer.from([0x6B]);
     offset = {
       'type': 'int',
+      'offset': 0,
       'length': 5,
       'minValue': 0,
       'maxValue': 15
     };
+
+    parent.onEvent.resetHistory();
 
     listenerFns = [];
   });
@@ -70,7 +78,7 @@ describe('FranchiseFileField unit tests', () => {
       field = new FranchiseFileField(key, unformattedValue, offset);
 
       expect(field.key).to.equal(key);
-      expect(field.unformattedValue).to.equal(unformattedValue);
+      expect(field.unformattedValue).to.be.an.instanceOf(BitView)
       expect(field.offset).to.eql(offset);
     });
 
@@ -82,69 +90,58 @@ describe('FranchiseFileField unit tests', () => {
     describe('formatted value', () => {
       it('parses int values correctly', () => {
         field = new FranchiseFileField(key, unformattedValue, offset);
-        expect(utilService.bin2dec.callCount).to.equal(1);
-        expect(utilService.bin2dec.firstCall.args[0]).to.eql(unformattedValue);
-        expect(field.value).to.eql(bin2DecResponse);
+        expect(field.value).to.eql(13);
       });
 
-      describe('parses int values without a max/min correctly', () => {
-        it('parses int values without a max/min correctly', () => {
-          let offset2 = {
-            'type': 'int',
-            'length': 32
-          };
+      // describe('parses int values without a max/min correctly', () => {
+      //   // it('parses int values without a max/min correctly', () => {
+      //   //   let offset2 = {
+      //   //     'type': 'int',
+      //   //     'length': 5,
+      //   //     'offset': 0
+      //   //   };
   
-          field = new FranchiseFileField(key, unformattedValue, offset2);
+      //   //   field = new FranchiseFileField(key, unformattedValue, offset2);
+      //   //   expect(field.value).to.equal(13);
+      //   // });
   
-          // bin2dec is stubbed out to always return 1. if you look
-          // inside the method here, it would do 1-1 which equals 0.
-          expect(field.value).to.equal(0);
-        });
+      //   it('parses int values of 0 correctly', () => {
+      //     let offset2 = {
+      //       'type': 'int',
+      //       'length': 32
+      //     };
   
-        it('parses int values of 0 correctly', () => {
-          let offset2 = {
-            'type': 'int',
-            'length': 32
-          };
+      //     field = new FranchiseFileField(key, '000000000000000000000000000000000', offset2);
 
-          utilService.bin2dec = sinon.spy((num) => {
-            if (num[0] === '1') {
-              return 214000000;
-            }
-            else {
-              return 0;
-            }
-          });
+      //     utilService.bin2dec = sinon.spy(() => { return bin2DecResponse; });
   
-          field = new FranchiseFileField(key, '000000000000000000000000000000000', offset2);
-
-          utilService.bin2dec = sinon.spy(() => { return bin2DecResponse; });
-  
-          // bin2dec is stubbed out to always return 1. if you look
-          // inside the method here, it would do 1-1 which equals 0.
-          expect(field.value).to.equal(0);
-        });
-      });
+      //     // bin2dec is stubbed out to always return 1. if you look
+      //     // inside the method here, it would do 1-1 which equals 0.
+      //     expect(field.value).to.equal(0);
+      //   });
+      // });
 
 
       it('parses s_ints correctly', () => {
         offset = {
           'type': 's_int',
+          'length': 5,
+          'offset': 0,
           'minValue': -2048
         };
 
         field = new FranchiseFileField(key, unformattedValue, offset);
-        expect(utilService.bin2dec.callCount).to.equal(1);
-        expect(utilService.bin2dec.firstCall.args[0]).to.eql(unformattedValue);
-        expect(field.value).to.eql(bin2DecResponse + offset.minValue);
+        expect(field.value).to.eql(-2035);
       });
 
       it('parses bools correctly - false', () => {
         offset = {
-          'type': 'bool'
+          'type': 'bool',
+          'length': 1,
+          'offset': 0,
         };
 
-        unformattedValue = '0';
+        unformattedValue = Buffer.from([0x00]);
 
         field = new FranchiseFileField(key, unformattedValue, offset);
         expect(field.value).to.be.false;
@@ -152,10 +149,12 @@ describe('FranchiseFileField unit tests', () => {
 
       it('parses bools correctly - true', () => {
         offset = {
-          'type': 'bool'
+          'type': 'bool',
+          'length': 1,
+          'offset': 7,
         };
 
-        unformattedValue = '1';
+        unformattedValue = Buffer.from([0x01]);
 
         field = new FranchiseFileField(key, unformattedValue, offset);
         expect(field.value).to.be.true;
@@ -163,22 +162,25 @@ describe('FranchiseFileField unit tests', () => {
 
       it('parses floats correctly', () => {
         offset = {
-          'type': 'float'
+          'type': 'float',
+          'length': 32,
+          'offset': 0
         };
 
-        field = new FranchiseFileField(key, unformattedValue, offset);
-        expect(utilService.bin2Float.callCount).to.equal(1);
-        expect(utilService.bin2Float.firstCall.args[0]).to.eql(unformattedValue);
-        expect(field.value).to.eql(bin2FloatResponse);
+        field = new FranchiseFileField(key, Buffer.from([0x3E, 0x8C, 0xCC, 0xCD]), offset);
+        expect(field.value.toFixed(3)).to.eql('0.275');
       });
 
       it('parses references correctly', () => {
         offset = {
-          'type': 'GameStats'
+          'type': 'GameStats',
+          'isReference': true,
+          'length': 32,
+          'offset': 0
         };
 
-        field = new FranchiseFileField(key, unformattedValue, offset);
-        expect(field.value).to.eql(unformattedValue);
+        field = new FranchiseFileField(key, Buffer.from([0x36, 0xD4, 0x00, 0x01]), offset);
+        expect(field.value).to.eql('00110110110101000000000000000001');
       });
 
       it('parses enums correctly', () => {
@@ -202,15 +204,13 @@ describe('FranchiseFileField unit tests', () => {
   describe('set value field', () => {
     describe('sets value field', () => {
       it('emits change event', () => {
-        field = new FranchiseFileField(key, unformattedValue, offset);
-
-        expect(function () {
-          field.value = '5';
-        }).to.emitFrom(field, 'change');
+        field = new FranchiseFileField(key, unformattedValue, offset, parent);
+        field.value = '4';
+        expect(parent.onEvent.callCount).to.equal(1);
       });
 
       it('parses int values correctly', () => {
-        field = new FranchiseFileField(key, unformattedValue, offset);
+        field = new FranchiseFileField(key, unformattedValue, offset, parent);
         field.value = '5';
         expect(field.value).to.eql(5);
       });
@@ -221,7 +221,7 @@ describe('FranchiseFileField unit tests', () => {
           'minValue': -2048
         };
 
-        field = new FranchiseFileField(key, unformattedValue, offset);
+        field = new FranchiseFileField(key, unformattedValue, offset, parent);
         field.value = -5;
 
         expect(field.value).to.eql(-5);
@@ -229,12 +229,14 @@ describe('FranchiseFileField unit tests', () => {
 
       it('parses bools correctly - false', () => {
         offset = {
-          'type': 'bool'
+          'type': 'bool',
+          'length': 1,
+          'offset': 7
         };
 
-        unformattedValue = '0';
+        unformattedValue = Buffer.from([0x00]);
 
-        field = new FranchiseFileField(key, unformattedValue, offset);
+        field = new FranchiseFileField(key, unformattedValue, offset, parent);
         field.value = 'false';
         expect(field.value).to.be.false;
 
@@ -247,12 +249,14 @@ describe('FranchiseFileField unit tests', () => {
 
       it('parses bools correctly - true', () => {
         offset = {
-          'type': 'bool'
+          'type': 'bool',
+          'length': 1,
+          'offset': 7
         };
 
-        unformattedValue = '1';
+        unformattedValue = Buffer.from([0x01]);
 
-        field = new FranchiseFileField(key, unformattedValue, offset);
+        field = new FranchiseFileField(key, unformattedValue, offset, parent);
         field.value = 'true';
         expect(field.value).to.be.true;
 
@@ -268,7 +272,7 @@ describe('FranchiseFileField unit tests', () => {
           'type': 'float'
         };
 
-        field = new FranchiseFileField(key, unformattedValue, offset);
+        field = new FranchiseFileField(key, unformattedValue, offset, parent);
         field.value = 0.593835935;
 
         expect(field.value).to.eql(0.593835935);
@@ -276,12 +280,15 @@ describe('FranchiseFileField unit tests', () => {
 
       it('parses references correctly', () => {
         offset = {
-          'type': 'GameStats'
+          'type': 'GameStats',
+          'isReference': true,
+          'length': 32,
+          'offset': 0
         };
 
-        field = new FranchiseFileField(key, unformattedValue, offset);
-        field.value = '010101010101011';
-        expect(field.value).to.eql('010101010101011');
+        field = new FranchiseFileField(key, Buffer.from([0x36, 0xD4, 0x00, 0x00]), offset, parent);
+        field.value = '00110110110101000000000000000000';
+        expect(field.value).to.eql('00110110110101000000000000000000');
       });
 
       it('parses enums correctly - valid enum value (set by value)', () => {
@@ -311,7 +318,7 @@ describe('FranchiseFileField unit tests', () => {
           }
         };
 
-        field = new FranchiseFileField(key, unformattedValue, offset);
+        field = new FranchiseFileField(key, unformattedValue, offset, parent);
         field.value = 0;
         expect(field.value).to.eql('AirJordan');
       });
@@ -342,7 +349,7 @@ describe('FranchiseFileField unit tests', () => {
           }
         };
 
-        field = new FranchiseFileField(key, unformattedValue, offset);
+        field = new FranchiseFileField(key, unformattedValue, offset, parent);
         field.value = 'AirJordan';
         expect(field.value).to.eql('AirJordan');
       });
@@ -370,7 +377,7 @@ describe('FranchiseFileField unit tests', () => {
           }
         };
 
-        field = new FranchiseFileField(key, unformattedValue, offset);
+        field = new FranchiseFileField(key, unformattedValue, offset, parent);
         let errorFn = () => { field.value = 'Test'; };
         expect(errorFn).to.throw(Error);
       });
@@ -378,91 +385,101 @@ describe('FranchiseFileField unit tests', () => {
 
     describe('sets unformatted value', () => {
       it('parses int values correctly', () => {
-        field = new FranchiseFileField(key, unformattedValue, offset);
+        field = new FranchiseFileField(key, unformattedValue, offset, parent);
         field.value = '7';
-
-        expect(utilService.dec2bin.callCount).to.equal(1);
-        expect(utilService.dec2bin.firstCall.args).to.eql(['7', 5]);
-        expect(field.unformattedValue).to.eql(dec2BinResponse);
+        expect(unformattedValue).to.eql(Buffer.from([0x3B]));
       });
   
       it('parses s_ints correctly', () => {
         offset = {
           'type': 's_int',
           'minValue': -2048,
-          'length': 8
+          'offset': 0,
+          'length': 32
         };
-  
-        field = new FranchiseFileField(key, unformattedValue, offset);
+
+        unformattedValue = Buffer.from([0x00, 0x00, 0x00, 0x6B]); 
+        field = new FranchiseFileField(key, unformattedValue, offset, parent);
         field.value = -5;
   
-        expect(utilService.dec2bin.callCount).to.equal(1);
-        expect(utilService.dec2bin.firstCall.args).to.eql([-5 + 2048, 8]);
-        expect(field.unformattedValue).to.eql(dec2BinResponse);
+        expect(unformattedValue).to.eql(Buffer.from([0x00, 0x00, 0x07, 0xFB]));
       });
   
       it('parses bools correctly - false', () => {
         offset = {
-          'type': 'bool'
+          'type': 'bool',
+          'offset': 7,
+          'length': 1
         };
   
-        unformattedValue = '0';
+        unformattedValue = Buffer.from([0x01]);
   
-        field = new FranchiseFileField(key, unformattedValue, offset);
+        field = new FranchiseFileField(key, unformattedValue, offset, parent);
         field.value = 'false';
-        expect(field.unformattedValue).to.equal('0');
+        expect(unformattedValue).to.eql(Buffer.from([0x00]));
   
         field.value = 0;
-        expect(field.unformattedValue).to.equal('0');
+        expect(unformattedValue).to.eql(Buffer.from([0x00]));
   
         field.value = false;
-        expect(field.unformattedValue).to.equal('0');
+        expect(unformattedValue).to.eql(Buffer.from([0x00]));
       });
   
       it('parses bools correctly - true', () => {
         offset = {
-          'type': 'bool'
+          'type': 'bool',
+          'offset': 7,
+          'length': 1
         };
   
-        unformattedValue = '1';
+        unformattedValue = Buffer.from([0x00]);
   
-        field = new FranchiseFileField(key, unformattedValue, offset);
+        field = new FranchiseFileField(key, unformattedValue, offset, parent);
         field.value = 'true';
-        expect(field.unformattedValue).to.equal('1');
+        expect(unformattedValue).to.eql(Buffer.from([0x01]));
   
         field.value = 1;
-        expect(field.unformattedValue).to.equal('1');
+        expect(unformattedValue).to.eql(Buffer.from([0x01]));
   
         field.value = true;
-        expect(field.unformattedValue).to.equal('1');
+        expect(unformattedValue).to.eql(Buffer.from([0x01]));
       });
   
       it('parses floats correctly', () => {
         offset = {
-          'type': 'float'
+          'type': 'float',
+          'offset': 0,
+          'length': 32
         };
+        
+        unformattedValue = Buffer.from([0x3F, 0x80, 0x00, 0x00]);
   
-        field = new FranchiseFileField(key, unformattedValue, offset);
+        field = new FranchiseFileField(key, unformattedValue, offset, parent);
         field.value = 0.593835935;
         
-        expect(utilService.float2Bin.callCount).to.equal(1);
-        expect(utilService.float2Bin.firstCall.args).to.eql([0.593835935])
-        expect(field.unformattedValue).to.eql(float2BinResponse);
+        expect(unformattedValue).to.eql(Buffer.from([0x3F, 0x18, 0x05, 0xA2]));
       });
   
       it('parses references correctly', () => {
         offset = {
-          'type': 'GameStats'
+          'type': 'GameStats',
+          'isReference': true,
+          'offset': 0,
+          'length': 32
         };
+
+        unformattedValue = Buffer.from([0x36, 0xD4, 0x00, 0x00]);
   
-        field = new FranchiseFileField(key, unformattedValue, offset);
-        field.value = '010101010101011';
-        expect(field.unformattedValue).to.eql('010101010101011');
+        field = new FranchiseFileField(key, unformattedValue, offset, parent);
+        field.value = '00110110110101000000000000000010';
+        expect(unformattedValue).to.eql(Buffer.from([0x36, 0xD4, 0x00, 0x02]));
       });
   
       it('parses enums correctly - valid enum value (set by name)', () => {
         offset = {
           'type': 'ShoeType',
+          'offset': 0,
+          'length': 8,
           'enum': {
             'getMemberByUnformattedValue': () => {
               return {
@@ -488,14 +505,16 @@ describe('FranchiseFileField unit tests', () => {
           }
         };
   
-        field = new FranchiseFileField(key, unformattedValue, offset);
+        field = new FranchiseFileField(key, unformattedValue, offset, parent);
         field.value = 'AirJordan';
-        expect(field.unformattedValue).to.eql('010101');
+        expect(unformattedValue).to.eql(Buffer.from([0x15]));
       });
 
       it('parses enums correctly - valid enum value (set by value)', () => {
         offset = {
           'type': 'ShoeType',
+          'offset': 0,
+          'length': 8,
           'enum': {
             'getMemberByUnformattedValue': () => {
               return {
@@ -520,9 +539,9 @@ describe('FranchiseFileField unit tests', () => {
           }
         };
   
-        field = new FranchiseFileField(key, unformattedValue, offset);
+        field = new FranchiseFileField(key, unformattedValue, offset, parent);
         field.value = '0';
-        expect(field.unformattedValue).to.eql('010101');
+        expect(unformattedValue).to.eql(Buffer.from([0x15]));
       });
 
       // it('parses enums correctly - valid enum value (set by unformatted value)', () => {
@@ -584,40 +603,78 @@ describe('FranchiseFileField unit tests', () => {
   });
 
   describe('set unformatted value field', () => {
-    it('sets the unformatted value', () => {
-      field = new FranchiseFileField(key, unformattedValue, offset);
-      field.unformattedValue = '101010101011';
+    it('sets the values', () => {
+      field = new FranchiseFileField(key, unformattedValue, offset, parent);
 
-      expect(field.unformattedValue).to.equal('101010101011');
+      const val = Buffer.from([0x5B]);
+      const bv = new BitView(val, val.byteOffset);
+      bv.bigEndian = true;
+
+      field.unformattedValue = bv;
+
+      expect(field.unformattedValue).to.equal(bv);
+      expect(field.value).to.equal(11);
+    });
+
+    it('sets the values - enum', () => {
+      offset = {
+        'type': 'ShoeType',
+        'offset': 0,
+        'length': 8,
+        'enum': {
+          'getMemberByUnformattedValue': () => {
+            return {
+              'name': 'AirJordan'
+            };
+          },
+          'getMemberByName': () => {
+            return null;
+          },
+          'getMemberByValue': () => {
+            return {
+              'name': 'AirJordan',
+              'value': 0,
+              'unformattedValue': '010101'
+            };
+          },
+          'members': [{
+            'name': 'AirJordan'
+          }, {
+            'name': 'Nike'
+          }]
+        }
+      };
+
+      field = new FranchiseFileField(key, unformattedValue, offset, parent);
+
+      const val = Buffer.from([0x15]);
+      const bv = new BitView(val, val.byteOffset);
+      bv.bigEndian = true;
+
+      field.unformattedValue = bv;
+
+      expect(field.unformattedValue).to.equal(bv);
+      expect(field.value).to.equal('AirJordan');
     });
 
     it('emits a change event', () => {
-      field = new FranchiseFileField(key, unformattedValue, offset);
-
-      expect(() => {
-        field.unformattedValue = '1010101';
-      }).to.emitFrom(field, 'change');
+      field = new FranchiseFileField(key, unformattedValue, offset, parent);
+      field.unformattedValue = new BitView(Buffer.from([0x00]));
+      expect(parent.onEvent.callCount).to.equal(1);
     });
 
     it('throws an error if the argument isn\'t a string', () => {
-      field = new FranchiseFileField(key, unformattedValue, offset);
+      field = new FranchiseFileField(key, unformattedValue, offset, parent);
       expect(() => {
         field.unformattedValue = 2;
       }).to.throw(Error);
     });
 
     it('throws an error if the string contains anything excepts 1s and 0s', () => {
-      field = new FranchiseFileField(key, unformattedValue, offset);
+      field = new FranchiseFileField(key, unformattedValue, offset, parent);
       expect(() => {
         field.unformattedValue = '10101014';
       }).to.throw(Error);
-    });
-
-    it('sets the value attribute', () => {
-      field = new FranchiseFileField(key, unformattedValue, offset);
-      field.unformattedValue = '1010101010';
-      expect(utilService.bin2dec.callCount).to.equal(2);
-      expect(field.value).to.eql(bin2DecResponse);
     });
   });
 
@@ -626,22 +683,25 @@ describe('FranchiseFileField unit tests', () => {
       offset = {
         'type': 'string',
         'maxLength': '10',
-        'valueInSecondTable': true
+        'valueInSecondTable': true,
+        'offset': 0,
+        'length': 32
       };
 
-      field = new FranchiseFileField(key, unformattedValue, offset);
+      unformattedValue = Buffer.from([0x00, 0x00, 0x00, 0x10]);
+      field = new FranchiseFileField(key, unformattedValue, offset, parent);
     });
 
     it('creates a second table field', () => {
       expect(field.secondTableField).to.not.be.undefined;
       expect(FranchiseFileTable2Field.callCount).to.equal(1);
-      expect(FranchiseFileTable2Field.firstCall.args[0]).to.eql(unformattedValue, offset);
+      expect(FranchiseFileTable2Field.firstCall.args[0]).to.eql(16, offset);
     });
 
-    it('changes field value when second table field changes', () => {
-      listenerFns[0]();
-      expect(field.value).to.equal('test');
-    });
+    // it('changes field value when second table field changes', () => {
+    //   listenerFns[0]();
+    //   expect(field.value).to.equal('test');
+    // });
 
     // it('emits the table2-change event when the second table field changes', () => {      
     //   field = new FranchiseFileField(key, unformattedValue, offset);
@@ -658,7 +718,11 @@ describe('FranchiseFileField unit tests', () => {
 
     it('should not set the second table field when .unformattedValue is set', () => {
       // this is because the field's unformatted value will contain a reference to the second table field's offset and we need to keep that.
-      field.unformattedValue = '1000010101';
+      const val = Buffer.from([0x00, 0x00, 0x00, 0x15]);
+      const bv = new BitView(val, val.byteOffset);
+      bv.bigEndian = true;
+      field.unformattedValue = bv;
+
       expect(field.secondTableField.value).to.equal('test');
     })
   });
@@ -671,7 +735,7 @@ describe('FranchiseFileField unit tests', () => {
         'isReference': true
       };
 
-      field = new FranchiseFileField('TestReference', '00111001101010000000000000000000', offset);
+      field = new FranchiseFileField('TestReference', Buffer.from([0x39, 0xA8, 0x00, 0x01]), offset);
     });
 
     it('should return true when calling isReference', () => {
@@ -681,7 +745,7 @@ describe('FranchiseFileField unit tests', () => {
     it('can parse the reference information', () => {
       expect(field.referenceData).to.eql({
         'tableId': 7380,
-        'rowNumber': 0
+        'rowNumber': 1
       });
     });
   });

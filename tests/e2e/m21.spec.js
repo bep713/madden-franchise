@@ -1,8 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 const expect = require('chai').expect;
+const { BitView } = require('bit-buffer');
 const FranchiseFile = require('../../FranchiseFile');
 const FranchiseFileTable = require('../../FranchiseFileTable');
+
 const filePaths = {
   'compressed': {
     'm21': 'tests/data/CAREER-21COMPRESS'
@@ -1234,28 +1236,40 @@ describe('Madden 21 end to end tests', function () {
 
       it('sets unformatted value correctly if the length is correctly passed in', () => {
         let first = table.records[0].fields.PlayerPosition;
-        first.unformattedValue = '00000000000000000000000000000011';
+        
+        const val = Buffer.from([0x36, 0xD4, 0x00, 0x14, 0x00, 0x00, 0x00, 0x3]);
+        const bv = new BitView(val, val.byteOffset);
+        bv.bigEndian = true;
+
+        first.unformattedValue = bv;
+
         expect(first.value).to.equal('WR');
-        expect(first.unformattedValue.getBits(first.offset.offset, 32)).to.equal(3);
+        expect(first.unformattedValue.getBits(32, 32)).to.equal(3);
       });
 
       it('sets unformatted value correctly if the length isnt correctly passed in', () => {
         let first = table.records[0].fields.PlayerPosition;
-        first.unformattedValue = '11';
-        expect(first.value).to.equal('WR');
-        expect(first.unformattedValue.getBits(first.offset.offset, 32)).to.equal(3);
+        
+        const val = Buffer.from([0x36, 0xD4, 0x00, 0x14, 0x00, 0x00, 0x00, 0x2]);
+        const bv = new BitView(val, val.byteOffset);
+        bv.bigEndian = true;
+
+        first.unformattedValue = bv;
+
+        expect(first.value).to.equal('FB');
+        expect(first.unformattedValue.getBits(32, 32)).to.equal(2);
       });
 
-      // it('throws an error if unformatted enum value is set to an invalid value', () => {
-      //   let first = table.records[0].fields.PlayerPosition;
+      it('throws an error if unformatted enum value is set to an invalid value', () => {
+        let first = table.records[0].fields.PlayerPosition;
 
-      //   expect(() => {
-      //     first.unformattedValue = '1000000';
-      //   }).to.throw(Error);
+        expect(() => {
+          first.unformattedValue = '1000000';
+        }).to.throw(Error);
 
-      //   expect(first.value).to.equal('WR');
-      //   expect(first.unformattedValue.getBits(first.offset.offset, 32)).to.equal(3);
-      // });
+        expect(first.value).to.equal('FB');
+        expect(first.unformattedValue.getBits(32, 32)).to.equal(2);
+      });
 
       it('throws an error if enum value is set to an invalid value', () => {
         let first = table.records[0].fields.PlayerPosition;
@@ -1264,8 +1278,8 @@ describe('Madden 21 end to end tests', function () {
           first.value = 'Coach';
         }).to.throw(Error);
 
-        expect(first.value).to.equal('WR');
-        expect(first.unformattedValue.getBits(first.offset.offset, 32)).to.equal(3);
+        expect(first.value).to.equal('FB');
+        expect(first.unformattedValue.getBits(32, 32)).to.equal(2);
       });
 
       it('sets enum values as values without an underscore if possible', () => {

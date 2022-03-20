@@ -79,11 +79,12 @@ class FranchiseFileField {
       else if (this.offset.enum) {
         try {
           let theEnum = this._getEnumFromValue(value);
-  
+          
           // Enums can have negative values and Madden negative numbers are not standard. We need to convert it here.
           // Ex: In Madden, binary "1000" = -1 for an enum with a max length of 4. But for everything else, "1000" = 8, so we need to get the "real" value here.
           const decimalEquivalent = utilService.bin2dec(theEnum.unformattedValue);
           this._unformattedValue.setBits(this.offset.offset, decimalEquivalent, this.offset.length);
+          this._value = theEnum.name;
         }
         catch (err) {
           this._value = null;
@@ -95,7 +96,7 @@ class FranchiseFileField {
           case 's_int':
             actualValue = parseInt(value);
             this._value = actualValue;
-            this._unformattedValue.setBits(this.offset.offset, actualValue, this.offset.length);
+            this._unformattedValue.setBits(this.offset.offset, actualValue - this.offset.minValue, this.offset.length);
             break;
           default:
           case 'int':
@@ -139,7 +140,9 @@ class FranchiseFileField {
   };
 
   get unformattedValue () {
-    this._setUnformattedValueIfEmpty();
+    if (this._unformattedValue === null) {
+      this._setUnformattedValueIfEmpty();
+    }
 
     return this._unformattedValue;
   };
@@ -158,8 +161,9 @@ class FranchiseFileField {
   };
 
   setUnformattedValueWithoutChangeEvent(unformattedValue, suppressErrors) {
-    if (!utilService.isString(unformattedValue)) { throw new Error(`Argument must be of type string. You passed in a ${typeof unformattedValue}.`); }
-    else if (!utilService.stringOnlyContainsBinaryDigits(unformattedValue)) { throw new Error(`Argument must only contain binary digits 1 and 0. If you would like to set the value, please set the 'value' attribute instead.`)}
+    // if (!utilService.isString(unformattedValue)) { throw new Error(`Argument must be of type string. You passed in a ${typeof unformattedValue}.`); }
+    // else if (!utilService.stringOnlyContainsBinaryDigits(unformattedValue)) { throw new Error(`Argument must only contain binary digits 1 and 0. If you would like to set the value, please set the 'value' attribute instead.`)}
+    if (!(unformattedValue instanceof BitView)) { throw new Error(`Argument must be of type BitView. You passed in a(n) ${typeof unformattedValue}.`); }
     else {
       let value;
 
@@ -171,9 +175,9 @@ class FranchiseFileField {
       }
 
       // check for 'allowed' error - this will be true if the unformatted value is invalid.
-      if (this._offset.enum && value === unformattedValue.padStart(this._offset.length, '0') && !suppressErrors) {
-        throw new Error(`Argument is not a valid unformatted value for this field. You passed in ${value}.`)
-      }
+      // if (!suppressErrors && this._offset.enum && value === unformattedValue.padStart(this._offset.length, '0')) {
+      //   throw new Error(`Argument is not a valid unformatted value for this field. You passed in ${value}.`)
+      // }
 
       // this._value = value;
 
@@ -245,6 +249,8 @@ class FranchiseFileField {
             return unformatted.getBits(offset.offset, offset.length);
           }
           else {
+            // This is for int[] tables.
+            
             const maxValueBinary = getMaxValueBinary(offset);
             const maxValue = utilService.bin2dec(maxValueBinary);
             const newValue = unformatted.getBits(offset.offset, offset.length);

@@ -622,22 +622,7 @@ function readRecords(data, header, offsetTable, table) {
     for (let i = header.table1StartIndex; i < header.table2StartIndex; i += header.record1Size) {
       // const recordBinary = binaryData.slice(i, i + (header.record1Size * 8));
       let record = new FranchiseFileRecord(data.slice(i, i + header.record1Size), index, offsetTable, table);
-      
-      records.push(new Proxy(record, {
-          get: function (target, prop, receiver) {
-              return record.fields[prop] !== undefined ? record.fields[prop].value : record[prop] !== undefined ? record[prop] : null;
-          },
-          set: function (target, prop, receiver) {
-              if (record.fields[prop] !== undefined) {
-                  record.fields[prop].value = receiver;
-              }
-              else {
-                  record[prop] = receiver;
-              }
-
-              return true;
-          }
-      }));
+      records.push(record);
 
       index += 1;
     }
