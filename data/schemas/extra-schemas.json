@@ -834,5 +834,20 @@
                 "default": "False"
             }
         ]
+    },
+    {
+        "name": "Transition",
+        "numMembers": "2",
+        "base": "none()",
+        "attributes": [
+            {
+                "name": "Evaluate",
+                "type": "Expression"
+            },
+            {
+                "name": "Stage",
+                "type": "Stage"
+            }
+        ]
     }
 ]
