@@ -758,5 +758,81 @@
                 "type": "bool"
             }
         ]
+    },
+    {
+        "name": "UserRegistry",
+        "numMembers": "7",
+        "base": "none()",
+        "attributes": [{
+                "name": "RegisterUserEvent",
+                "type": "RegisterUserEvent"
+            },
+            {
+                "name": "TransferOwnerUserEvent",
+                "type": "TransferOwnerUserEvent"
+            },
+            {
+                "name": "UnregisterUserEvent",
+                "type": "UnregisterUserEvent"
+            },
+            {
+                "name": "UpdateUserDefaultRequestActionEvent",
+                "type": "UpdateUserDefaultRequestActionEvent"
+            },
+            {
+                "name": "Users",
+                "type": "User[]"
+            },
+            {
+                "name": "AddAdminUserEvent",
+                "type": "AddAdminUserEvent"
+            },
+            {
+                "name": "RemoveAdminUserEvent",
+                "type": "RemoveAdminUserEvent"
+            }
+        ]
+    },
+    {
+        "name": "User",
+        "numMembers": "6",
+        "base": "none()",
+        "attributes": [{
+                "name": "UserIdLower",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "-1",
+                "default": "0"
+            },
+            {
+                "name": "UserIdUpper",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "-1",
+                "default": "0"
+            },
+            {
+                "name": "UserEntity",
+                "type": "UserEntity"
+            },
+            {
+                "name": "DefaultRequestAction",
+                "type": "Action",
+                "enum": "Action",
+                "default": "Action:Respond"
+            },
+            {
+                "name": "DefaultRequestActionTimeout",
+                "type": "int",
+                "minValue": "-2000000",
+                "maxValue": "2000000",
+                "default": "0"
+            },
+            {
+                "name": "IsRetired",
+                "type": "bool",
+                "default": "False"
+            }
+        ]
     }
 ]
