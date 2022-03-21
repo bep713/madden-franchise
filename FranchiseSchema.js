@@ -67,6 +67,7 @@ class FranchiseSchema extends EventEmitter {
     extraSchemas.forEach((schema) => {
       if (!this.schemaMap[schema.name]) {
         schema.attributes.forEach((attrib) => {
+          console.log(attrib);
           if (attrib.enum) {
             attrib.enum = new FranchiseEnum(this.enumMap[attrib.enum]);
           }

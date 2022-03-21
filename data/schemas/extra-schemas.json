@@ -675,5 +675,88 @@
                 "maxValue": "59"
             }
         ]
+    },
+    {
+        "name": "Transaction",
+        "numMembers": "11",
+        "base": "none()",
+        "attributes": [{
+                "name": "StartStage",
+                "type": "Stage"
+            },
+            {
+                "name": "CurrentStage",
+                "type": "Stage"
+            },
+            {
+                "name": "TransitionStage",
+                "type": "Stage"
+            },
+            {
+                "name": "IsDynamic",
+                "type": "bool",
+                "default": "False"
+            },            
+            {
+                "name": "IsDone",
+                "type": "bool()"
+            },
+            {
+                "name": "Process",
+                "type": "none()"
+            },
+            {
+                "name": "Sleep",
+                "type": "ITransaction_Sleep"
+            },
+            {
+                "name": "Start",
+                "type": "none()"
+            },
+            {
+                "name": "IsBlocking",
+                "type": "bool",
+                "default": "True"
+            },
+            {
+                "name": "TransitionPending",
+                "type": "bool",
+                "default": "False"
+            },
+            {
+                "name": "TimeScale",
+                "type": "float"
+            }
+        ]
+    },
+    {
+        "name": "Stage",
+        "numMembers": "6",
+        "base": "none()",
+        "attributes": [{
+                "name": "Start",
+                "type": "Expression"
+            },
+            {
+                "name": "End",
+                "type": "Expression"
+            },
+            {
+                "name": "Process",
+                "type": "Expression"
+            },
+            {
+                "name": "Transitions",
+                "type": "Transition[]"
+            },
+            {
+                "name": "IsExclusive",
+                "type": "bool"
+            },
+            {
+                "name": "IsIdle",
+                "type": "bool"
+            }
+        ]
     }
 ]

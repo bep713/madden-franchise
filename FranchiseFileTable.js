@@ -502,13 +502,17 @@ function readOffsetTable(data, schema, header) {
   // console.log(offsetTable.sort((a,b) => { return a.indexOffset - b.indexOffset}))
   sortOffsetTableByIndexOffset();
 
+  function isSkippedOffset(offset) {
+    return offset.final || offset.const || offset.type.indexOf('()') >= 0 || offset.type === 'ITransaction_Sleep';
+  };
+
   for(let i = 0; i < offsetTable.length; i++) {
     let curOffset = offsetTable[i];
     let nextOffset = offsetTable.length > i + 1 ? offsetTable[i+1] : null;
 
     if (nextOffset) {
       let curIndex = i+2;
-      while(nextOffset && (nextOffset.final || nextOffset.const || nextOffset.type.indexOf('()') >= 0)) {
+      while(nextOffset && isSkippedOffset(nextOffset)) {
         nextOffset = offsetTable[curIndex];
         curIndex += 1;
       }
@@ -539,7 +543,7 @@ function readOffsetTable(data, schema, header) {
       const currentOffset = offsetTable[currentOffsetIndex];
 
       if (currentOffset) {
-        if (currentOffset.final || currentOffset.const || currentOffset.type.indexOf('()') >= 0) {
+        if (isSkippedOffset(currentOffset)) {
           currentOffsetIndex += 1;
           continue;
         }
@@ -569,7 +573,7 @@ function readOffsetTable(data, schema, header) {
     }
   });
 
-  offsetTable = offsetTable.filter((offset) => { return !offset.final && !offset.const && offset.type.indexOf('()') === -1; });
+  offsetTable = offsetTable.filter((offset) => { return !(isSkippedOffset(offset)) });
   offsetTable.sort((a,b) => { return a.offset - b.offset; });
   
   for (let i = 0; i < offsetTable.length; i++) {
