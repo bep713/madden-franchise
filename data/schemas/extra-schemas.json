@@ -675,5 +675,179 @@
                 "maxValue": "59"
             }
         ]
+    },
+    {
+        "name": "Transaction",
+        "numMembers": "11",
+        "base": "none()",
+        "attributes": [{
+                "name": "StartStage",
+                "type": "Stage"
+            },
+            {
+                "name": "CurrentStage",
+                "type": "Stage"
+            },
+            {
+                "name": "TransitionStage",
+                "type": "Stage"
+            },
+            {
+                "name": "IsDynamic",
+                "type": "bool",
+                "default": "False"
+            },            
+            {
+                "name": "IsDone",
+                "type": "bool()"
+            },
+            {
+                "name": "Process",
+                "type": "none()"
+            },
+            {
+                "name": "Sleep",
+                "type": "ITransaction_Sleep"
+            },
+            {
+                "name": "Start",
+                "type": "none()"
+            },
+            {
+                "name": "IsBlocking",
+                "type": "bool",
+                "default": "True"
+            },
+            {
+                "name": "TransitionPending",
+                "type": "bool",
+                "default": "False"
+            },
+            {
+                "name": "TimeScale",
+                "type": "float"
+            }
+        ]
+    },
+    {
+        "name": "Stage",
+        "numMembers": "6",
+        "base": "none()",
+        "attributes": [{
+                "name": "Start",
+                "type": "Expression"
+            },
+            {
+                "name": "End",
+                "type": "Expression"
+            },
+            {
+                "name": "Process",
+                "type": "Expression"
+            },
+            {
+                "name": "Transitions",
+                "type": "Transition[]"
+            },
+            {
+                "name": "IsExclusive",
+                "type": "bool"
+            },
+            {
+                "name": "IsIdle",
+                "type": "bool"
+            }
+        ]
+    },
+    {
+        "name": "UserRegistry",
+        "numMembers": "7",
+        "base": "none()",
+        "attributes": [{
+                "name": "RegisterUserEvent",
+                "type": "RegisterUserEvent"
+            },
+            {
+                "name": "TransferOwnerUserEvent",
+                "type": "TransferOwnerUserEvent"
+            },
+            {
+                "name": "UnregisterUserEvent",
+                "type": "UnregisterUserEvent"
+            },
+            {
+                "name": "UpdateUserDefaultRequestActionEvent",
+                "type": "UpdateUserDefaultRequestActionEvent"
+            },
+            {
+                "name": "Users",
+                "type": "User[]"
+            },
+            {
+                "name": "AddAdminUserEvent",
+                "type": "AddAdminUserEvent"
+            },
+            {
+                "name": "RemoveAdminUserEvent",
+                "type": "RemoveAdminUserEvent"
+            }
+        ]
+    },
+    {
+        "name": "User",
+        "numMembers": "6",
+        "base": "none()",
+        "attributes": [{
+                "name": "UserIdLower",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "-1",
+                "default": "0"
+            },
+            {
+                "name": "UserIdUpper",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "-1",
+                "default": "0"
+            },
+            {
+                "name": "UserEntity",
+                "type": "UserEntity"
+            },
+            {
+                "name": "DefaultRequestAction",
+                "type": "Action",
+                "enum": "Action",
+                "default": "Action:Respond"
+            },
+            {
+                "name": "DefaultRequestActionTimeout",
+                "type": "int",
+                "minValue": "-2000000",
+                "maxValue": "2000000",
+                "default": "0"
+            },
+            {
+                "name": "IsRetired",
+                "type": "bool",
+                "default": "False"
+            }
+        ]
+    },
+    {
+        "name": "Transition",
+        "numMembers": "2",
+        "base": "none()",
+        "attributes": [
+            {
+                "name": "Evaluate",
+                "type": "Expression"
+            },
+            {
+                "name": "Stage",
+                "type": "Stage"
+            }
+        ]
     }
 ]
