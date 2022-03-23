@@ -5,14 +5,14 @@ const crypto = require('crypto');
 const expect = require('chai').expect;
 const schemaGenerator = require('../../services/schemaGenerator');
 
-const NUM_CUSTOM_SCHEMAS = 11;
+const NUM_CUSTOM_SCHEMAS = 16;
 
 const TEST_SCHEMA_FOLDER = path.join(__dirname, '../data/test-schemas/');
 const SCHEMA_PATHS = {
     outputTest: path.join(TEST_SCHEMA_FOLDER, 'output-test'),
     m22: {
-        xml: path.join(TEST_SCHEMA_FOLDER, 'M22_328_1.FTX'),
-        gz: path.join(TEST_SCHEMA_FOLDER, 'M22_328_1.gz'),
+        xml: path.join(TEST_SCHEMA_FOLDER, 'M22_329_0.FTX'),
+        gz: path.join(TEST_SCHEMA_FOLDER, 'M22_329_0.gz'),
         outputTest: path.join(TEST_SCHEMA_FOLDER, 'output-test/M22_328_1.gz')
     }
 };
@@ -31,21 +31,21 @@ describe('schema generator unit tests', () => {
     });
 
     it('contains the correct amount of schemas', async () => {
-        expect(schemaRoot.schemas.length).to.equal(2994);
+        expect(schemaRoot.schemas.length).to.equal(2999);
         expect(Object.keys(schemaRoot.schemaMap).length).to.equal(2982);    // extra schemas not added to schema map
     });
 
     describe('schemaRoot format', () => {
         it('meta', () => {
             expect(schemaRoot.meta).to.eql({
-                major: 328,
-                minor: 1,
+                major: 329,
+                minor: 0,
                 gameYear: 22
             });
         });
 
         it('individual schema attributes', () => {
-            // first 11 schemas are custom added in the data/schemas/extra-schemas.json file
+            // first few schemas are custom added in the data/schemas/extra-schemas.json file
             // so start with 12th index which would be the first schema in the actual file.
             const schema = schemaRoot.schemas[NUM_CUSTOM_SCHEMAS + 1];
             

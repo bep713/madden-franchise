@@ -1,4 +1,4 @@
-<FranTkData fileName="Franchise-Schemas" databaseName="Madden22_Gen4_CFM.M22_DL" dataMajorVersion="328" dataMinorVersion="1" dataRevisionVersion="3" isSchema="True" majorVersionCRC="-818956309" minorVersionCRC="-999420906">
+<FranTkData fileName="Franchise-Schemas" databaseName="Madden22_Gen4_CFM.M22_DL" thisIsNotRealAndOnlyUsedForTheseTests="true" dataMajorVersion="329" dataMinorVersion="0" dataRevisionVersion="3" isSchema="True" majorVersionCRC="-818956309" minorVersionCRC="-999420906">
     <!--INCLUDES-->
     <Includes />
     <!--SCHEMAS-->
