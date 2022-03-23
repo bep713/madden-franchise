@@ -9,7 +9,7 @@ schemaPicker.pick = (gameYear, major, minor, settings) => {
   let schemaDirectories = [SCHEMA_DIRECTORY];
 
   if (settings && settings.schemaDirectory) {
-    schemaDirectories.push(settings.schemaDirectory);
+    schemaDirectories.unshift(settings.schemaDirectory);
   }
 
   const schemasMeta = readSchemaDirectories(schemaDirectories);
