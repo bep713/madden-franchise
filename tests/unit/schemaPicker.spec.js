@@ -52,6 +52,11 @@ describe('schema picker service unit tests', () => {
       expect(schema.minor).to.equal(7);
       expect(schema.path).to.equal('C:\\Projects\\madden-franchise\\data\\schemas\\19\\M19_95_7.gz');
     });
+
+    it('prefers the custom directory if there are multiple matches', () => {
+      const schema = schemaPicker.pick(22, 328, 1, schemaPickerSettings);
+      expect(schema.path).to.contain('tests\\data\\test-schemas')
+    });
   });
 
   it('returns a list of saved schemas', () => {
@@ -88,13 +93,13 @@ describe('schema picker service unit tests', () => {
     const schema = schemaPicker.pick(null, 328, 1, schemaPickerSettings);
     expect(schema.major).to.equal(328);
     expect(schema.minor).to.equal(1);
-    expect(schema.path).to.equal('C:\\Projects\\madden-franchise\\data\\schemas\\22\\M22_328_1.gz')
+    expect(schema.path).to.contain('M22_328_1.gz')
   });
 
   it('picks closest match if game year is null', () => {
     const schema = schemaPicker.pick(null, 319, 1, schemaPickerSettings);
     expect(schema.major).to.equal(328);
     expect(schema.minor).to.equal(1);
-    expect(schema.path).to.equal('C:\\Projects\\madden-franchise\\data\\schemas\\22\\M22_328_1.gz')
+    expect(schema.path).to.contain('M22_328_1.gz')
   });
 });
