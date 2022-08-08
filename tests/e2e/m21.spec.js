@@ -917,6 +917,7 @@ describe('Madden 21 end to end tests', function () {
     describe('Player table', () => {
       const marcusMayeIndex = 1584;
       const bakerMayfieldIndex = 1585;
+      const firstEmptyRecordIndex = 2971;
 
       beforeEach(() => {
         table = file.getTableById(playerTableId);
@@ -961,13 +962,13 @@ describe('Madden 21 end to end tests', function () {
 
       describe('reads records that are passed in', () => {
         beforeEach((done) => {
-          table.readRecords(['FirstName', 'LastName', 'Position', 'TRAIT_BIGHITTER', 'MetaMorph_GutBase', 'SeasonStats', 'InjuryType']).then(() => {
+          table.readRecords(['FirstName', 'LastName', 'Position', 'TRAIT_BIGHITTER', 'MetaMorph_GutBase', 'SeasonStats', 'InjuryType', 'TRAIT_COVER_BALL']).then(() => {
             done();
           });
         });
 
         it('has expected offset table', () => {
-          expect(table.loadedOffsets.length).to.equal(7);
+          expect(table.loadedOffsets.length).to.equal(8);
           expect(table.offsetTable.length).to.equal(312);
 
           let offset0 = table.offsetTable[0];
@@ -1059,6 +1060,11 @@ describe('Madden 21 end to end tests', function () {
             expect(field.unformattedValue.length).to.equal(17);
             expect(field.unformattedValue).to.eql(Buffer.from([0x42, 0x61, 0x6b, 0x65, 0x72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
           });
+
+          it('incorrect enum value is returned correctly', () => {
+            let record = table.records[firstEmptyRecordIndex];
+            expect(record['TRAIT_COVER_BALL']).to.equal('000');
+          });
         });
 
         it('can set a Player record to empty', () => {
@@ -1071,7 +1077,7 @@ describe('Madden 21 end to end tests', function () {
         it('will re-read records if new attributes are passed in', (done) => {
           table.readRecords(['GameStats']).then(() => {
             expect(table.records[0].GameStats).to.not.be.undefined;
-            expect(table.loadedOffsets.length).to.equal(8)
+            expect(table.loadedOffsets.length).to.equal(9)
             done();
           }).catch((err) => {
             done(err);

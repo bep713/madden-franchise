@@ -221,8 +221,9 @@ class FranchiseFileField {
       return this.secondTableField.value;
     }
     else if (offset.enum) {
+      const enumUnformattedValue = utilService.dec2bin(this.unformattedValue.getBits(this.offset.offset, this.offset.length), offset.enum._maxLength);
+      
       try {
-        const enumUnformattedValue = utilService.dec2bin(this.unformattedValue.getBits(this.offset.offset, this.offset.length), offset.enum._maxLength);
         const theEnum = offset.enum.getMemberByUnformattedValue(enumUnformattedValue);
   
         if (theEnum) {
@@ -233,7 +234,7 @@ class FranchiseFileField {
         // console.log(err);
       }
       
-      return unformatted;
+      return enumUnformattedValue;
     }
     else if (offset.isReference) {
       const referenceData = utilService.getReferenceDataFromBitview(this._unformattedValue, this.offset.offset);
