@@ -25,29 +25,14 @@ class FranchiseFileTable2Field {
     if (this.lengthAtLastSave === null) {
       this.lengthAtLastSave = getLengthOfUnformattedValue(this._unformattedValue);
     }
-    
-    // let formattedValue = '';
-    // const chunked = utilService.chunk(this._unformattedValue, 8);
-    // chunked.forEach((chunk) => {
-    //   formattedValue += String.fromCharCode(parseInt(chunk,2));
-    // });
 
     this._value = null;
-    // this.emit('change');
     if (this._parent) {
       this._parent.onEvent('change', this);
     }
   };
 
   get value () {
-    // let formattedValue = '';
-    // const chunked = utilService.chunk(this._unformattedValue, 8);
-    // chunked.forEach((chunk) => {
-    //   formattedValue += String.fromCharCode(parseInt(chunk,2));
-    // });
-
-    // return formattedValue.replace(/\0.*$/g,'');
-
     if (this._value === null) {
       this._value = this._unformattedValue.toString().replace(/\0.*$/g,'');
     }
@@ -62,14 +47,12 @@ class FranchiseFileTable2Field {
       value = value.substring(0, this.maxLength);
     }
     
-    // this._value = value;
     this._unformattedValue = this._strategy.setUnformattedValueFromFormatted(value, this.maxLength);
 
     if (this.lengthAtLastSave === null) {
       this.lengthAtLastSave = getLengthOfUnformattedValue(this._unformattedValue);
     }
     
-    // this.emit('change');
     this._parent.onEvent('change', this);
   };
 
@@ -94,7 +77,6 @@ class FranchiseFileTable2Field {
     this.index = offset;
 
     if (this.fieldReference) {
-      // this.fieldReference.unformattedValue = utilService.dec2bin(offset, 32);
       this.fieldReference.unformattedValue.setBits(this.fieldReference.offset.offset, offset, 32);
     }
   };

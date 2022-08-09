@@ -11,7 +11,7 @@ describe('FranchiseSchema unit tests', () => {
         expect(schema.meta.gameYear).to.equal(20);
 
         // will add extra schemas if they don't already exist
-        expect(schema.schemas.length).to.equal(2636);
+        expect(schema.schemas.length).to.equal(2641);
         expect(schema.schemas.find((schema) => { return schema.name === 'Scheduler'})).to.not.be.undefined;
 
         // will add correct enums to the extra schemas
@@ -85,7 +85,7 @@ describe('FranchiseSchema unit tests', () => {
         expect(schema.meta.major).to.equal(95);
         expect(schema.meta.minor).to.equal(7);
         expect(schema.meta.gameYear).to.equal(19);
-        expect(schema.schemas.length).to.equal(2408);
+        expect(schema.schemas.length).to.equal(2413);
         done();
       });
 
@@ -98,7 +98,7 @@ describe('FranchiseSchema unit tests', () => {
         expect(schema.meta.major).to.equal(367);
         expect(schema.meta.minor).to.equal(1);
         expect(schema.meta.gameYear).to.equal(20);
-        expect(schema.schemas.length).to.equal(2641);
+        expect(schema.schemas.length).to.equal(2646);
         done();
       });
 

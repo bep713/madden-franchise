@@ -64,6 +64,11 @@ class FranchiseFileRecord {
     return field ? field.value : null;
   };
 
+  getReferenceDataByKey(key) {
+    let field = this.getFieldByKey(key);
+    return field ? field.referenceData : null;
+  };
+
   parseRecordFields(data, offsetTable, record) {
     let fields = {};
   

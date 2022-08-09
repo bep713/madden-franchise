@@ -113,7 +113,7 @@ class FranchiseFile extends EventEmitter {
 
       for (let i = 0; i < tableIndicies.length; i++) {
         const currentTable = tableIndicies[i];
-        const nextTable = tableIndicies.length >= i+1 ? tableIndicies[i+1] : null;
+        const nextTable = tableIndicies.length > i+1 ? tableIndicies[i+1] : this.unpackedFileContents.length - 8;  // Ignore trailing 8 bytes on last table
 
         const tableData = this.unpackedFileContents.slice(currentTable, nextTable);
 
