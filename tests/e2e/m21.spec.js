@@ -551,23 +551,23 @@ describe('Madden 21 end to end tests', function () {
                 expect(record.NationalPopularity).to.equal(85);
               });
   
-              // it('getValueByKey()', () => {
-              //   expect(record.getValueByKey('LocalPopularity')).to.equal(85); 
-              //   expect(record.getValueByKey('RegionalPopularity')).to.equal(90);
-              //   expect(record.getValueByKey('NationalPopularity')).to.equal(85);
-              // });
+              it('getValueByKey()', () => {
+                expect(record.getValueByKey('LocalPopularity')).to.equal(85); 
+                expect(record.getValueByKey('RegionalPopularity')).to.equal(90);
+                expect(record.getValueByKey('NationalPopularity')).to.equal(85);
+              });
 
-              // it('getFieldByKey()', () => {
-              //   let localPopField = record.getFieldByKey('LocalPopularity');
-              //   expect(localPopField).to.not.be.undefined;
-              //   expect(localPopField.value).to.equal(85);
-              //   expect(localPopField.unformattedValue).to.equal('000000000001010101');
+              it('getFieldByKey()', () => {
+                let localPopField = record.getFieldByKey('LocalPopularity');
+                expect(localPopField).to.not.be.undefined;
+                expect(localPopField.value).to.equal(85);
+                expect(localPopField.unformattedValue.getBits(localPopField.offset.offset, localPopField.offset.length)).to.equal(85);
 
-              //   let regionalPopField = record.getFieldByKey('RegionalPopularity');
-              //   expect(regionalPopField).to.not.be.undefined;
-              //   expect(regionalPopField.value).to.equal(90);
-              //   expect(regionalPopField.unformattedValue).to.equal('1011010');
-              // });
+                let regionalPopField = record.getFieldByKey('RegionalPopularity');
+                expect(regionalPopField).to.not.be.undefined;
+                expect(regionalPopField.value).to.equal(90);
+                expect(regionalPopField.unformattedValue.getBits(regionalPopField.offset.offset, regionalPopField.offset.length)).to.equal(90);
+              });
             });
 
             describe('second record', () => {
@@ -583,11 +583,11 @@ describe('Madden 21 end to end tests', function () {
                 expect(record.NationalPopularity).to.equal(60);
               });
 
-              // it('has expected unformatted values', () => {
-              //   expect(record.fields['LocalPopularity'].unformattedValue).to.equal('000000000001010101');
-              //   expect(record.fields['NationalPopularity'].unformattedValue).to.equal('0111100');
-              //   expect(record.fields['RegionalPopularity'].unformattedValue).to.equal('1000001');
-              // });
+              it('has expected unformatted values', () => {
+                expect(record.fields['LocalPopularity'].unformattedValue.getBits(0, 18)).to.equal(85);
+                expect(record.fields['RegionalPopularity'].unformattedValue.getBits(25, 7)).to.equal(65);
+                expect(record.fields['NationalPopularity'].unformattedValue.getBits(18, 7)).to.equal(60);
+              });
             });
           });
         });
@@ -781,8 +781,6 @@ describe('Madden 21 end to end tests', function () {
             expect(table.recordsRead).to.be.true;
 
             let record = table.records[0];
-            // expect(record._data).to.eql('001000010000010000001000000110110010000100000100000000101010000100100001000001000000000001010110');
-            
             expect(record.Player0).to.eql('00100001000001000000100000011011');
             expect(record.Player1).to.eql('00100001000001000000001010100001');
             expect(record.Player2).to.eql('00100001000001000000000001010110');
@@ -1051,7 +1049,7 @@ describe('Madden 21 end to end tests', function () {
 
           it('Baker Mayfield - table2 field (First Name)', () => {
             let record = table.records[bakerMayfieldIndex];
-            const field = record.fields.FirstName.secondTableField;
+            const field = record.getFieldByKey('FirstName').secondTableField;
 
             expect(field).to.not.be.undefined;
             expect(field.index).to.equal(166425);
@@ -1633,14 +1631,12 @@ describe('Madden 21 end to end tests', function () {
       it('changes record correctly', () => {
         table.records[0].int0 = 54;
         expect(table.records[0].int0).to.equal(54);
-        // expect(table.records[0].fieldsArray[0].unformattedValue).to.equal('10000000000000000000000000110110');
         expect(table.records[0].fieldsArray[0].unformattedValue.getBits(table.records[0].fieldsArray[0].offset.offset, 32)).to.equal(2147483702);
       });
 
       it('changes an invalid value to the minimum allowed value', (done) => {
         table.records[0].int0 = -1;
         expect(table.records[0].int0).to.equal(-1);
-        // expect(table.records[0].fieldsArray[0].unformattedValue).to.equal('01111111111111111111111111111111');
         expect(table.records[0].fieldsArray[0].unformattedValue.getBits(table.records[0].fieldsArray[0].offset.offset, 32)).to.equal(0x7FFFFFFF);
 
         file.save(filePaths.saveTest.m21).then(() => {
@@ -1649,7 +1645,6 @@ describe('Madden 21 end to end tests', function () {
             let table2 = file2.getTableById(intArrayTableId);
             table2.readRecords().then(() => {
               expect(table2.records[0].int0).to.eql(-1);
-              // expect(table2.records[0].fieldsArray[0].unformattedValue).to.eql('01111111111111111111111111111111');
               expect(table.records[0].fieldsArray[0].unformattedValue.getBits(table.records[0].fieldsArray[0].offset.offset, 32)).to.eql(0x7FFFFFFF);
               done();
             });
@@ -1671,7 +1666,7 @@ describe('Madden 21 end to end tests', function () {
       });
 
       it('contains correct reference', () => {
-        expect(table.records[0].fields.WR.referenceData).to.eql({
+        expect(table.records[0].getReferenceDataByKey('WR')).to.eql({
           tableId: 7308,
           rowNumber: 14
         });
@@ -1820,6 +1815,19 @@ describe('Madden 21 end to end tests', function () {
         expect(references[10].tableId).to.eql(7698);
         expect(references[10].name).to.eql('PlayerStatRecord');
         expect(references[10].table).to.eql(playerStatRecord);
+      });
+    });
+
+    describe('ResponseForm[] - last table', () => {
+      const lastTableId = 7789;
+
+      before(async () => {
+        table = file.getTableById(lastTableId);
+        await table.readRecords();
+      });
+
+      it('trailing 8 bytes of file is not included in data', () => {
+        expect(table.data.length).to.equal(0x114);
       });
     });
 
