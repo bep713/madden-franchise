@@ -1,7 +1,9 @@
 const path = require('path');
 const expect = require('chai').expect;
+const { BitView } = require('bit-buffer');
 const FranchiseFile = require('../../FranchiseFile');
 const FranchiseFileTable = require('../../FranchiseFileTable');
+
 const filePaths = {
   'compressed': {
     'ftc': 'tests/data/FTC_COMPRESS.FTC',
@@ -203,12 +205,12 @@ describe('Madden 20 FTC end to end tests', function () {
                             let entriesField = record.getFieldByKey('Entries');
                             expect(entriesField).to.not.be.undefined;
                             expect(entriesField.value).to.equal('00000110011110000000000000000000');
-                            expect(entriesField.unformattedValue).to.equal('00000110011110000000000000000000');
+                            expect(entriesField.unformattedValue.getBits(0, 32)).to.equal(0x6780000);
             
                             let nameField = record.getFieldByKey('Name');
                             expect(nameField).to.not.be.undefined;
                             expect(nameField.value).to.equal('AwardType');
-                            expect(nameField.unformattedValue).to.equal('00000000000000000000000000000000');
+                            expect(nameField.unformattedValue.getBits(32, 32)).to.equal(0);
                         });
 
                         it('table2 field', () => {
@@ -217,7 +219,8 @@ describe('Madden 20 FTC end to end tests', function () {
                             expect(nameTable2Field.index).to.equal(0);
                             expect(nameTable2Field.maxLength).to.equal(44);
                             expect(nameTable2Field.value).to.equal('AwardType');
-                            expect(nameTable2Field.unformattedValue).to.equal('01000001011101110110000101110010011001000101010001111001011100000110010100000000');
+                            expect(nameTable2Field.unformattedValue)
+                                .to.eql(Buffer.from([0x41, 0x77, 0x61, 0x72, 0x64, 0x54, 0x79, 0x70, 0x65, 0x00]));
                         });
                     });
 
@@ -243,12 +246,12 @@ describe('Madden 20 FTC end to end tests', function () {
                             let entriesField = record.getFieldByKey('Entries');
                             expect(entriesField).to.not.be.undefined;
                             expect(entriesField.value).to.equal('00000110011001100000000000000000');
-                            expect(entriesField.unformattedValue).to.equal('00000110011001100000000000000000');
+                            expect(entriesField.unformattedValue.getBits(0, 32)).to.equal(0x6660000);
             
                             let nameField = record.getFieldByKey('Name');
                             expect(nameField).to.not.be.undefined;
                             expect(nameField.value).to.equal('City Personality');
-                            expect(nameField.unformattedValue).to.equal('00000000000000000000000000001010');
+                            expect(nameField.unformattedValue.getBits(32, 32)).to.equal(0xA);
                         });
 
                         it('table2 field', () => {
@@ -257,7 +260,8 @@ describe('Madden 20 FTC end to end tests', function () {
                             expect(nameTable2Field.index).to.equal(10);
                             expect(nameTable2Field.maxLength).to.equal(44);
                             expect(nameTable2Field.value).to.equal('City Personality');
-                            expect(nameTable2Field.unformattedValue).to.equal('0100001101101001011101000111100100100000010100000110010101110010011100110110111101101110011000010110110001101001011101000111100100000000');
+                            expect(nameTable2Field.unformattedValue)
+                                .to.eql(Buffer.from([0x43, 0x69, 0x74, 0x79, 0x20, 0x50, 0x65, 0x72, 0x73, 0x6f, 0x6e, 0x61, 0x6c, 0x69, 0x74, 0x79, 0x00]));
                         });
                     });
                 });

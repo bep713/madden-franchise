@@ -45,7 +45,11 @@ class FranchiseEnum {
   };
 
   getMemberByValue(value) {
-    return this._members.find((member) => { return member.name !== 'First_' && member.name !== 'Last_' && member.value === value; });
+    const matches = this._members.filter((member) => { return member.name !== 'First_' && member.name !== 'Last_' && member.value === value; });
+    if (matches.length === 0) { throw new Error(`Argument is not a valid enum value for this field. You passed in ${value}. Field name: ${this.name}`); }
+
+    const matchesNoUnderscore = matches.find((member) => { return member.name[member.name.length - 1] !== '_'});    
+    return matchesNoUnderscore ? matchesNoUnderscore : matches[0];
   };
 
   getMemberByUnformattedValue(value) {

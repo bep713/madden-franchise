@@ -12,7 +12,7 @@ FTCTable2FieldStrategy.getInitialUnformattedValue = (field, data) => {
         fieldData = fieldData.slice(0, endOfFieldIndex + 1);
     }
 
-    return utilService.getBitArray(fieldData);
+    return fieldData;
 };
 
 FTCTable2FieldStrategy.setUnformattedValueFromFormatted = (formattedValue, maxLength) => {
@@ -20,10 +20,8 @@ FTCTable2FieldStrategy.setUnformattedValueFromFormatted = (formattedValue, maxLe
         // FTC strings cannot equal max length because the last character must be the null character.
         formattedValue = formattedValue.substring(0, maxLength - 1);
     }
-    
-    return formattedValue.split('').map((char) => {
-        return char.charCodeAt(0).toString(2).padStart(8, '0');
-    }).join('') + '00000000';
+
+    return Buffer.from(formattedValue + '\u0000');
 };
 
 module.exports = FTCTable2FieldStrategy;

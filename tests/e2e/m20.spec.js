@@ -1,7 +1,9 @@
 const path = require('path');
 const expect = require('chai').expect;
+const { BitView } = require('bit-buffer');
 const FranchiseFile = require('../../FranchiseFile');
 const FranchiseFileTable = require('../../FranchiseFileTable');
+
 const filePaths = {
   'compressed': {
     'm20': 'tests/data/CAREER-20COMPRESS'
@@ -519,23 +521,23 @@ describe('Madden 20 end to end tests', function () {
                 expect(record.NationalPopularity).to.equal(85);
               });
   
-              it('getValueByKey()', () => {
-                expect(record.getValueByKey('LocalPopularity')).to.equal(85); 
-                expect(record.getValueByKey('RegionalPopularity')).to.equal(90);
-                expect(record.getValueByKey('NationalPopularity')).to.equal(85);
-              });
+              // it('getValueByKey()', () => {
+              //   expect(record.getValueByKey('LocalPopularity')).to.equal(85); 
+              //   expect(record.getValueByKey('RegionalPopularity')).to.equal(90);
+              //   expect(record.getValueByKey('NationalPopularity')).to.equal(85);
+              // });
 
-              it('getFieldByKey()', () => {
-                let localPopField = record.getFieldByKey('LocalPopularity');
-                expect(localPopField).to.not.be.undefined;
-                expect(localPopField.value).to.equal(85);
-                expect(localPopField.unformattedValue).to.equal('000000000001010101');
+              // it('getFieldByKey()', () => {
+              //   let localPopField = record.getFieldByKey('LocalPopularity');
+              //   expect(localPopField).to.not.be.undefined;
+              //   expect(localPopField.value).to.equal(85);
+              //   expect(localPopField.unformattedValue).to.equal('000000000001010101');
 
-                let regionalPopField = record.getFieldByKey('RegionalPopularity');
-                expect(regionalPopField).to.not.be.undefined;
-                expect(regionalPopField.value).to.equal(90);
-                expect(regionalPopField.unformattedValue).to.equal('1011010');
-              });
+              //   let regionalPopField = record.getFieldByKey('RegionalPopularity');
+              //   expect(regionalPopField).to.not.be.undefined;
+              //   expect(regionalPopField.value).to.equal(90);
+              //   expect(regionalPopField.unformattedValue).to.equal('1011010');
+              // });
             });
 
             describe('second record', () => {
@@ -552,9 +554,9 @@ describe('Madden 20 end to end tests', function () {
               });
 
               it('has expected unformatted values', () => {
-                expect(record.getFieldByKey('LocalPopularity').unformattedValue).to.equal('000000000001010101');
-                expect(record.getFieldByKey('NationalPopularity').unformattedValue).to.equal('0111100');
-                expect(record.getFieldByKey('RegionalPopularity').unformattedValue).to.equal('1000001');
+                expect(record.fields.LocalPopularity.unformattedValue.getBits(11, 7)).to.equal(85);
+                expect(record.fields.RegionalPopularity.unformattedValue.getBits(25, 7)).to.equal(65);
+                expect(record.fields.NationalPopularity.unformattedValue.getBits(18, 7)).to.equal(60);
               });
             });
           });
@@ -627,7 +629,7 @@ describe('Madden 20 end to end tests', function () {
             expect(table.recordsRead).to.be.true;
 
             let record = table.records[0];
-            expect(record._data).to.eql('001000010000101000000000010111010010000100001010000010001111011000100001000010100000001010100000');
+            expect(record._data).to.eql(Buffer.from([0x21, 0x0A, 0x00, 0x5D, 0x21, 0x0A, 0x08, 0xF6, 0x21, 0x0A, 0x02, 0xA0]));
             expect(record.Player0).to.eql('00100001000010100000000001011101');
             expect(record.Player1).to.eql('00100001000010100000100011110110');
             expect(record.Player2).to.eql('00100001000010100000001010100000');
@@ -752,7 +754,7 @@ describe('Madden 20 end to end tests', function () {
         describe('records have expected values', () => {
           it('first record', () => {
             let record = table.records[0];
-            expect(record.GameStats).to.be.undefined;
+            expect(record.GameStats).to.be.null;
             expect(record.SeasonStats).to.equal('00111100010100100000000000000000');
             expect(record.FirstName).to.equal('Ameer');
             expect(record.LastName).to.equal('Abdullah');
@@ -764,7 +766,7 @@ describe('Madden 20 end to end tests', function () {
 
           it('Marcus Maye', () => {
             let record = table.records[1735];
-            expect(record.GameStats).to.be.undefined;
+            expect(record.GameStats).to.be.null;
             expect(record.SeasonStats).to.equal('00111100010100100000010100110101');
             expect(record.FirstName).to.equal('Marcus');
             expect(record.LastName).to.equal('Maye');
@@ -775,7 +777,7 @@ describe('Madden 20 end to end tests', function () {
 
           it('Baker Mayfield', () => {
             let record = table.records[1736];
-            expect(record.GameStats).to.be.undefined;
+            expect(record.GameStats).to.be.null;
             expect(record.SeasonStats).to.equal('00111100010100100000010100110110');
             expect(record.FirstName).to.equal('Baker');
             expect(record.LastName).to.equal('Mayfield');
@@ -786,14 +788,14 @@ describe('Madden 20 end to end tests', function () {
 
           it('Baker Mayfield - table2 field (First Name)', () => {
             let record = table.records[1736];
-            const field = record.getFieldByKey('FirstName').secondTableField;
+            const field = record.fields.FirstName.secondTableField;
 
             expect(field).to.not.be.undefined;
             expect(field.index).to.equal(182280);
             expect(field.maxLength).to.equal(17);
             expect(field.value).to.equal('Baker');
             expect(field.unformattedValue).to
-              .equal('0100001001100001011010110110010101110010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000');
+              .eql(Buffer.from([0x42, 0x61, 0x6b, 0x65, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]));
           });
         });
       });
@@ -825,14 +827,14 @@ describe('Madden 20 end to end tests', function () {
 
           expect(record.FirstName).to.equal('Clark');
           expect(record.LastName).to.equal('Kent');
-          expect(record.MetaMorph_GutBase).to.equal(0.49494949494);
+          expect(record.MetaMorph_GutBase.toFixed(6)).to.equal('0.494949'); // string value because of toFixed()
         });
 
         it('wont allow invalid reference value', () => {
           let record = table.records[1736];
 
           expect(() => {
-            record.getFieldByKey('FirstName').unformattedValue = '30101010101';
+            record.fields.FirstName.unformattedValue = '30101010101';
           }).to.throw(Error);
         });
 
@@ -940,57 +942,70 @@ describe('Madden 20 end to end tests', function () {
       });
 
       it('reads enum correctly if it has leading zeroes', () => {
-        let first = table.records[0].getFieldByKey('PlayerPosition');
+        let first = table.records[0].fields.PlayerPosition;
         expect(first.offset.enum).to.not.be.undefined;
-        expect(first.unformattedValue).to.equal('00000000000000000000000000010000');
+        expect(first.unformattedValue.getBits(32, 32)).to.equal(0x10);
         expect(first.value).to.equal('CB');
       });
 
       it('sets enum correctly if it has leading zeroes', () => {
-        let first = table.records[0].getFieldByKey('PlayerPosition');
+        let first = table.records[0].fields.PlayerPosition;
         first.value = 'WR';
+
         expect(first.value).to.equal('WR');
-        expect(first.unformattedValue).to.equal('00000000000000000000000000000011');
+        expect(first.unformattedValue.getBits(32, 32)).to.equal(3);
       });
 
       it('sets unformatted value correctly if the length is correctly passed in', () => {
-        let first = table.records[0].getFieldByKey('PlayerPosition');
-        first.unformattedValue = '00000000000000000000000000000011';
+        let first = table.records[0].fields.PlayerPosition;
+
+        const val = Buffer.from([0x36, 0xD4, 0x00, 0x14, 0x00, 0x00, 0x00, 0x3]);
+        const bv = new BitView(val, val.byteOffset);
+        bv.bigEndian = true;
+
+        first.unformattedValue = bv;
+
         expect(first.value).to.equal('WR');
-        expect(first.unformattedValue).to.equal('00000000000000000000000000000011');
+        expect(first.unformattedValue.getBits(32, 32)).to.equal(3);
       });
 
       it('sets unformatted value correctly if the length isnt correctly passed in', () => {
-        let first = table.records[0].getFieldByKey('PlayerPosition');
-        first.unformattedValue = '11';
-        expect(first.value).to.equal('WR');
-        expect(first.unformattedValue).to.equal('00000000000000000000000000000011');
+        let first = table.records[0].fields.PlayerPosition;
+        
+        const val = Buffer.from([0x36, 0xD4, 0x00, 0x14, 0x00, 0x00, 0x00, 0x2]);
+        const bv = new BitView(val, val.byteOffset);
+        bv.bigEndian = true;
+
+        first.unformattedValue = bv;
+
+        expect(first.value).to.equal('FB');
+        expect(first.unformattedValue.getBits(32, 32)).to.equal(2);
       });
 
       it('throws an error if unformatted enum value is set to an invalid value', () => {
-        let first = table.records[0].getFieldByKey('PlayerPosition');
+        let first = table.records[0].fields.PlayerPosition;
 
         expect(() => {
           first.unformattedValue = '1000000';
         }).to.throw(Error);
 
-        expect(first.value).to.equal('WR');
-        expect(first.unformattedValue).to.equal('00000000000000000000000000000011');
+        expect(first.value).to.equal('FB');
+        expect(first.unformattedValue.getBits(32, 32)).to.equal(2);
       });
 
       it('throws an error if enum value is set to an invalid value', () => {
-        let first = table.records[0].getFieldByKey('PlayerPosition');
+        let first = table.records[0].fields.PlayerPosition;
 
         expect(() => {
           first.value = 'Coach';
         }).to.throw(Error);
 
-        expect(first.value).to.equal('WR');
-        expect(first.unformattedValue).to.equal('00000000000000000000000000000011');
+        expect(first.value).to.equal('FB');
+        expect(first.unformattedValue.getBits(32, 32)).to.equal(2);
       });
 
       it('sets enum values as values without an underscore if possible', () => {
-        let seventh = table.records[6].getFieldByKey('PlayerPosition');
+        let seventh = table.records[6].fields.PlayerPosition;
         expect(seventh.value).to.equal('K');
       });
     });
@@ -1027,9 +1042,8 @@ describe('Madden 20 end to end tests', function () {
 
         record.WeeklyDefenseMedal = 'MedalNone';
         expect(record.WeeklyDefenseMedal).to.equal('MedalNone');
-        expect(record.getFieldByKey('WeeklyDefenseMedal').unformattedValue).to.equal('1000');
+        expect(record.fields.WeeklyDefenseMedal.unformattedValue.getBits(3776, 4)).to.equal(8);
       });
-    
     });
 
     describe('Spline', () => {
@@ -1067,13 +1081,13 @@ describe('Madden 20 end to end tests', function () {
       it('changes record correctly', () => {
         table.records[0].int0 = 54;
         expect(table.records[0].int0).to.equal(54);
-        expect(table.records[0].fields[0].unformattedValue).to.equal('10000000000000000000000000110110');
+        expect(table.records[0].fieldsArray[0].unformattedValue.getBits(0, 32)).to.eql(0x80000036);
       });
 
       it('changes an invalid value to the minimum allowed value', (done) => {
         table.records[0].int0 = -1;
         expect(table.records[0].int0).to.equal(-1);
-        expect(table.records[0].fields[0].unformattedValue).to.equal('01111111111111111111111111111111');
+        expect(table.records[0].fieldsArray[0].unformattedValue.getBits(0, 32)).to.eql(0x7FFFFFFF);
 
         file.save(filePaths.saveTest.m20).then(() => {
           let file2 = new FranchiseFile(filePaths.saveTest.m20);
@@ -1081,7 +1095,7 @@ describe('Madden 20 end to end tests', function () {
             let table2 = file2.getTableById(7182);
             table2.readRecords().then(() => {
               expect(table2.records[0].int0).to.eql(-1);
-              expect(table2.records[0].fields[0].unformattedValue).to.eql('01111111111111111111111111111111');
+              expect(table2.records[0].fieldsArray[0].unformattedValue.getBits(0, 32)).to.eql(0x7FFFFFFF);
               done();
             });
           });

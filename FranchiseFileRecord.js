@@ -1,79 +1,62 @@
-const EventEmitter = require('events').EventEmitter;
 const utilService = require('./services/utilService');
 const FranchiseFileField = require('./FranchiseFileField');
 
-class FranchiseFileRecord extends EventEmitter {
-  constructor(data, index, offsetTable) {
-    super();
+class FranchiseFileRecord {
+  constructor(data, index, offsetTable, parent) {
     this._data = data;
     this._offsetTable = offsetTable;
     this.index = index;
-    this._fields = parseRecordFields(data, offsetTable);
+    this._fieldsArray = [];
+    this._fields = this.parseRecordFields(data, offsetTable, this);
     this.isChanged = false;
     this.arraySize = null;
     this.isEmpty = false;
+    this._parent = parent;
 
-    const that = this;
-    this._fields.forEach((field) => {
-      Object.defineProperty(this, field.key, {
-        set: function (value) {
-          field.value = value;
-        },
-        get: function () {
-          return field.value;
+    return new Proxy(this, {
+      get: function (target, prop, receiver) {
+        return target.fields[prop] !== undefined ? target.fields[prop].value : target[prop] !== undefined ? target[prop] : null;
+      },
+      set: function (target, prop, receiver) {
+        if (target.fields[prop] !== undefined) {
+          target.fields[prop].value = receiver;
         }
-      });
-
-      field.on('change', function () {
-        that._data = utilService.replaceAt(that._data, this.offset.offset, this.unformattedValue);
-
-        // NOTE: At this time, we can only change the size of arrays of references.
-        // I'm not sure how to change the size of non-reference arrays, or if it's even possible.
-        if (that.arraySize !== null && that.arraySize !== undefined) {
-          const referenceData = this.referenceData;
-
-          // If the field is outside of the previous array size and was edited to a valid reference,
-          // then reset the array size
-          if (this.offset.index >= that.arraySize) {
-            if (this.isReference) {
-              if (referenceData.tableId !== 0 || referenceData.rowNumber !== 0) {
-                that.arraySize = this.offset.index + 1;
-              }
-            }
-          }
-          
-          // If the value was changed to 0s, then shrink the array size to this index.
-          else if (this.isReference) {
-            if (referenceData.tableId === 0 && referenceData.rowNumber === 0) {
-              that.arraySize = this.offset.index;
-            }
-          }
+        else {
+          target[prop] = receiver;
         }
 
-        that.emit('change', this.offset);
-      });
-    });
+        return true;
+      }
+    })
   };
 
   get hexData () {
-    return Buffer.from(utilService.binaryBlockToDecimalBlock(this._data));
+    return this._data;
   };
 
   get fields () {
     return this._fields;
   };
 
+  get fieldsArray () {
+    return this._fieldsArray;
+  };
+
+  get data() {
+    return this._data;
+  };
+
   set data (data) {
     this._data = data;
 
-    this._fields.forEach((field) => {
+    this._fieldsArray.forEach((field) => {
       const unformattedValue = data.slice(field.offset.offset, field.offset.offset + field.offset.length);
       field.setUnformattedValueWithoutChangeEvent(unformattedValue);
     });
   };
 
   getFieldByKey(key) {
-    return this._fields.find((field) => { return field.key === key; });
+    return this._fields[key];
   };
 
   getValueByKey(key) {
@@ -86,22 +69,57 @@ class FranchiseFileRecord extends EventEmitter {
     return field ? field.referenceData : null;
   };
 
+  parseRecordFields(data, offsetTable, record) {
+    let fields = {};
+  
+    for (let j = 0; j < offsetTable.length; j++) {
+      const offset = offsetTable[j];
+
+      // Push the entire record buffer to the field. No need to perform a calculation
+      // to subarray the buffer, BitView will take care of it in the Field.
+      fields[offset.name] = new FranchiseFileField(offset.name, data, offset, record);
+
+      this._fieldsArray.push(fields[offset.name]);
+    }
+  
+    return fields;
+  };
+
   empty() {
-    this.emit('empty');
+    this._parent.onEvent('empty', this);
     this.isEmpty = true;
+  };
+
+  onEvent(name, field) {
+    if (name === 'change') {
+      // this._data = utilService.replaceAt(this._data, field.offset.offset, field.unformattedValue);
+
+      // NOTE: At field time, we can only change the size of arrays of references.
+      // I'm not sure how to change the size of non-reference arrays, or if it's even possible.
+      if (this.arraySize !== null && this.arraySize !== undefined) {
+        const referenceData = field.referenceData;
+
+        // If the field is outside of the previous array size and was edited to a valid reference,
+        // then reset the array size
+        if (field.offset.index >= this.arraySize) {
+          if (field.isReference) {
+            if (referenceData.tableId !== 0 || referenceData.rowNumber !== 0) {
+              this.arraySize = field.offset.index + 1;
+            }
+          }
+        }
+        
+        // If the value was changed to 0s, then shrink the array size to field index.
+        else if (field.isReference) {
+          if (referenceData.tableId === 0 && referenceData.rowNumber === 0) {
+            this.arraySize = field.offset.index;
+          }
+        }
+      }
+
+      this._parent.onEvent('change', this);
+    }
   };
 };
 
 module.exports = FranchiseFileRecord;
-
-function parseRecordFields (data, offsetTable) {
-  let fields = [];
-
-  for (let j = 0; j < offsetTable.length; j++) {
-    const offset = offsetTable[j];
-    const unformattedValue = data.slice(offset.offset, offset.offset + offset.length);
-    fields.push(new FranchiseFileField(offset.name, unformattedValue, offset));
-  }
-
-  return fields;
-};

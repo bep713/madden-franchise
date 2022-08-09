@@ -3,7 +3,7 @@ const utilService = require('../../../services/utilService');
 let FranchiseTable2FieldStrategy = {};
 
 FranchiseTable2FieldStrategy.getInitialUnformattedValue = (field, data) => {
-    return utilService.getBitArray(data.slice(field.secondTableField.index, (field.secondTableField.index + field.offset.maxLength)));
+    return data.slice(field.secondTableField.index, (field.secondTableField.index + field.offset.maxLength));
 };
 
 FranchiseTable2FieldStrategy.setUnformattedValueFromFormatted = (formattedValue, maxLength) => {
@@ -18,10 +18,8 @@ FranchiseTable2FieldStrategy.setUnformattedValueFromFormatted = (formattedValue,
     for (let i = 0; i < numberOfNullCharactersToAdd; i++) {
         valuePadded += String.fromCharCode(0);
     }
-    
-    return valuePadded.split('').map((char) => {
-        return char.charCodeAt(0).toString(2).padStart(8, '0');
-    }).join('');
+
+    return Buffer.from(valuePadded);
 };
 
 module.exports = FranchiseTable2FieldStrategy;

@@ -1,8 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 const expect = require('chai').expect;
+const { BitView } = require('bit-buffer');
 const FranchiseFile = require('../../FranchiseFile');
 const FranchiseFileTable = require('../../FranchiseFileTable');
+
 const filePaths = {
   'compressed': {
     'm21': 'tests/data/CAREER-21COMPRESS'
@@ -559,12 +561,12 @@ describe('Madden 21 end to end tests', function () {
                 let localPopField = record.getFieldByKey('LocalPopularity');
                 expect(localPopField).to.not.be.undefined;
                 expect(localPopField.value).to.equal(85);
-                expect(localPopField.unformattedValue).to.equal('000000000001010101');
+                expect(localPopField.unformattedValue.getBits(localPopField.offset.offset, localPopField.offset.length)).to.equal(85);
 
                 let regionalPopField = record.getFieldByKey('RegionalPopularity');
                 expect(regionalPopField).to.not.be.undefined;
                 expect(regionalPopField.value).to.equal(90);
-                expect(regionalPopField.unformattedValue).to.equal('1011010');
+                expect(regionalPopField.unformattedValue.getBits(regionalPopField.offset.offset, regionalPopField.offset.length)).to.equal(90);
               });
             });
 
@@ -582,9 +584,9 @@ describe('Madden 21 end to end tests', function () {
               });
 
               it('has expected unformatted values', () => {
-                expect(record.getFieldByKey('LocalPopularity').unformattedValue).to.equal('000000000001010101');
-                expect(record.getFieldByKey('NationalPopularity').unformattedValue).to.equal('0111100');
-                expect(record.getFieldByKey('RegionalPopularity').unformattedValue).to.equal('1000001');
+                expect(record.fields['LocalPopularity'].unformattedValue.getBits(0, 18)).to.equal(85);
+                expect(record.fields['RegionalPopularity'].unformattedValue.getBits(25, 7)).to.equal(65);
+                expect(record.fields['NationalPopularity'].unformattedValue.getBits(18, 7)).to.equal(60);
               });
             });
           });
@@ -625,8 +627,8 @@ describe('Madden 21 end to end tests', function () {
               // Make sure the next record buffer is unchanged.
               expect(table.data.readUInt32BE(table.header.table1StartIndex + 4)).to.eql(firstRecordValue);
 
-              expect(table.records[0]._data).to.eql('00000000000000000000000100000000');
-              expect(table.records[255]._data).to.eql('00000000000000000000000000000000');
+              expect(table.records[0].data.readUInt32BE(0)).to.equal(256);
+              expect(table.records[255].data.readUInt32BE(0)).to.equal(0);
             });
 
             it('cannot empty an already emptied record', () => {
@@ -651,8 +653,8 @@ describe('Madden 21 end to end tests', function () {
               // Make sure the next record buffer is unchanged.
               expect(table.data.readUInt32BE(table.header.table1StartIndex + 4)).to.eql(firstRecordValue);
 
-              expect(table.records[0]._data).to.eql('00000000000000000000000100000000');
-              expect(table.records[255]._data).to.eql('00000000000000000000000000000000');
+              expect(table.records[0].data.readUInt32BE(0)).to.equal(256);
+              expect(table.records[255].data.readUInt32BE(0)).to.equal(0);
             });
           });
 
@@ -677,7 +679,7 @@ describe('Madden 21 end to end tests', function () {
               });
 
               expect(table.data.readUInt32BE(table.header.table1StartIndex + (252 * 4))).to.equal(254);
-              expect(table.records[252]._data).to.eql('00000000000000000000000011111110');
+              expect(table.records[252].data.readUInt32BE(0)).to.equal(254);
             });
 
             it('filling a record when there is already one or more empty records - last record', () => {
@@ -692,7 +694,7 @@ describe('Madden 21 end to end tests', function () {
               });
 
               expect(table.data.readUInt32BE(table.header.table1StartIndex + (255 * 4))).to.equal(256);
-              expect(table.records[255]._data).to.eql('00000000000000000000000100000000');
+              expect(table.records[255].data.readUInt32BE(0)).to.eql(256);
             });
           });
         });
@@ -779,7 +781,6 @@ describe('Madden 21 end to end tests', function () {
             expect(table.recordsRead).to.be.true;
 
             let record = table.records[0];
-            expect(record._data).to.eql('001000010000010000001000000110110010000100000100000000101010000100100001000001000000000001010110');
             expect(record.Player0).to.eql('00100001000001000000100000011011');
             expect(record.Player1).to.eql('00100001000001000000001010100001');
             expect(record.Player2).to.eql('00100001000001000000000001010110');
@@ -896,7 +897,7 @@ describe('Madden 21 end to end tests', function () {
         });
 
         it('make one record empty', () => {
-          table.records[19].Player0 = '00000000000000000000000000100000'
+          table.records[19].Player0 = '00000000000000000000000000100000';
           table.recalculateEmptyRecordReferences();
 
           expect(table.emptyRecords.size).to.equal(1);
@@ -914,6 +915,7 @@ describe('Madden 21 end to end tests', function () {
     describe('Player table', () => {
       const marcusMayeIndex = 1584;
       const bakerMayfieldIndex = 1585;
+      const firstEmptyRecordIndex = 2971;
 
       beforeEach(() => {
         table = file.getTableById(playerTableId);
@@ -958,13 +960,13 @@ describe('Madden 21 end to end tests', function () {
 
       describe('reads records that are passed in', () => {
         beforeEach((done) => {
-          table.readRecords(['FirstName', 'LastName', 'Position', 'TRAIT_BIGHITTER', 'MetaMorph_GutBase', 'SeasonStats', 'InjuryType']).then(() => {
+          table.readRecords(['FirstName', 'LastName', 'Position', 'TRAIT_BIGHITTER', 'MetaMorph_GutBase', 'SeasonStats', 'InjuryType', 'TRAIT_COVER_BALL']).then(() => {
             done();
           });
         });
 
         it('has expected offset table', () => {
-          expect(table.loadedOffsets.length).to.equal(7);
+          expect(table.loadedOffsets.length).to.equal(8);
           expect(table.offsetTable.length).to.equal(312);
 
           let offset0 = table.offsetTable[0];
@@ -1013,7 +1015,7 @@ describe('Madden 21 end to end tests', function () {
         describe('records have expected values', () => {
           it('first record', () => {
             let record = table.records[0];
-            expect(record.GameStats).to.be.undefined;
+            expect(record.GameStats).to.be.null;
             expect(record.SeasonStats).to.equal('00111100010110000000000000000000');
             expect(record.FirstName).to.equal('Ameer');
             expect(record.LastName).to.equal('Abdullah');
@@ -1025,7 +1027,7 @@ describe('Madden 21 end to end tests', function () {
 
           it('Marcus Maye', () => {
             let record = table.records[marcusMayeIndex];
-            expect(record.GameStats).to.be.undefined;
+            expect(record.GameStats).to.be.null;
             expect(record.SeasonStats).to.equal('00111100010110000000010101000010');
             expect(record.FirstName).to.equal('Marcus');
             expect(record.LastName).to.equal('Maye');
@@ -1036,7 +1038,7 @@ describe('Madden 21 end to end tests', function () {
 
           it('Baker Mayfield', () => {
             let record = table.records[bakerMayfieldIndex];
-            expect(record.GameStats).to.be.undefined;
+            expect(record.GameStats).to.be.null;
             expect(record.SeasonStats).to.equal('00111100010110000000010101000011');
             expect(record.FirstName).to.equal('Baker');
             expect(record.LastName).to.equal('Mayfield');
@@ -1053,8 +1055,13 @@ describe('Madden 21 end to end tests', function () {
             expect(field.index).to.equal(166425);
             expect(field.maxLength).to.equal(17);
             expect(field.value).to.equal('Baker');
-            expect(field.unformattedValue).to
-              .equal('0100001001100001011010110110010101110010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000');
+            expect(field.unformattedValue.length).to.equal(17);
+            expect(field.unformattedValue).to.eql(Buffer.from([0x42, 0x61, 0x6b, 0x65, 0x72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
+          });
+
+          it('incorrect enum value is returned correctly', () => {
+            let record = table.records[firstEmptyRecordIndex];
+            expect(record['TRAIT_COVER_BALL']).to.equal('000');
           });
         });
 
@@ -1068,7 +1075,7 @@ describe('Madden 21 end to end tests', function () {
         it('will re-read records if new attributes are passed in', (done) => {
           table.readRecords(['GameStats']).then(() => {
             expect(table.records[0].GameStats).to.not.be.undefined;
-            expect(table.loadedOffsets.length).to.equal(8)
+            expect(table.loadedOffsets.length).to.equal(9)
             done();
           }).catch((err) => {
             done(err);
@@ -1078,7 +1085,7 @@ describe('Madden 21 end to end tests', function () {
 
       describe('can set values', () => {
         before((done) => {
-          table.readRecords(['GameStats', 'FirstName', 'LastName', 'MetaMorph_GutBase']).then(() => {
+          table.readRecords(['GameStats', 'FirstName', 'LastName', 'MetaMorph_GutBase', 'CarryingRating']).then(() => {
             done();
           });
         });
@@ -1091,7 +1098,7 @@ describe('Madden 21 end to end tests', function () {
 
           expect(record.FirstName).to.equal('Clark');
           expect(record.LastName).to.equal('Kent');
-          expect(record.MetaMorph_GutBase).to.equal(0.49494949494);
+          expect(record.MetaMorph_GutBase.toFixed(6)).to.equal('0.494949'); // string value because of toFixed()
         });
 
         it('wont allow invalid reference value', () => {
@@ -1108,6 +1115,18 @@ describe('Madden 21 end to end tests', function () {
           expect(() => {
             record.GameStats = '222010101';
           }).to.throw(Error);
+        });
+
+        it('can set an integer field with a string', () => {
+          let record = table.records[bakerMayfieldIndex];
+          record.CarryingRating = '50';
+          expect(record.CarryingRating).to.equal(50);
+        });
+
+        it('can set a float field with a string', () => {
+          let record = table.records[bakerMayfieldIndex];
+          record.MetaMorph_GutBase = '0.60';
+          expect(record.MetaMorph_GutBase).to.equal(0.60);
         });
       });
     });
@@ -1206,57 +1225,69 @@ describe('Madden 21 end to end tests', function () {
       });
 
       it('reads enum correctly if it has leading zeroes', () => {
-        let first = table.records[0].getFieldByKey('PlayerPosition');
+        let first = table.records[0].fields.PlayerPosition;
         expect(first.offset.enum).to.not.be.undefined;
-        expect(first.unformattedValue).to.equal('00000000000000000000000000010000');
+        expect(first.unformattedValue.getBits(first.offset.offset, 32)).to.equal(16);
         expect(first.value).to.equal('CB');
       });
 
       it('sets enum correctly if it has leading zeroes', () => {
-        let first = table.records[0].getFieldByKey('PlayerPosition');
+        let first = table.records[0].fields.PlayerPosition;
         first.value = 'WR';
         expect(first.value).to.equal('WR');
-        expect(first.unformattedValue).to.equal('00000000000000000000000000000011');
+        expect(first.unformattedValue.getBits(first.offset.offset, 32)).to.equal(3);
       });
 
       it('sets unformatted value correctly if the length is correctly passed in', () => {
-        let first = table.records[0].getFieldByKey('PlayerPosition');
-        first.unformattedValue = '00000000000000000000000000000011';
+        let first = table.records[0].fields.PlayerPosition;
+        
+        const val = Buffer.from([0x36, 0xD4, 0x00, 0x14, 0x00, 0x00, 0x00, 0x3]);
+        const bv = new BitView(val, val.byteOffset);
+        bv.bigEndian = true;
+
+        first.unformattedValue = bv;
+
         expect(first.value).to.equal('WR');
-        expect(first.unformattedValue).to.equal('00000000000000000000000000000011');
+        expect(first.unformattedValue.getBits(32, 32)).to.equal(3);
       });
 
       it('sets unformatted value correctly if the length isnt correctly passed in', () => {
-        let first = table.records[0].getFieldByKey('PlayerPosition');
-        first.unformattedValue = '11';
-        expect(first.value).to.equal('WR');
-        expect(first.unformattedValue).to.equal('00000000000000000000000000000011');
+        let first = table.records[0].fields.PlayerPosition;
+        
+        const val = Buffer.from([0x36, 0xD4, 0x00, 0x14, 0x00, 0x00, 0x00, 0x2]);
+        const bv = new BitView(val, val.byteOffset);
+        bv.bigEndian = true;
+
+        first.unformattedValue = bv;
+
+        expect(first.value).to.equal('FB');
+        expect(first.unformattedValue.getBits(32, 32)).to.equal(2);
       });
 
       it('throws an error if unformatted enum value is set to an invalid value', () => {
-        let first = table.records[0].getFieldByKey('PlayerPosition');
+        let first = table.records[0].fields.PlayerPosition;
 
         expect(() => {
           first.unformattedValue = '1000000';
         }).to.throw(Error);
 
-        expect(first.value).to.equal('WR');
-        expect(first.unformattedValue).to.equal('00000000000000000000000000000011');
+        expect(first.value).to.equal('FB');
+        expect(first.unformattedValue.getBits(32, 32)).to.equal(2);
       });
 
       it('throws an error if enum value is set to an invalid value', () => {
-        let first = table.records[0].getFieldByKey('PlayerPosition');
+        let first = table.records[0].fields.PlayerPosition;
 
         expect(() => {
           first.value = 'Coach';
         }).to.throw(Error);
 
-        expect(first.value).to.equal('WR');
-        expect(first.unformattedValue).to.equal('00000000000000000000000000000011');
+        expect(first.value).to.equal('FB');
+        expect(first.unformattedValue.getBits(32, 32)).to.equal(2);
       });
 
       it('sets enum values as values without an underscore if possible', () => {
-        let seventh = table.records[6].getFieldByKey('PlayerPosition');
+        let seventh = table.records[6].fields.PlayerPosition;
         expect(seventh.value).to.equal('K');
       });
       
@@ -1285,7 +1316,7 @@ describe('Madden 21 end to end tests', function () {
           expect(table.data.readUInt32BE(table.header.table1StartIndex + (9 * table.header.record1Size))).to.equal(21);
 
           // Updates record buffer to reflect change
-          expect(table.records[9]._data.slice(0, 32)).to.equal('00000000000000000000000000010101');
+          expect(table.records[9].data.readUInt32BE(0)).to.equal(21);
         });
 
         it('can empty a 2nd record', () => {
@@ -1315,10 +1346,10 @@ describe('Madden 21 end to end tests', function () {
           expect(table.data.readUInt32BE(table.header.table1StartIndex + (9 * table.header.record1Size))).to.equal(6);
 
           // Updates record buffer to reflect change
-          expect(table.records[6]._data.slice(0, 32)).to.equal('00000000000000000000000000010101');
+          expect(table.records[6].data.readUInt32BE(0)).to.equal(21);
 
           // Updates other record buffer to reflect change to point to 6
-          expect(table.records[9]._data.slice(0, 32)).to.equal('00000000000000000000000000000110');
+          expect(table.records[9].data.readUInt32BE(0)).to.equal(6);
         });
 
         it('can fill the 1st empty record', () => {
@@ -1522,6 +1553,26 @@ describe('Madden 21 end to end tests', function () {
         record.STADIUM_FLAGBASEBALL = false;
         expect(record.STADIUM_FLAGBASEBALL).to.be.false;
       });
+
+      it('can set a boolean attribute with a string', () => {
+        let record = table.records[0];
+
+        record.STADIUM_FLAGBASEBALL = 'true';
+        expect(record.STADIUM_FLAGBASEBALL).to.be.true;
+
+        record.STADIUM_FLAGBASEBALL = 'false';
+        expect(record.STADIUM_FLAGBASEBALL).to.be.false;
+      });
+
+      it('can set a boolean attribute with an integer', () => {
+        let record = table.records[0];
+
+        record.STADIUM_FLAGBASEBALL = 1;
+        expect(record.STADIUM_FLAGBASEBALL).to.be.true;
+
+        record.STADIUM_FLAGBASEBALL = 0;
+        expect(record.STADIUM_FLAGBASEBALL).to.be.false;
+      });
     });
 
     describe('Team', () => {
@@ -1537,9 +1588,10 @@ describe('Madden 21 end to end tests', function () {
 
         record.WeeklyDefenseMedal = 'MedalNone';
         expect(record.WeeklyDefenseMedal).to.equal('MedalNone');
-        expect(record.getFieldByKey('WeeklyDefenseMedal').unformattedValue).to.equal('1000');
+
+        // Normally, 8 = "1000". Since this enum is a maxLength of 4, "1000" = -1, which equals MedalNone.
+        expect(record.fields.WeeklyDefenseMedal.unformattedValue.getBits(record.fields.WeeklyDefenseMedal.offset.offset, 4)).to.equal(8);
       });
-    
     });
 
     describe('Spline', () => {
@@ -1579,13 +1631,13 @@ describe('Madden 21 end to end tests', function () {
       it('changes record correctly', () => {
         table.records[0].int0 = 54;
         expect(table.records[0].int0).to.equal(54);
-        expect(table.records[0].fields[0].unformattedValue).to.equal('10000000000000000000000000110110');
+        expect(table.records[0].fieldsArray[0].unformattedValue.getBits(table.records[0].fieldsArray[0].offset.offset, 32)).to.equal(2147483702);
       });
 
       it('changes an invalid value to the minimum allowed value', (done) => {
         table.records[0].int0 = -1;
         expect(table.records[0].int0).to.equal(-1);
-        expect(table.records[0].fields[0].unformattedValue).to.equal('01111111111111111111111111111111');
+        expect(table.records[0].fieldsArray[0].unformattedValue.getBits(table.records[0].fieldsArray[0].offset.offset, 32)).to.equal(0x7FFFFFFF);
 
         file.save(filePaths.saveTest.m21).then(() => {
           let file2 = new FranchiseFile(filePaths.saveTest.m21);
@@ -1593,7 +1645,7 @@ describe('Madden 21 end to end tests', function () {
             let table2 = file2.getTableById(intArrayTableId);
             table2.readRecords().then(() => {
               expect(table2.records[0].int0).to.eql(-1);
-              expect(table2.records[0].fields[0].unformattedValue).to.eql('01111111111111111111111111111111');
+              expect(table.records[0].fieldsArray[0].unformattedValue.getBits(table.records[0].fieldsArray[0].offset.offset, 32)).to.eql(0x7FFFFFFF);
               done();
             });
           });
@@ -1610,7 +1662,7 @@ describe('Madden 21 end to end tests', function () {
       });
 
       it('recognizes type `record` as a reference', () => {
-        expect(table.records[0].fields[0].isReference).to.be.true;
+        expect(table.records[0].fieldsArray[0].isReference).to.be.true;
       });
 
       it('contains correct reference', () => {

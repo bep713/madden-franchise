@@ -19,7 +19,7 @@ const filePaths = {
 
 let file, tuningFile;
 
-describe('Madden 20 FTC end to end tests', function () {
+describe('Madden 22 FTC end to end tests', function () {
     this.timeout(7000);
 
     describe('post-open tests', () => {
@@ -71,6 +71,8 @@ describe('Madden 20 FTC end to end tests', function () {
                 const newRecordValue = 'testnamechange';
 
                 table.records[0].DisplayName = newRecordValue;
+                expect(table.records[0].DisplayName).to.equal(newRecordValue);
+                expect(table.records[1].DisplayName).to.equal(nextRecordValue);
 
                 await file.save(filePaths.saveTest.ftc);
 
