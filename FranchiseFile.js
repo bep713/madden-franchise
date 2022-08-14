@@ -461,6 +461,9 @@ function getGameYear(data, isCompressed, format) {
     else if (yearIdentifier[2] === 0x32) {
       return 22;
     }
+    else if (yearIdentifier[2] === 0x33) {
+      return 23;
+    }
     else {
       const schemaMajor = getCompressedSchema(data).major;
       const year = schemaMax.find((schema) => { return schema.max >= schemaMajor; }).year;

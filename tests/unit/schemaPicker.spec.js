@@ -65,7 +65,8 @@ describe('schema picker service unit tests', () => {
     expect(schemas[0].major).to.equal(95);
     expect(schemas[1].major).to.equal(371);
     expect(schemas[2].major).to.equal(220);
-    expect(schemas[3].major).to.equal(328);
+    expect(schemas[3].major).to.equal(329);
+    expect(schemas[4].major).to.equal(156);
   });
 
   it('retrieves M21 schema', () => {
