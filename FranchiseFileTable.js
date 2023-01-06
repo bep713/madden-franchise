@@ -96,6 +96,7 @@ class FranchiseFileTable extends EventEmitter {
       
       bufferArrays.push(this.data.slice(currentOffset, recordOffset));
       const recordHexData = record.hexData;
+      
       bufferArrays.push(recordHexData);
       currentOffset = recordOffset + recordHexData.length;
     }
@@ -152,6 +153,7 @@ class FranchiseFileTable extends EventEmitter {
 
       record.isEmpty = isEmptyReference;
     });
+
 
     // We need to determine the starting node.
     // To do that, we need to find the empty record which no other empty record points to.
@@ -430,8 +432,8 @@ class FranchiseFileTable extends EventEmitter {
             // If so, then the record is still considered empty.
             
             // We need to check the buffer because the first field is not always a reference.
-            const referenceData = utilService.getReferenceDataFromBuffer(object.data.slice(0, 4));
-            if (referenceData.tableId !== 0) {
+            // const referenceData = utilService.getReferenceDataFromBuffer(object.data.slice(0, 4));
+            // if (referenceData.tableId !== 0 || referenceData.rowNumber > this.header.recordCapacity) {
 
               // Delete the empty record entry because it is no longer empty
               this.emptyRecords.delete(object.index);
@@ -476,7 +478,7 @@ class FranchiseFileTable extends EventEmitter {
               if (!previousEmptyReference && !nextEmptyReference) {
                 this.setNextRecordToUse(this.header.recordCapacity);
               }
-            }
+            // }
           }
         }
 

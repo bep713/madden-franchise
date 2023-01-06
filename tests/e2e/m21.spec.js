@@ -1369,15 +1369,15 @@ describe('Madden 21 end to end tests', function () {
           expect(table.data.readUInt32BE(table.header.headerOffset - 4)).to.equal(6);
         });
 
-        it('record stays empty as long as the first 4 bytes reference the 0th table', () => {
-          table.records[6].PlayerPosition = 'WR';
+        // it('record stays empty as long as the first 4 bytes reference the 0th table', () => {
+        //   table.records[6].PlayerPosition = 'WR';
 
-          expect(table.emptyRecords.size).to.equal(1);
-          expect(table.emptyRecords.get(6)).to.eql({
-            previous: null,
-            next: 21
-          });
-        });
+        //   expect(table.emptyRecords.size).to.equal(1);
+        //   expect(table.emptyRecords.get(6)).to.eql({
+        //     previous: null,
+        //     next: 21
+        //   });
+        // });
 
         it('can fill all empty records', () => {
           table.records[6].PercentageSpline = '10000000000000000000000000000011';
@@ -1494,8 +1494,8 @@ describe('Madden 21 end to end tests', function () {
           });
 
           it('updates the empty record reference map if a value changes in the middle of the list', () => {
-            table.records[5].PercentageSpline = '00000000000000000000000000001010';
-            table.records[10].PercentageSpline = '00000000000000000000000000000110';
+            table.records[5].empty();
+            table.records[10].empty();
             table.recalculateEmptyRecordReferences();
 
             expect(table.emptyRecords.size).to.equal(4);
@@ -1505,15 +1505,15 @@ describe('Madden 21 end to end tests', function () {
             });
             expect(table.emptyRecords.get(5)).to.eql({
               previous: 7,
-              next: 10
-            });
-            expect(table.emptyRecords.get(10)).to.eql({
-              previous: 5,
               next: 6
             });
-            expect(table.emptyRecords.get(6)).to.eql({
-              previous: 10,
+            expect(table.emptyRecords.get(10)).to.eql({
+              previous: 6,
               next: 21
+            });
+            expect(table.emptyRecords.get(6)).to.eql({
+              previous: 5,
+              next: 10
             });
           });
 
@@ -1828,6 +1828,61 @@ describe('Madden 21 end to end tests', function () {
 
       it('trailing 8 bytes of file is not included in data', () => {
         expect(table.data.length).to.equal(0x114);
+      });
+    });
+
+    describe('TeamNeedEvaluation', () => {
+      const tableId = 4103;
+
+      before(async () => {
+        table = file.getTableById(tableId);
+        await table.readRecords();
+      });
+
+      it('correctly identifies first empty record', () => {
+        expect(table.header.nextRecordToUse).to.equal(878);
+      });
+
+      it('recognizes record as not empty after editing first column', () => {
+        table.records[878].Depth = 1;
+        expect(table.header.nextRecordToUse).to.equal(879);
+      });
+
+      it('recognizes record as not empty after editing last column', () => {
+        table.records[879].Severity = 25;
+        expect(table.header.nextRecordToUse).to.equal(880);
+      });
+    });
+
+    describe('Coach', () => {
+      const tableId = 4152;
+
+      before(async () => {
+        table = file.getTableById(tableId);
+        await table.readRecords();
+      });
+
+      it('external table reference should remain intact as the user entered it', async () => {
+        table.records[0].DefensivePlaybook = '10000000000000011001100000100000';
+        expect(table.records[0].DefensivePlaybook).to.equal('10000000000000011001100000100000');
+
+        // Save test
+        await file.save(filePaths.saveTest.m21);
+          
+        let file2 = new FranchiseFile(filePaths.saveTest.m21);
+
+        let readyPromise = new Promise((resolve, reject) => {
+          file2.on('ready', () => {
+            resolve();
+          });
+        });
+
+        await readyPromise;
+
+        let table2 = file2.getTableById(tableId);
+        await table2.readRecords();
+
+        expect(table2.records[0].DefensivePlaybook).to.equal('10000000000000011001100000100000');
       });
     });
 

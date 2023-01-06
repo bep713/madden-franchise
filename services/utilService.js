@@ -221,7 +221,7 @@ utilService.toInteger = function (x) {
 utilService.getReferenceData = function (value) {
   return {
     'tableId': utilService.bin2dec(value.substring(0, 15)),
-    'rowNumber': utilService.bin2dec(value.substring(16))
+    'rowNumber': utilService.bin2dec(value.substring(15))
   }
 };
 
