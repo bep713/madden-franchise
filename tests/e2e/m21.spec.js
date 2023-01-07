@@ -1884,6 +1884,56 @@ describe('Madden 21 end to end tests', function () {
 
         expect(table2.records[0].DefensivePlaybook).to.equal('10000000000000011001100000100000');
       });
+
+      it('changing a table2 value should mark the entire row as not empty', () => {
+        table.records[137].FirstName = 'Test';
+        expect(table.records[137].isEmpty).to.be.false;
+      });
+
+      it('changing an empty table2 value will reset the table2 offsets for that record', async () => {
+        table.records[137].FirstName = 'Test';
+
+        // first string in first record stays at offset 0
+        expect(table.records[0]._fields.FirstName.secondTableField.offset).to.equal(0);
+
+        // previously empty row points to its allocated table2 bytes (non-FTC files allocate bytes for empty rows)
+        expect(table.records[137]._fields.FirstName.secondTableField.offset).to.equal(12878);
+        expect(table.records[137]._fields.LastName.secondTableField.offset).to.equal(12895);
+        expect(table.records[137]._fields.AssetName.secondTableField.offset).to.equal(12913);
+        expect(table.records[137]._fields.Name.secondTableField.offset).to.equal(12954);
+      });
+
+      it('changing an empty table2 value will persist the new values and new offsets', async () => {
+        const firstRowFirstName = table.records[0].FirstName;
+
+        table.records[138].FirstName = 'Test1';
+        expect(table.records[138].FirstName).to.equal('Test1');
+
+        // Save test
+        await file.save(filePaths.saveTest.m21);
+          
+        let file2 = new FranchiseFile(filePaths.saveTest.m21);
+
+        let readyPromise = new Promise((resolve, reject) => {
+          file2.on('ready', () => {
+            resolve();
+          });
+        });
+
+        await readyPromise;
+
+        let table2 = file2.getTableById(tableId);
+        await table2.readRecords();
+
+
+        expect(table2.records[0].FirstName).to.equal(firstRowFirstName);
+        expect(table2.records[138].FirstName).to.equal('Test1');
+
+        expect(table.records[137]._fields.FirstName.secondTableField.offset).to.equal(12878);
+        expect(table.records[137]._fields.LastName.secondTableField.offset).to.equal(12895);
+        expect(table.records[137]._fields.AssetName.secondTableField.offset).to.equal(12913);
+        expect(table.records[137]._fields.Name.secondTableField.offset).to.equal(12954);
+      });
     });
 
     // describe('LeagueSetting', () => {

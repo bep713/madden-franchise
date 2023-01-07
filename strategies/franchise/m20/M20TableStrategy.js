@@ -8,5 +8,6 @@ M20TableStrategy.parseHeaderAttributesFromSchema = M20TableHeaderStrategy.parseH
 
 M20TableStrategy.getTable2BinaryData = FranchiseTableStrategy.getTable2BinaryData;
 M20TableStrategy.getMandatoryOffsets = FranchiseTableStrategy.getMandatoryOffsets;
+M20TableStrategy.recalculateStringOffsets = FranchiseTableStrategy.recalculateStringOffsets;
 
 module.exports = M20TableStrategy;

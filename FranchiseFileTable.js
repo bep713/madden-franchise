@@ -428,12 +428,20 @@ class FranchiseFileTable extends EventEmitter {
           const changedRecordWasEmpty = emptyRecordReference !== null && emptyRecordReference !== undefined;
 
           if (changedRecordWasEmpty) {
-            // Check if the record's first four bytes still have a reference to the 0th table.
-            // If so, then the record is still considered empty.
+            // 1/5/23: Assume all changes to a field make the record not empty. Leaving comments
+            // below if this needs to be reverted in the future.
             
-            // We need to check the buffer because the first field is not always a reference.
-            // const referenceData = utilService.getReferenceDataFromBuffer(object.data.slice(0, 4));
-            // if (referenceData.tableId !== 0 || referenceData.rowNumber > this.header.recordCapacity) {
+
+              // Check if the record's first four bytes still have a reference to the 0th table.
+              // If so, then the record is still considered empty.
+              
+              // We need to check the buffer because the first field is not always a reference.
+              // const referenceData = utilService.getReferenceDataFromBuffer(object.data.slice(0, 4));
+              // if (referenceData.tableId !== 0 || referenceData.rowNumber > this.header.recordCapacity) {
+
+              // if the record contains any string values, point the string values to
+              // their correct offsets
+              this.strategy.recalculateStringOffsets(this, object);
 
               // Delete the empty record entry because it is no longer empty
               this.emptyRecords.delete(object.index);
@@ -491,7 +499,16 @@ class FranchiseFileTable extends EventEmitter {
     }
     else if (object instanceof FranchiseFileTable2Field) {
       object.isChanged = true;
-      this.emit('change');
+      
+      // When a table2 field changes, we need to check if the record is empty. If so, we need to mark it as not empty. 
+      if (object.fieldReference) {
+        this.onEvent('change', object.fieldReference._parent);
+      }
+      else {
+        // Only emit change here if the field reference is empty.
+        // the onEvent call will emit a change in the above condition.
+        this.emit('change');
+      }
     }
   };
 };

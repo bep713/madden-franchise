@@ -96,4 +96,78 @@ describe('Franchise Table Strategy unit tests', () => {
             expect(FranchiseTableStrategy.getMandatoryOffsets()).to.eql([]);
         });
     });
+
+    it('can recalculate string offsets for a given record', () => {
+        const table = {
+            offsetTable: [
+                {
+                    index: 0,
+                    type: 'string',
+                    maxLength: 9
+                },
+                {
+                    index: 2,
+                    type: 'string',
+                    maxLength: 11
+                },
+                {
+                    index: 1,
+                    type: 'string',
+                    maxLength: 22
+                },
+                {
+                    index: 3,
+                    type: 's_int',
+                    maxLength: 7
+                },
+                {
+                    index: 4,
+                    type: 'string',
+                    maxLength: 6
+                }
+            ]
+        };
+
+        let record = {
+            index: 7,
+            fieldsArray: [
+                {
+                    offset: table.offsetTable[0],
+                    secondTableField: {
+                        offset: 0
+                    }
+                },
+                {
+                    offset: table.offsetTable[1],
+                    secondTableField: {
+                        offset: 0
+                    }
+                },
+                {
+                    offset: table.offsetTable[2],
+                    secondTableField: {
+                        offset: 0
+                    }
+                },
+                {
+                    offset: table.offsetTable[3],   // not a string field
+                },
+                {
+                    offset: table.offsetTable[4],
+                    secondTableField: {
+                        offset: 0
+                    }
+                },
+            ]
+        };
+
+        FranchiseTableStrategy.recalculateStringOffsets(table, record);
+
+        // each record table2 holds 48 bytes
+        // This record index is 7, so 7*48 + (field offset)
+        expect(record.fieldsArray[0].secondTableField.offset).to.equal(336);
+        expect(record.fieldsArray[1].secondTableField.offset).to.equal(367);    // offsets are out of order above
+        expect(record.fieldsArray[2].secondTableField.offset).to.equal(345);
+        expect(record.fieldsArray[4].secondTableField.offset).to.equal(378);
+    });
 });

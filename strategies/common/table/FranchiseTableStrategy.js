@@ -33,4 +33,28 @@ FranchiseTableStrategy.getMandatoryOffsets = (offsets) => {
     return [];
 };
 
+FranchiseTableStrategy.recalculateStringOffsets = (table, record) => {
+    // First, calculate length allocated per record in table2
+    const byteLengthPerRecord = table.offsetTable.filter((offsetEntry) => {
+        return offsetEntry.type === 'string';
+    }).reduce((accum, cur) => {
+        return accum + cur.maxLength;
+    }, 0);
+
+    // Then, go through each string field sorted by offset index, and assign offsets to the table2 fields
+    let runningOffset = 0;
+
+    record.fieldsArray.filter((field) => {
+        return field.offset.type === 'string';
+    }).sort((a, b) => {
+        return a.offset.index - b.offset.index;
+    }).forEach((field) => {
+        if (field.secondTableField) {
+            field.secondTableField.offset = (record.index * byteLengthPerRecord) + runningOffset;
+        }
+        
+        runningOffset += field.offset.maxLength;
+    });
+};
+
 module.exports = FranchiseTableStrategy;

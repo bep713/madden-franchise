@@ -8,5 +8,6 @@ M19FTCTableStrategy.parseHeaderAttributesFromSchema = M19TableHeaderStrategy.par
 
 M19FTCTableStrategy.getTable2BinaryData = FTCTableStrategy.getTable2BinaryData;
 M19FTCTableStrategy.getMandatoryOffsets = FTCTableStrategy.getMandatoryOffsets;
+M19FTCTableStrategy.recalculateStringOffsets = () => {};
 
 module.exports = M19FTCTableStrategy;
