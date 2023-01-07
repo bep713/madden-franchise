@@ -39,6 +39,10 @@ describe('M20 Table Header unit tests', () => {
                 expect(result.tablePad1).to.equal(279914534);
             });
 
+            it('unique id', () => {
+                expect(result.uniqueId).to.equal(279914534);
+            });
+
             it('table unknown 1', () => {
                 expect(result.tableUnknown1).to.equal(0);
             });
@@ -189,6 +193,10 @@ describe('M20 Table Header unit tests', () => {
             before(() => {
                 result = M20TableHeaderStrategy.parseHeader(playerTable);
             });
+
+            it('unique id', () => {
+                expect(result.uniqueId).to.equal(1612938518);
+            })
 
             // This table has a second table unlike the ones above.
             it('has second table', () => {

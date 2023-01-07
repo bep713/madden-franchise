@@ -64,6 +64,7 @@ M19TableHeaderStrategy.parseHeader = (data) => {
         'isArray': isArray,
         'tableId': tableId,
         'tablePad1': tablePad1,
+        'uniqueId': tablePad1,
         'tableUnknown1': tableUnknown1,
         'tableUnknown2': tableUnknown2,
         'data1Id': data1Id,

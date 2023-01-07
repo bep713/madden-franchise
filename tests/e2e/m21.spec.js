@@ -105,6 +105,11 @@ describe('Madden 21 end to end tests', function () {
       })
     });
 
+    it('can get a table by its unique id', () => {
+      const table = file.getTableByUniqueId(1612938518);
+      expect(table.name).to.equal('Player');
+    });
+
     describe('can read in the file\'s asset table', () => {
       it('expected length', () => { 
         expect(file.assetTable.length).to.eql(0xD6);

@@ -270,6 +270,10 @@ class FranchiseFile extends EventEmitter {
     return this.tables[index];
   };
 
+  getTableByUniqueId (id) {
+    return this.tables.find((table) => { return table.header && table.header.uniqueId === id; });
+  };
+
   getReferencedRecord (referenceValue) {
     const reference = utilService.getReferenceData(referenceValue);
     return this.getTableById(reference.tableId).records[reference.rowNumber];
