@@ -145,7 +145,7 @@ class FranchiseFileTable extends EventEmitter {
         const firstOffset = this.offsetTable[0];
         if (firstOffset.type !== 'string') {
           isEmptyReference = true;
-
+          
           // Save the row number that this record points to.
           emptyRecordReferenceIndicies.push(firstFourBytesReference.rowNumber);
         }
@@ -153,7 +153,6 @@ class FranchiseFileTable extends EventEmitter {
 
       record.isEmpty = isEmptyReference;
     });
-
 
     // We need to determine the starting node.
     // To do that, we need to find the empty record which no other empty record points to.
@@ -438,6 +437,21 @@ class FranchiseFileTable extends EventEmitter {
               // We need to check the buffer because the first field is not always a reference.
               // const referenceData = utilService.getReferenceDataFromBuffer(object.data.slice(0, 4));
               // if (referenceData.tableId !== 0 || referenceData.rowNumber > this.header.recordCapacity) {
+
+
+              // if the changed field isn't included in the first 32 bits, zero out the first 32 bits. 
+              // Otherwise, it's not necessary to zero out.
+              const changedFieldsInFirst4Bytes = object.fieldsArray.filter((field) => { return field.isChanged && field.offset.indexOffset < 32; });
+              if (changedFieldsInFirst4Bytes.length === 0) {
+                // set first 4 bytes to 0
+                this._changeRecordBuffers(object.index, 0);
+
+                // invalidate the cached values since we set the buffer directly
+                const fieldsInFirst4Bytes = object.fieldsArray.filter((field) => { return field.offset.indexOffset < 32; });
+                fieldsInFirst4Bytes.forEach((field) => { 
+                  field.clearCachedValues();
+                });
+              }
 
               // if the record contains any string values, point the string values to
               // their correct offsets

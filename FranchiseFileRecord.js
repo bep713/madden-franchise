@@ -7,8 +7,8 @@ class FranchiseFileRecord {
     this._offsetTable = offsetTable;
     this.index = index;
     this._fieldsArray = [];
-    this._fields = this.parseRecordFields(data, offsetTable, this);
-    this.isChanged = false;
+    this._fields = this.parseRecordFields();
+    this._isChanged = false;
     this.arraySize = null;
     this.isEmpty = false;
     this._parent = parent;
@@ -55,6 +55,20 @@ class FranchiseFileRecord {
     });
   };
 
+  get isChanged() {
+    return this._isChanged;
+  };
+
+  set isChanged(changed) {
+    this._isChanged = changed;
+
+    if (changed === false) {
+      this.fieldsArray.forEach((field) => {
+        field.isChanged = false;
+      });
+    }
+  }
+
   getFieldByKey(key) {
     return this._fields[key];
   };
@@ -69,15 +83,16 @@ class FranchiseFileRecord {
     return field ? field.referenceData : null;
   };
 
-  parseRecordFields(data, offsetTable, record) {
+  parseRecordFields() {
     let fields = {};
+    this._fieldsArray = [];
   
-    for (let j = 0; j < offsetTable.length; j++) {
-      const offset = offsetTable[j];
+    for (let j = 0; j < this._offsetTable.length; j++) {
+      const offset = this._offsetTable[j];
 
       // Push the entire record buffer to the field. No need to perform a calculation
       // to subarray the buffer, BitView will take care of it in the Field.
-      fields[offset.name] = new FranchiseFileField(offset.name, data, offset, record);
+      fields[offset.name] = new FranchiseFileField(offset.name, this._data, offset, this);
 
       this._fieldsArray.push(fields[offset.name]);
     }

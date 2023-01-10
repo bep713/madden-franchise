@@ -10,6 +10,7 @@ class FranchiseFileField {
     this._unformattedValue = null;
     this._offset = offset;
     this._parent = parent;
+    this._isChanged = false;
 
     if (offset.valueInSecondTable) {
       this.secondTableField = new FranchiseFileTable2Field(this._recordBuffer.readUInt32BE(offset.offset / 8), offset.maxLength);
@@ -53,12 +54,13 @@ class FranchiseFileField {
     return null;
   };
 
-  set value (value) {    
+  set value (value) {
     if (this._unformattedValue === null) {
       this._setUnformattedValueIfEmpty();
     }
 
     this._value = value;
+    this.isChanged = true;
 
     if (this.offset.valueInSecondTable) {
       this.secondTableField.value = value.toString();
@@ -147,6 +149,19 @@ class FranchiseFileField {
     this.setUnformattedValueWithoutChangeEvent(unformattedValue);
     this._value = null;
     this._parent.onEvent('change', this);
+  };
+
+  get isChanged() {
+    return this._isChanged;
+  };
+
+  set isChanged(changed) {
+    this._isChanged = changed;
+  };
+
+  clearCachedValues() {
+    this._value = null;
+    this._unformattedValue = null;
   };
 
   _setUnformattedValueIfEmpty() {

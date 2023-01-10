@@ -1850,12 +1850,32 @@ describe('Madden 21 end to end tests', function () {
 
       it('recognizes record as not empty after editing first column', () => {
         table.records[878].Depth = 1;
+
+        expect(table.records[878].isEmpty).to.be.false;
         expect(table.header.nextRecordToUse).to.equal(879);
+      });
+
+      it('does not zero out the first 32 bits since changed field is part of first 32 bytes', () => {
+        // each record is only 4 bytes long
+        table.records[878].Depth = 1;
+        expect(table.records[878].data.readUInt32BE(0)).to.be.greaterThan(0);
       });
 
       it('recognizes record as not empty after editing last column', () => {
         table.records[879].Severity = 25;
         expect(table.header.nextRecordToUse).to.equal(880);
+      });
+
+      it('will not clear out values changed if first column was edited before last column', () => {
+        let value = table.records[880].Depth;   // caching values
+        value = table.records[880].Severity;    // caching values
+
+        table.records[880].Depth = 1;
+        table.records[880].Severity = 25;
+
+        expect(table.records[880].isEmpty).to.be.false;
+        expect(table.records[880].Depth).to.equal(1);       // check that value persists
+        expect(table.records[880].Severity).to.equal(25);   // check that value persists
       });
     });
 
@@ -1908,6 +1928,22 @@ describe('Madden 21 end to end tests', function () {
         expect(table.records[137]._fields.Name.secondTableField.offset).to.equal(12954);
       });
 
+      it('changing an empty table2 value will un-empty the row and zero out the first 4 bytes if the field isn\'t part of it', () => {
+        table.records[137].FirstName = 'Test';
+
+        expect(table.records[137].data.readUInt32BE(0)).to.equal(0);
+        const recordStartIndex = table.header.table1StartIndex + (137 * table.header.record1Size)
+        expect(table.data.readUInt32BE(recordStartIndex)).to.equal(0);
+      });
+
+      it('when the first 4 bytes are zeroed out, the first column\'s value changes as well', () => {
+        let value = table.records[138].SeasonalGoal;  // read the value first so its cached
+
+        table.records[138].FirstName = 'Test';
+        expect(value).to.not.equal('00000000000000000000000000000000');
+        expect(table.records[138].SeasonalGoal).to.equal('00000000000000000000000000000000');
+      });
+
       it('changing an empty table2 value will persist the new values and new offsets', async () => {
         const firstRowFirstName = table.records[0].FirstName;
 
@@ -1938,6 +1974,44 @@ describe('Madden 21 end to end tests', function () {
         expect(table.records[137]._fields.LastName.secondTableField.offset).to.equal(12895);
         expect(table.records[137]._fields.AssetName.secondTableField.offset).to.equal(12913);
         expect(table.records[137]._fields.Name.secondTableField.offset).to.equal(12954);
+      });
+
+      it('if a field in the first 4 bytes is changed, it should not get zeroed out', () => {
+        table.records[139].SeasonalGoal = '10000000000000001110101110010111';
+        expect(table.records[139].SeasonalGoal).to.equal('10000000000000001110101110010111');
+
+        expect(table.records[140].SeasonalGoal).to.not.equal('10000000000000001110101110010111');
+        table.records[140].FirstName = 'Test';
+        table.records[140].SeasonalGoal = '10000000000000001110101110010111';
+        expect(table.records[140].SeasonalGoal).to.equal('10000000000000001110101110010111');
+      });
+
+      it('can recalculate empty references after un-emptying a row', () => {
+        table.recalculateEmptyRecordReferences();
+        expect(table.emptyRecords.get(136)).to.eql({
+          previous: 135,
+          next: 141
+        });
+
+        expect(table.emptyRecords.get(137)).to.eql(undefined);  // un-emptied in a test above
+        expect(table.emptyRecords.get(138)).to.eql(undefined);  // un-emptied in a test above
+        expect(table.emptyRecords.get(139)).to.eql(undefined);  // un-emptied in a test above
+        expect(table.emptyRecords.get(140)).to.eql(undefined);  // un-emptied in a test above
+        
+        expect(table.emptyRecords.get(141)).to.eql({
+          previous: 136,
+          next: 142
+        });
+      });
+
+      it('field isChanged attribute is reset after saving', async () => {
+        table.records[138].FirstName = 'Test2';
+        expect(table.records[138]._fieldsArray[14].isChanged).to.be.true;
+
+        // Save test
+        await file.save(filePaths.saveTest.m21);
+          
+        expect(table.records[138]._fieldsArray[14].isChanged).to.be.false;
       });
     });
 
