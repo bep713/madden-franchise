@@ -4,7 +4,7 @@ const FranchiseFileRecord = require('./FranchiseFileRecord');
 const FranchiseFileTable2Field = require('./FranchiseFileTable2Field');
 
 class FranchiseFileTable extends EventEmitter {
-  constructor(data, offset, gameYear, strategy) {
+  constructor(data, offset, gameYear, strategy, settings) {
     super();
     this.index = -1;
     this.data = data;
@@ -23,6 +23,7 @@ class FranchiseFileTable extends EventEmitter {
     this.table2Records = [];
     this.arraySizes = [];
     this.emptyRecords = new Map();
+    this._settings = settings;
   };
 
   get hexData () {
@@ -426,10 +427,8 @@ class FranchiseFileTable extends EventEmitter {
           const emptyRecordReference = this.emptyRecords.get(object.index);
           const changedRecordWasEmpty = emptyRecordReference !== null && emptyRecordReference !== undefined;
 
+          // Automatically un-empty the row if the setting is enabled and the changed record was empty.
           if (changedRecordWasEmpty) {
-            // 1/5/23: Assume all changes to a field make the record not empty. Leaving comments
-            // below if this needs to be reverted in the future.
-            
 
               // Check if the record's first four bytes still have a reference to the 0th table.
               // If so, then the record is still considered empty.
@@ -453,52 +452,56 @@ class FranchiseFileTable extends EventEmitter {
                 });
               }
 
-              // if the record contains any string values, point the string values to
-              // their correct offsets
-              this.strategy.recalculateStringOffsets(this, object);
+              // If autoUnempty is disabled, only un-empty the row if a field in the first 4 bytes changed.
+              // If autoUnempty is enabled, un-empty the row if ANY field changed.
+              if (this._settings.autoUnempty || changedFieldsInFirst4Bytes.length > 0) {
+                // if the record contains any string values, point the string values to
+                // their correct offsets
+                this.strategy.recalculateStringOffsets(this, object);
 
-              // Delete the empty record entry because it is no longer empty
-              this.emptyRecords.delete(object.index);
+                // Delete the empty record entry because it is no longer empty
+                this.emptyRecords.delete(object.index);
 
-              // Set the isEmpty back to false because it's no longer empty
-              object.isEmpty = false;
+                // Set the isEmpty back to false because it's no longer empty
+                object.isEmpty = false;
 
-              // Check if there is a previous empty record
-              const previousEmptyReference = this.emptyRecords.get(emptyRecordReference.previous);
+                // Check if there is a previous empty record
+                const previousEmptyReference = this.emptyRecords.get(emptyRecordReference.previous);
 
-              if (previousEmptyReference) {
-                // Set the previous empty record to point to the old reference's next node
-                this.emptyRecords.set(emptyRecordReference.previous, {
-                  previous: this.emptyRecords.get(emptyRecordReference.previous).previous,
-                  next: emptyRecordReference.next
-                });
+                if (previousEmptyReference) {
+                  // Set the previous empty record to point to the old reference's next node
+                  this.emptyRecords.set(emptyRecordReference.previous, {
+                    previous: this.emptyRecords.get(emptyRecordReference.previous).previous,
+                    next: emptyRecordReference.next
+                  });
 
-                // change the table buffer and record buffer to reflect object change
-                this._changeRecordBuffers(emptyRecordReference.previous, emptyRecordReference.next);
-              }
-
-              // If there is a next empty reference, update the previous value accordingly to now point
-              // to the current record's previous index.
-              const nextEmptyReference = this.emptyRecords.get(emptyRecordReference.next);
-
-              if (nextEmptyReference) {
-                this.emptyRecords.set(emptyRecordReference.next, {
-                  previous: emptyRecordReference.previous,
-                  next: this.emptyRecords.get(emptyRecordReference.next).next
-                });
-
-                if (!previousEmptyReference) {
-                  // If no previous empty record exists and a next record exists, we need to update the header to
-                  // point to object record as the next record to use.
-                  this.setNextRecordToUse(emptyRecordReference.next);
+                  // change the table buffer and record buffer to reflect object change
+                  this._changeRecordBuffers(emptyRecordReference.previous, emptyRecordReference.next);
                 }
-              }
 
-              // If there are no previous or next empty references
-              // Then there are no more empty references in the table
-              // Update the table header nextRecordToUse back to the table record capacity
-              if (!previousEmptyReference && !nextEmptyReference) {
-                this.setNextRecordToUse(this.header.recordCapacity);
+                // If there is a next empty reference, update the previous value accordingly to now point
+                // to the current record's previous index.
+                const nextEmptyReference = this.emptyRecords.get(emptyRecordReference.next);
+
+                if (nextEmptyReference) {
+                  this.emptyRecords.set(emptyRecordReference.next, {
+                    previous: emptyRecordReference.previous,
+                    next: this.emptyRecords.get(emptyRecordReference.next).next
+                  });
+
+                  if (!previousEmptyReference) {
+                    // If no previous empty record exists and a next record exists, we need to update the header to
+                    // point to object record as the next record to use.
+                    this.setNextRecordToUse(emptyRecordReference.next);
+                  }
+                }
+
+                // If there are no previous or next empty references
+                // Then there are no more empty references in the table
+                // Update the table header nextRecordToUse back to the table record capacity
+                if (!previousEmptyReference && !nextEmptyReference) {
+                  this.setNextRecordToUse(this.header.recordCapacity);
+                }
               }
             // }
           }

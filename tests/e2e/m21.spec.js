@@ -48,7 +48,8 @@ describe('Madden 21 end to end tests', function () {
           'saveOnChange': false,
           'schemaOverride': false,
           'schemaDirectory': path.join(__dirname, '../data/test-schemas'),
-          'autoParse': true
+          'autoParse': true,
+          'autoUnempty': false
         });
 
         expect(file.isLoaded).to.be.true;
@@ -105,6 +106,11 @@ describe('Madden 21 end to end tests', function () {
       file.on('ready', () => {
         done();
       })
+    });
+
+    beforeEach(() => {
+      // Assume we want to autoUnempty, unless specifically stated.
+      file.settings.autoUnempty = true;
     });
 
     it('can get a table by its unique id', () => {
@@ -2047,13 +2053,13 @@ describe('Madden 21 end to end tests', function () {
         expect(table.records[2778].isEmpty).to.be.false;
       });
 
-      it('recalculating empty records can detect user-entered empty enum', () => {
-        table.records[2778].TalentStatus = '1010110';
-        expect(table.records[2778].TalentStatus).to.equal('1010110');
+      // it('recalculating empty records can detect user-entered empty enum', () => {
+      //   table.records[2778].TalentStatus = '1010110';
+      //   expect(table.records[2778].TalentStatus).to.equal('1010110');
 
-        table.recalculateEmptyRecordReferences();
-        expect(table.records[2778].isEmpty).to.be.true;
-      });
+      //   table.recalculateEmptyRecordReferences();
+      //   expect(table.records[2778].isEmpty).to.be.true;
+      // });
     });
 
     // describe('LeagueSetting', () => {

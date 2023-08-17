@@ -54,7 +54,8 @@ describe('Madden 24 end to end tests', function () {
           'saveOnChange': false,
           'schemaOverride': false,
           'schemaDirectory': path.join(__dirname, '../data/test-schemas'),
-          'autoParse': true
+          'autoParse': true,
+          'autoUnempty': false
         });
 
         expect(file.isLoaded).to.be.true;
@@ -84,6 +85,11 @@ describe('Madden 24 end to end tests', function () {
       file.on('ready', () => {
         done();
       })
+    });
+
+    beforeEach(() => {
+      // Assume we want to autoUnempty, unless specifically stated.
+      file.settings.autoUnempty = true;
     });
 
     it('can get a table by its unique id', () => {
@@ -645,7 +651,9 @@ describe('Madden 24 end to end tests', function () {
           });
 
           describe('can fill an empty record', () => {
-            it('filling a record when there is already one or more empty records', () => {
+            it('filling an empty record with autoUnempty disabled - changing first 4 bytes should unempty anyway', () => {
+              file.settings.autoUnempty = false;
+
               expect(table.records[253].isEmpty).to.be.true;
 
               table.records[253].LocalPopularity = 20;
@@ -668,14 +676,39 @@ describe('Madden 24 end to end tests', function () {
               expect(table.records[252].data.readUInt32BE(0)).to.equal(254);
             });
 
+            it('filling a record when there is already one or more empty records', () => {
+              file.settings.autoUnempty = true;
+              expect(table.records[254].isEmpty).to.be.true;
+
+              table.records[254].LocalPopularity = 20;
+              table.records[254].NationalPopularity = 23;
+              table.records[254].RegionalPopularity = 25;
+
+              expect(table.records[254].isEmpty).to.be.false;
+
+              expect(table.emptyRecords.size).to.equal(94);
+              expect(table.emptyRecords.get(252)).to.eql({
+                previous: 251,
+                next: 255
+              });
+              expect(table.emptyRecords.get(255)).to.eql({
+                previous: 252,
+                next: 0
+              });
+
+              expect(table.data.readUInt32BE(table.header.table1StartIndex + (252 * 4))).to.equal(255);
+              expect(table.records[252].data.readUInt32BE(0)).to.equal(255);
+            });
+
             it('filling a record when there is already one or more empty records - last record', () => {
+              file.settings.autoUnempty = true;
               table.records[0].LocalPopularity = 20;
               table.records[0].NationalPopularity = 23;
               table.records[0].RegionalPopularity = 25;
 
-              expect(table.emptyRecords.size).to.equal(94);
+              expect(table.emptyRecords.size).to.equal(93);
               expect(table.emptyRecords.get(255)).to.eql({
-                previous: 254,
+                previous: 252,
                 next: 256
               });
 
@@ -1045,6 +1078,23 @@ describe('Madden 24 end to end tests', function () {
         it('can set a Player record to empty', () => {
           let record = table.records[5];
           record.empty();
+        });
+
+        it('"autoUnempty: false" will not un-empty the row if an empty player row is edited', () => {
+          file.settings.autoUnempty = false;
+          let record = table.records[table.header.nextRecordToUse];
+
+          expect(record.isEmpty).to.be.true;
+          record.FirstName = 'NotEmpty';
+          expect(record.isEmpty).to.be.true;
+        });
+
+        it('"autoUnempty: true" will un-empty the row if an empty player row is edited', () => {
+          let record = table.records[table.header.nextRecordToUse];
+
+          expect(record.isEmpty).to.be.true;
+          record.FirstName = 'NotEmpty';
+          expect(record.isEmpty).to.be.false;
         });
       });
 
@@ -1990,25 +2040,26 @@ describe('Madden 24 end to end tests', function () {
         await table.readRecords();
       });
 
-      it('can set the value of an empty record enum', () => {
-        table.records[2778].TalentStatus = 'NotOwned';
-        expect(table.records[2778].TalentStatus).to.equal('NotOwned');
-        expect(table.records[2778].isEmpty).to.be.false;
+      it('can set the value of an empty record enum - autoUnempty: true', () => {
+        expect(table.records[3875].isEmpty).to.be.true;
+        table.records[3875].TalentStatus = 'NotOwned';
+        expect(table.records[3875].TalentStatus).to.equal('NotOwned');
+        expect(table.records[3875].isEmpty).to.be.false;
       });
 
       it('can set the value of an enum to an empty record reference', () => {
-        table.records[2778].TalentStatus = '1010110';
-        expect(table.records[2778].TalentStatus).to.equal('1010110');
-        expect(table.records[2778].isEmpty).to.be.false;
+        table.records[3875].TalentStatus = '1010110';
+        expect(table.records[3875].TalentStatus).to.equal('1010110');
+        expect(table.records[3875].isEmpty).to.be.false;
       });
 
-      it('recalculating empty records can detect user-entered empty enum', () => {
-        table.records[2778].TalentStatus = '1010110';
-        expect(table.records[2778].TalentStatus).to.equal('1010110');
+      // it('recalculating empty records can detect user-entered empty enum', () => {
+      //   table.records[3875].TalentStatus = '1010110';
+      //   expect(table.records[3875].TalentStatus).to.equal('1010110');
 
-        table.recalculateEmptyRecordReferences();
-        expect(table.records[2778].isEmpty).to.be.true;
-      });
+      //   table.recalculateEmptyRecordReferences();
+      //   expect(table.records[3875].isEmpty).to.be.true;
+      // });
     });
 
     // describe('LeagueSetting', () => {

@@ -41,7 +41,8 @@ describe('Madden 19 end to end tests', function () {
           'saveOnChange': false,
           'schemaOverride': false,
           'schemaDirectory': false,
-          'autoParse': true
+          'autoParse': true,
+          'autoUnempty': false
         });
 
         expect(file.isLoaded).to.be.true;

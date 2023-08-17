@@ -42,7 +42,8 @@ describe('Madden 20 end to end tests', function () {
           'saveOnChange': false,
           'schemaOverride': false,
           'schemaDirectory': path.join(__dirname, '../data/test-schemas'),
-          'autoParse': true
+          'autoParse': true,
+          'autoUnempty': false
         });
 
         expect(file.isLoaded).to.be.true;

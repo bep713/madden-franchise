@@ -49,6 +49,10 @@ Franchise file settings
 
       // AUTO PARSE - specify if you want the system to automatically parse all tables in the file, or if you want to explicity call file.parse()
       'autoParse': true/false [default: true]
+
+      // AUTO UNEMPTY - specify if you want the system to automatically determine if an empty field should become un-empty once you edit it.
+      // Warning: may have unintended side-effects if you batch import. Enable with caution.
+      'autoUnempty': true/false [default: false]
     }
 
 #### fields
