@@ -276,7 +276,7 @@ class FranchiseFile extends EventEmitter {
 
   getReferencedRecord (referenceValue) {
     const reference = utilService.getReferenceData(referenceValue);
-    return this.getTableById(reference.tableId).records[reference.rowNumber];
+    return this.getTableById(reference.tableId)?.records[reference.rowNumber];
   };
 
   getReferenceFromAssetId (assetId) {
@@ -433,7 +433,7 @@ function getGameYear(data, isCompressed, format) {
       'max': 95
     },
     {
-      'year': 22,
+      'year': 24,
       'max': 999
     }
   ];
@@ -467,6 +467,9 @@ function getGameYear(data, isCompressed, format) {
     }
     else if (yearIdentifier[2] === 0x33) {
       return 23;
+    }
+    else if (yearIdentifier[2] === 0x34 || yearIdentifier[2] === 'd') {
+      return 24;
     }
     else {
       const schemaMajor = getCompressedSchema(data).major;

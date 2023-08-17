@@ -7,13 +7,15 @@ const FranchiseFileTable = require('../../FranchiseFileTable');
 
 const filePaths = {
   'compressed': {
-    'm21': 'tests/data/CAREER-21COMPRESS'
+    'm21': 'tests/data/CAREER-21COMPRESS',
+    'm23': 'tests/data/CAREER-23COMPRESS'
   },
   'uncompressed': {
     'm21': 'tests/data/21UNCOMPRESS.frt'
   },
   'saveTest': {
-    'm21': 'tests/data/CAREER-TESTSAVE-21'
+    'm21': 'tests/data/CAREER-TESTSAVE-21',
+    'm23': 'tests/data/CAREER-TESTSAVE-23'
   }
 };
 
@@ -2012,6 +2014,45 @@ describe('Madden 21 end to end tests', function () {
         await file.save(filePaths.saveTest.m21);
           
         expect(table.records[138]._fieldsArray[14].isChanged).to.be.false;
+      });
+    });
+
+    describe('TalentNodeStatus', () => {
+      const tableId = 4294;
+      let m23File;
+
+      before(async () => {
+        await new Promise((resolve, reject) => {
+          m23File = new FranchiseFile(filePaths.compressed.m23, {
+            'schemaDirectory': path.join(__dirname, '../data/test-schemas')
+          });
+
+          m23File.on('ready', async () => {
+            table = m23File.getTableById(tableId);
+            await table.readRecords();
+            resolve();
+          });
+        });
+      });
+
+      it('can set the value of an empty record enum', () => {
+        table.records[2778].TalentStatus = 'NotOwned';
+        expect(table.records[2778].TalentStatus).to.equal('NotOwned');
+        expect(table.records[2778].isEmpty).to.be.false;
+      });
+
+      it('can set the value of an enum to an empty record reference', () => {
+        table.records[2778].TalentStatus = '1010110';
+        expect(table.records[2778].TalentStatus).to.equal('1010110');
+        expect(table.records[2778].isEmpty).to.be.false;
+      });
+
+      it('recalculating empty records can detect user-entered empty enum', () => {
+        table.records[2778].TalentStatus = '1010110';
+        expect(table.records[2778].TalentStatus).to.equal('1010110');
+
+        table.recalculateEmptyRecordReferences();
+        expect(table.records[2778].isEmpty).to.be.true;
       });
     });
 

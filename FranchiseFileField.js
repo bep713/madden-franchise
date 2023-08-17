@@ -85,8 +85,15 @@ class FranchiseFileField {
           this._value = theEnum.name;
         }
         catch (err) {
-          this._value = null;
-          throw err;
+          // if user tries entering an invalid enum value, check if it's an empty record reference (will be binary)
+          if (utilService.stringOnlyContainsBinaryDigits(value)) {
+            this._value = value;
+            this._unformattedValue.setBits(this.offset.offset, value, this.offset.length);
+          }
+          else {
+            this._value = null;
+            throw err;
+          }
         }
       }
       else {
