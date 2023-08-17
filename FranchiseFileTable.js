@@ -441,7 +441,7 @@ class FranchiseFileTable extends EventEmitter {
               // if the changed field isn't included in the first 32 bits, zero out the first 32 bits. 
               // Otherwise, it's not necessary to zero out.
               const changedFieldsInFirst4Bytes = object.fieldsArray.filter((field) => { return field.isChanged && field.offset.indexOffset < 32; });
-              if (changedFieldsInFirst4Bytes.length === 0) {
+              if (this._settings.autoUnempty && changedFieldsInFirst4Bytes.length === 0) {
                 // set first 4 bytes to 0
                 this._changeRecordBuffers(object.index, 0);
 
@@ -451,7 +451,7 @@ class FranchiseFileTable extends EventEmitter {
                   field.clearCachedValues();
                 });
               }
-
+              
               // If autoUnempty is disabled, only un-empty the row if a field in the first 4 bytes changed.
               // If autoUnempty is enabled, un-empty the row if ANY field changed.
               if (this._settings.autoUnempty || changedFieldsInFirst4Bytes.length > 0) {

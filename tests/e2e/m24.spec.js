@@ -979,13 +979,13 @@ describe('Madden 24 end to end tests', function () {
 
       describe('reads records that are passed in', () => {
         beforeEach((done) => {
-          table.readRecords(['FirstName', 'LastName', 'Position', 'TRAIT_BIGHITTER', 'MetaMorph_GutBase', 'SeasonStats', 'InjuryType', 'TRAIT_COVER_BALL']).then(() => {
+          table.readRecords(['MorphHead', 'FirstName', 'LastName', 'Position', 'TRAIT_BIGHITTER', 'MetaMorph_GutBase', 'SeasonStats', 'InjuryType', 'TRAIT_COVER_BALL']).then(() => {
             done();
           });
         });
 
         it('has expected offset table', () => {
-          expect(table.loadedOffsets.length).to.equal(8);
+          expect(table.loadedOffsets.length).to.equal(9);
           expect(table.offsetTable.length).to.equal(330);
 
           let offset0 = table.offsetTable[0];
@@ -1085,8 +1085,11 @@ describe('Madden 24 end to end tests', function () {
           let record = table.records[table.header.nextRecordToUse];
 
           expect(record.isEmpty).to.be.true;
+          const valueBefore = record.MorphHead;
+
           record.FirstName = 'NotEmpty';
           expect(record.isEmpty).to.be.true;
+          expect(record.MorphHead).to.equal(valueBefore); // should not clear out the first 4 bytes
         });
 
         it('"autoUnempty: true" will un-empty the row if an empty player row is edited', () => {
@@ -1095,6 +1098,7 @@ describe('Madden 24 end to end tests', function () {
           expect(record.isEmpty).to.be.true;
           record.FirstName = 'NotEmpty';
           expect(record.isEmpty).to.be.false;
+          expect(record.MorphHead).to.equal('00000000000000000000000000000000'); // should clear out the first 4 bytes
         });
       });
 
@@ -1102,7 +1106,7 @@ describe('Madden 24 end to end tests', function () {
         it('will re-read records if new attributes are passed in', (done) => {
           table.readRecords(['GameStats']).then(() => {
             expect(table.records[0].GameStats).to.not.be.undefined;
-            expect(table.loadedOffsets.length).to.equal(9)
+            expect(table.loadedOffsets.length).to.equal(10)
             done();
           }).catch((err) => {
             done(err);
