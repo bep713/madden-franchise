@@ -155,7 +155,8 @@ describe('Madden 20 FTC end to end tests', function () {
                                 'offset': 0,
                                 'originalIndex': 0,
                                 'type': "EnumTableEntry[]",
-                                'valueInSecondTable': false
+                                'valueInSecondTable': false,
+                                'valueInThirdTable': false,
                             });
                         });
 
@@ -178,7 +179,8 @@ describe('Madden 20 FTC end to end tests', function () {
                                 'offset': 32,
                                 'originalIndex': 1,
                                 'type': "string",
-                                'valueInSecondTable': true
+                                'valueInSecondTable': true,
+                                'valueInThirdTable': false,
                             });
                         });
                     });
@@ -328,7 +330,8 @@ describe('Madden 20 FTC end to end tests', function () {
                                 'name': "AbilityProgressionTunable0",
                                 'offset': 0,
                                 'type': "AbilityProgressionTunable",
-                                'valueInSecondTable': false
+                                'valueInSecondTable': false,
+                                'valueInThirdTable': false
                             });
                         });
 
@@ -348,7 +351,8 @@ describe('Madden 20 FTC end to end tests', function () {
                                 'name': "AbilityProgressionTunable1",
                                 'offset': 32,
                                 'type': "AbilityProgressionTunable",
-                                'valueInSecondTable': false
+                                'valueInSecondTable': false,
+                                'valueInThirdTable': false
                             });
                         });
                     });

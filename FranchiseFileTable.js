@@ -2,6 +2,7 @@ const EventEmitter = require('events').EventEmitter;
 const utilService = require('./services/utilService');
 const FranchiseFileRecord = require('./FranchiseFileRecord');
 const FranchiseFileTable2Field = require('./FranchiseFileTable2Field');
+const FranchiseFileTable3Field = require('./FranchiseFileTable3Field');
 
 class FranchiseFileTable extends EventEmitter {
   constructor(data, offset, gameYear, strategy, settings) {
@@ -21,6 +22,7 @@ class FranchiseFileTable extends EventEmitter {
     this.isChanged = false;
     this.records = [];
     this.table2Records = [];
+    this.table3Records = [];
     this.arraySizes = [];
     this.emptyRecords = new Map();
     this._settings = settings;
@@ -52,22 +54,31 @@ class FranchiseFileTable extends EventEmitter {
   };
   
   updateBuffer() {
-    // need to check table2 data first because it may change offsets of the legit records.
-    const table2Data = this.strategy.getTable2BinaryData(this.table2Records, this.data.slice(this.header.table2StartIndex));
+    // need to check table2 & table3 data first because it may change offsets of the legit records.
+    let table2Data = this.strategy.getTable2BinaryData(this.table2Records, this.data.slice(this.header.table2StartIndex));
+    let table3Data = this.strategy.getTable3BinaryData(this.table3Records, this.data.slice(this.header.table3StartIndex));
     
     // update table2 length and table total length in table header (only if records have been read)
     if (this.recordsRead) {
       let table2DataLength = 0;
+      let table3DataLength = 0;
 
       // Get length of all table2Data sub arrays
       table2Data.forEach((arr) => {
         table2DataLength += arr.length;
       });
 
+      table3Data.forEach((arr) => {
+        table3DataLength += arr.length;
+      });
+
       this.header.table2Length = table2DataLength;
       this.header.tableTotalLength = this.header.table1Length + this.header.table2Length;
 
+      this.header.table3Length = table3DataLength;
+
       this.data.writeUInt32BE(this.header.table2Length , this.header.offsetStart - 44);
+      this.data.writeUInt32BE(this.header.table3Length, this.header.offsetStart - 40);
       this.data.writeUInt32BE(this.header.tableTotalLength, this.header.offsetStart - 24);
     }
 
@@ -103,7 +114,18 @@ class FranchiseFileTable extends EventEmitter {
     }
 
     bufferArrays.push(this.data.slice(currentOffset, this.header.table2StartIndex));
+
+    if (!this.recordsRead && this.header.hasSecondTable && table2Data.length === 0) {
+      table2Data = this.data.slice(this.header.table2StartIndex);
+    }
+
     bufferArrays = bufferArrays.concat(table2Data);
+
+    if (!this.recordsRead && this.header.hasThirdTable && table3Data.length === 0) {
+      table3Data = this.data.slice(this.header.table3StartIndex);
+    }
+
+    bufferArrays = bufferArrays.concat(table3Data);
 
     this.data = Buffer.concat(bufferArrays);
   };
@@ -196,6 +218,7 @@ class FranchiseFileTable extends EventEmitter {
     this.isChanged = false;
     this.records = [];
     this.table2Records = [];
+    this.table3Records = [];
     this.arraySizes = [];
     this.emptyRecords = new Map();
 
@@ -231,7 +254,8 @@ class FranchiseFileTable extends EventEmitter {
               'name': `${this.name.substring(0, this.name.length - 2)}${i}`,
               'offset': i * 32,
               'type': this.name.substring(0, this.name.length - 2),
-              'valueInSecondTable': false
+              'valueInSecondTable': false,
+              'valueInThirdTable': false,
             }
             
             offset.isReference = !offset.enum && (offset.type[0] == offset.type[0].toUpperCase() || offset.type.includes('[]')) ? true : false,
@@ -267,6 +291,10 @@ class FranchiseFileTable extends EventEmitter {
         
         if (this.header.hasSecondTable) {
           this._parseTable2Values(this.data, this.header, this.records);
+        }
+
+        if (this.header.hasThirdTable) {
+          this._parseTable3Values(this.data, this.header, this.records);
         }
 
         this.emptyRecords = this._parseEmptyRecords();
@@ -377,6 +405,22 @@ class FranchiseFileTable extends EventEmitter {
         field.secondTableField.strategy = that.strategyBase.table2Field;
         that.table2Records.push(field.secondTableField);
         field.secondTableField.parent = that;
+      });
+    });
+  };
+  
+  _parseTable3Values(data, header, records) {
+    const that = this;
+    const thirdTableData = data.slice(header.table3StartIndex);
+
+    records.forEach((record) => {
+      const fieldsReferencingThirdTable = record.fieldsArray.filter((field) => { return field.thirdTableField; });
+  
+      fieldsReferencingThirdTable.forEach((field) => {
+        field.thirdTableField.unformattedValue = that.strategyBase.table3Field.getInitialUnformattedValue(field, thirdTableData);
+        field.thirdTableField.strategy = that.strategyBase.table3Field;
+        that.table3Records.push(field.thirdTableField);
+        field.thirdTableField.parent = that;
       });
     });
   };
@@ -514,7 +558,7 @@ class FranchiseFileTable extends EventEmitter {
         this.emit('change');
       }
     }
-    else if (object instanceof FranchiseFileTable2Field) {
+    else if (object instanceof FranchiseFileTable2Field || object instanceof FranchiseFileTable3Field) {
       object.isChanged = true;
       
       // When a table2 field changes, we need to check if the record is empty. If so, we need to mark it as not empty. 
@@ -636,6 +680,7 @@ function readOffsetTable(data, schema, header) {
         'type': (minValue < 0 || maxValue < 0) ? 's_' + attribute.type : attribute.type,
         'isReference': !attribute.enum && (attribute.type[0] == attribute.type[0].toUpperCase() || attribute.type.includes('[]') || attribute.type === 'record') ? true : false,
         'valueInSecondTable': header.hasSecondTable && attribute.type === 'string',
+        'valueInThirdTable': header.hasThirdTable && attribute.type === 'binaryblob',
         'isSigned': minValue < 0 || maxValue < 0,
         'minValue': minValue,
         'maxValue': maxValue,

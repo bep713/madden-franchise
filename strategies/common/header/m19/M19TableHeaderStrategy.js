@@ -99,7 +99,8 @@ M19TableHeaderStrategy.parseHeader = (data) => {
         'recordWords': data2RecordWords,
         'recordCapacity': data2RecordCapacity,
         'numMembers': data2IndexEntries,
-        'nextRecordToUse': nextRecordToUse
+        'nextRecordToUse': nextRecordToUse,
+        'hasThirdTable': false
     };
 };
 

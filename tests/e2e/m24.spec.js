@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const zlib = require('zlib');
 const expect = require('chai').expect;
 const { BitView } = require('bit-buffer');
 const FranchiseFile = require('../../FranchiseFile');
@@ -2064,6 +2065,124 @@ describe('Madden 24 end to end tests', function () {
       //   table.recalculateEmptyRecordReferences();
       //   expect(table.records[3875].isEmpty).to.be.true;
       // });
+    });
+
+    describe('CharacterVisuals (table3)', () => {
+      const tableId = 4209;
+
+      before(async () => {
+        table = file.getTableById(tableId);
+        await table.readRecords();
+      });
+
+      it('populates table3 attributes in header', () => {
+        expect(table.header.table3Length).to.equal(4550400);
+        expect(table.header.hasThirdTable).to.be.true;
+        expect(table.header.table3StartIndex).to.equal(31840);
+      });
+
+      it('populates offset flag correctly', () => {
+        expect(table.offsetTable[1].valueInThirdTable).to.be.true;
+      });
+
+      it('populates table3 records', () => {
+        expect(table.table3Records.length).to.equal(3950);
+      });
+
+      it('can get the uncompressed JSON data from the field', () => {
+        const data = table.records[0].RawData;
+        expect(data[0]).to.equal('{');
+        expect(data.length).to.equal(864);
+      });
+
+      it('can get the table3 record from the field', () => {
+        const thirdTableField = table.records[0]._fields.RawData.thirdTableField;
+        const data = thirdTableField.value;
+        expect(data[0]).to.equal('{');
+        expect(data.length).to.equal(864);
+      });
+
+      it('can get the table3 unformatted data', () => {
+        const thirdTableField = table.records[0]._fields.RawData.thirdTableField;
+        const data = thirdTableField.unformattedValue;
+        expect(data.length).to.equal(0x480);
+        expect(data.readUInt16LE(0)).to.equal(0x161);   // size of gzipped data in first 2 bytes
+        expect(data.readUInt16LE(2)).to.equal(0x8B1F);  // gzip signature
+      });
+
+      it('can set the table3 data', () => {
+        let existingData = JSON.parse(table.records[0].RawData);
+        existingData.firstName = 'Test';
+        existingData.lastName = 'Test';
+
+        table.records[0].RawData = JSON.stringify(existingData);
+        
+        expect(table.records[0].RawData).to.eql(JSON.stringify(existingData));
+        expect(table.records[0]._fields.RawData.thirdTableField.value).to.eql(JSON.stringify(existingData));
+      });
+
+      it('can set the table3 data without JSON.stringify', () => {
+        let existingData = JSON.parse(table.records[0].RawData);
+        existingData.firstName = 'Test';
+        existingData.lastName = 'Test';
+
+        table.records[0].RawData = existingData;
+        
+        expect(table.records[0].RawData).to.eql(JSON.stringify(existingData));
+        expect(table.records[0]._fields.RawData.thirdTableField.value).to.eql(JSON.stringify(existingData));
+      });
+
+      it('populates unformatted value correctly after setting the value', () => {
+        let existingData = JSON.parse(table.records[0].RawData);
+        existingData.firstName = 'Test';
+        existingData.lastName = 'Test';
+
+        table.records[0].RawData = existingData;
+
+        expect(table.records[0]._fields.RawData.thirdTableField.unformattedValue).to.be.an.instanceOf(Buffer);
+        expect(table.records[0]._fields.RawData.thirdTableField.unformattedValue.length).to.equal(0x480);
+
+        const data = zlib.gunzipSync(table.records[0]._fields.RawData.thirdTableField.unformattedValue.subarray(2));
+        expect(JSON.parse(data.toString())).to.eql(existingData);
+      });
+
+      it('saves properly after edit', (done) => {
+        let existingData = JSON.parse(table.records[0].RawData);
+        existingData.firstName = 'Test';
+        existingData.lastName = 'Test';
+
+        table.records[0].RawData = existingData;
+        file.save(filePathToSave).then(() => {
+          let file2 = new FranchiseFile(filePathToSave);
+          file2.on('ready', async () => {
+            let table2 = file2.getTableById(tableId);
+            await table2.readRecords();
+  
+            expect(table2.records[0].RawData).to.eql(JSON.stringify(existingData));
+            done();
+          });
+        });
+      });
+
+      it('handles empty scenario', () => {
+        const prevData = table.records[0].RawData;
+        table.records[0].empty();
+        expect(table.records[0].RawData).to.eql(prevData);
+        expect(table.records[0]._fields.RawData.thirdTableField.value).to.eql(prevData);
+      });
+
+      it('handles un-empty scenario', () => {
+        const prevData = table.records[0].RawData;
+        const prevUnformatted = table.records[0]._fields.RawData.unformattedValue;
+
+        table.records[0].empty();
+        expect(table.records[0].RawData).to.eql(prevData);
+
+        table.records[0].Overflow = '00000000000000000000000000000000';
+        expect(table.records[0].RawData).to.eql(prevData);
+        expect(table.records[0]._fields.RawData.unformattedValue).to.eql(prevUnformatted);
+        expect(table.records[0]._fields.RawData.thirdTableField.value).to.eql(prevData);
+      });
     });
 
     // describe('LeagueSetting', () => {

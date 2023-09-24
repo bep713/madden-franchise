@@ -2,6 +2,7 @@ const { BitView } = require('bit-buffer');
 
 const utilService = require('./services/utilService');
 const FranchiseFileTable2Field = require('./FranchiseFileTable2Field');
+const FranchiseFileTable3Field = require('./FranchiseFileTable3Field');
 
 class FranchiseFileField {
   constructor(key, value, offset, parent) {
@@ -15,6 +16,11 @@ class FranchiseFileField {
     if (offset.valueInSecondTable) {
       this.secondTableField = new FranchiseFileTable2Field(this._recordBuffer.readUInt32BE(offset.offset / 8), offset.maxLength);
       this.secondTableField.fieldReference = this;
+    }
+    
+    if (offset.valueInThirdTable) {
+      this.thirdTableField = new FranchiseFileTable3Field(this._recordBuffer.readUInt32BE(offset.offset / 8), offset.maxLength);
+      this.thirdTableField.fieldReference = this;
     }
   };
 
@@ -64,7 +70,18 @@ class FranchiseFileField {
 
     if (this.offset.valueInSecondTable) {
       this.secondTableField.value = value.toString();
-    } else {
+    }
+    else if (this.offset.valueInThirdTable) {
+      if (typeof value === 'object') {
+        const newVal = JSON.stringify(value);
+        this._value = newVal;
+        this.thirdTableField.value = newVal;
+      }
+      else {
+        this.thirdTableField.value = value.toString();
+      }
+    }
+    else {
       let actualValue;
 
       if (this.offset.isReference) {
@@ -213,6 +230,9 @@ class FranchiseFileField {
   _parseFieldValue(unformatted, offset) {
     if (offset.valueInSecondTable) {
       return this.secondTableField.value;
+    }
+    else if (offset.valueInThirdTable) {
+      return this.thirdTableField.value;
     }
     else if (offset.enum) {
       const enumUnformattedValue = utilService.dec2bin(this.unformattedValue.getBits(this.offset.offset, this.offset.length), offset.enum._maxLength);

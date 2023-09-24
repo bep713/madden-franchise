@@ -24,7 +24,9 @@ FranchiseTableStrategy.getTable2BinaryData = (table2Records, fullTable2Buffer) =
         currentOffset = recordOffset + recordHexData.length;
     }
 
-    table2Data.push(fullTable2Buffer.slice(currentOffset));
+    if (table2Records.length > 0) {
+        table2Data.push(fullTable2Buffer.slice(currentOffset));
+    }
 
     return table2Data;
 };
