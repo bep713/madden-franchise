@@ -1,6 +1,3 @@
-const EventEmitter = require('events').EventEmitter;
-const utilService = require('./services/utilService');
-
 class FranchiseFileTable3Field {
   constructor (index, maxLength, parent) {
     this._value = '';
@@ -42,7 +39,7 @@ class FranchiseFileTable3Field {
 
   set value (value) {
     this._value = value;    
-    this._unformattedValue = this._strategy.setUnformattedValueFromFormatted(value, this.maxLength);
+    this._unformattedValue = this._strategy.setUnformattedValueFromFormatted(value, this._unformattedValue, this.maxLength);
 
     if (this.lengthAtLastSave === null) {
       this.lengthAtLastSave = getLengthOfUnformattedValue(this._unformattedValue);

@@ -2183,39 +2183,45 @@ describe('Madden 24 end to end tests', function () {
         expect(table.records[0]._fields.RawData.unformattedValue).to.eql(prevUnformatted);
         expect(table.records[0]._fields.RawData.thirdTableField.value).to.eql(prevData);
       });
+
+      describe('handles scenario where data exists between the table3 size & data', () => {
+        let table, file3;
+
+        before((done) => {
+          file3 = new FranchiseFile('tests/data/CAREER-24Table3Data');
+          file3.on('ready', () => {
+            table = file3.getTableById(tableId);
+            table.readRecords().then(() => {
+              done();
+            });
+          });
+        });
+
+        it('can read the data', () => {
+          expect(table.records[1400].RawData.length).to.be.greaterThan(0);
+          expect(table.records[1400]._fields.RawData.thirdTableField.unformattedValue.readUInt8(2)).to.eql(7);
+        });
+
+        it('can set the data', (done) => {
+          const newData = {
+            firstName: 'Test',
+            lastName: 'Test'
+          };
+
+          table.records[1400].RawData = newData;
+
+          file3.save(filePathToSave).then(() => {
+            let file2 = new FranchiseFile(filePathToSave);
+            file2.on('ready', async () => {
+              let table2 = file2.getTableById(tableId);
+              await table2.readRecords();
+    
+              expect(table2.records[1400].RawData).to.eql(JSON.stringify(newData));
+              done();
+            });
+          });
+        });
+      });
     });
-
-    // describe('LeagueSetting', () => {
-    //   before((done) => {
-    //     table = file.getTableByName('LeagueSetting');
-    //     table.readRecords(['SkillLevel']).then(() => {
-    //       done();
-    //     });
-    //   });
-
-    //   it('can set a negative enum attribute', () => {
-    //     let record = table.records[0];
-
-    //     record.SkillLevel = 'Invalid_';
-    //     expect(record.SkillLevel).to.equal('INVALID_');
-    //     expect(record.getFieldByKey('SkillLevel').unformattedValue).to.equal('1001');
-    //   });
-    // });
-
-    /* DISABLED TEST BECAUSE THE TABLE ISNT CONFIGURED CORRECTLY */
-    // describe('Resign_TeamRequest', () => {
-    //   before((done) => {
-    //     table = file.getTableById(4216);
-    //     table.readRecords().then(() => {
-    //       done();
-    //     })
-    //   });
-
-    //   it('reads offset table correctly', () => {
-    //     expect(table.offsetTable[0].name).to.equal('SeasonInfo');
-    //     expect(table.offsetTable[1].name).to.equal('AwardsEvalRef');
-    //     expect(table.offsetTable[2].name).to.equal('EventRecord');
-    //   });
-    // });
   });
 });
