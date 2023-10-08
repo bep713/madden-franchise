@@ -14,10 +14,15 @@ FranchiseTableStrategy.getTable2BinaryData = (table2Records, fullTable2Buffer) =
 
         if (i > 0 && recordOffset === 0) {
             // this case is true for the last few rows with no data in them. They reference the first table2 value.
-            break;
+            continue;
         }
 
-        table2Data.push(fullTable2Buffer.slice(currentOffset, recordOffset));
+        const preData = fullTable2Buffer.slice(currentOffset, recordOffset);
+
+        if (preData.length > 0) {
+            table2Data.push(preData);
+        }
+
         const recordHexData = record.hexData;
         table2Data.push(recordHexData);
 
@@ -64,7 +69,7 @@ FranchiseTableStrategy.recalculateBlobOffsets = (table, record) => {
     const byteLengthPerRecord = table.offsetTable.filter((offsetEntry) => {
         return offsetEntry.type === 'binaryblob';
     }).reduce((accum, cur) => {
-        return accum + cur.maxLength;
+        return accum + cur.maxLength + 2;   // +2 bytes for size, which is not considered in max length.
     }, 0);
 
     // Then, go through each string field sorted by offset index, and assign offsets to the table2 fields

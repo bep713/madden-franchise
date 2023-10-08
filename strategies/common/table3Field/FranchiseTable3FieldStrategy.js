@@ -7,7 +7,7 @@ FranchiseTable3FieldStrategy.getZlibDataStartIndex = (unformattedValue) => {
 };
 
 FranchiseTable3FieldStrategy.getInitialUnformattedValue = (field, data) => {
-    return data.slice(field.thirdTableField.index, (field.thirdTableField.index + field.offset.maxLength + 2)); 
+    return data.slice(field.thirdTableField.index, (field.thirdTableField.index + field.offset.maxLength + 2));
     // extend maxLength + 2 because the first 2 bytes are the size of the zipped data
 };
 

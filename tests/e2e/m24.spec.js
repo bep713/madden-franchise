@@ -2219,6 +2219,26 @@ describe('Madden 24 end to end tests', function () {
         });
       });
 
+      it('handles scenario where all records change', (done) => {
+        for (let row = 0; row < table.header.recordCapacity; row++) {
+          table.records[row]['RawData'] = {};
+        }
+
+        file.save(filePathToSave).then(() => {
+          let file2 = new FranchiseFile(filePathToSave);
+          file2.on('ready', async () => {
+            let table2 = file2.getTableById(tableId);
+            await table2.readRecords();
+            
+            for (let row = 0; row < table2.header.recordCapacity; row++) {
+              expect(table2.records[row]['RawData']).to.eql('{}');
+            }
+
+            done();
+          });
+        });
+      });
+
       describe('handles scenario where data exists between the table3 size & data', () => {
         let table, file3;
 
