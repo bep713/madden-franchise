@@ -11,5 +11,6 @@ M24TableStrategy.getTable2BinaryData = FranchiseTableStrategy.getTable2BinaryDat
 M24TableStrategy.getTable3BinaryData = FranchiseTableStrategy.getTable2BinaryData;
 M24TableStrategy.getMandatoryOffsets = FranchiseTableStrategy.getMandatoryOffsets;
 M24TableStrategy.recalculateStringOffsets = FranchiseTableStrategy.recalculateStringOffsets;
+M24TableStrategy.recalculateBlobOffsets = FranchiseTableStrategy.recalculateBlobOffsets;
 
 module.exports = M24TableStrategy;

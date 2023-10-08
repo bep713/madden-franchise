@@ -502,6 +502,7 @@ class FranchiseFileTable extends EventEmitter {
                 // if the record contains any string values, point the string values to
                 // their correct offsets
                 this.strategy.recalculateStringOffsets(this, object);
+                this.strategy.recalculateBlobOffsets(this, object);
 
                 // Delete the empty record entry because it is no longer empty
                 this.emptyRecords.delete(object.index);

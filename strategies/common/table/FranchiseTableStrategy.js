@@ -59,4 +59,28 @@ FranchiseTableStrategy.recalculateStringOffsets = (table, record) => {
     });
 };
 
+FranchiseTableStrategy.recalculateBlobOffsets = (table, record) => {
+    // First, calculate length allocated per record in table2
+    const byteLengthPerRecord = table.offsetTable.filter((offsetEntry) => {
+        return offsetEntry.type === 'binaryblob';
+    }).reduce((accum, cur) => {
+        return accum + cur.maxLength;
+    }, 0);
+
+    // Then, go through each string field sorted by offset index, and assign offsets to the table2 fields
+    let runningOffset = 0;
+
+    record.fieldsArray.filter((field) => {
+        return field.offset.type === 'binaryblob';
+    }).sort((a, b) => {
+        return a.offset.index - b.offset.index;
+    }).forEach((field) => {
+        if (field.thirdTableField) {
+            field.thirdTableField.offset = (record.index * byteLengthPerRecord) + runningOffset;
+        }
+        
+        runningOffset += field.offset.maxLength;
+    });
+};
+
 module.exports = FranchiseTableStrategy;

@@ -2184,6 +2184,41 @@ describe('Madden 24 end to end tests', function () {
         expect(table.records[0]._fields.RawData.thirdTableField.value).to.eql(prevData);
       });
 
+      it('handles un-empty scenario (not manually emptying first)', (done) => {
+        const recordIndex = 3720;
+        expect(table.records[recordIndex].isEmpty).to.be.true;
+
+        let offsetTableEntry = table.records[recordIndex]._fields.RawData.offset;
+        const oldOffset1 = table.records[recordIndex]._fields.RawData.unformattedValue.getBits(offsetTableEntry.offset, offsetTableEntry.length);
+        const oldOffset2 = table.records[recordIndex]._fields.RawData.thirdTableField.offset;
+    
+        table.records[recordIndex].Overflow = '00000000000000000000000000000000';
+
+        const newData = { test: 'Hi' };
+        table.records[recordIndex].RawData = newData;
+
+        expect(table.records[recordIndex].isEmpty).to.be.false;
+        expect(table.records[recordIndex].RawData).to.eql(JSON.stringify(newData));
+        expect(table.records[recordIndex]._fields.RawData.unformattedValue.getBits(offsetTableEntry.offset, offsetTableEntry.length)).to.not.equal(oldOffset1);
+        expect(table.records[recordIndex]._fields.RawData.thirdTableField.offset).to.not.equal(oldOffset2);
+
+        file.save(filePathToSave).then(() => {
+          let file2 = new FranchiseFile(filePathToSave);
+          file2.on('ready', async () => {
+            let table2 = file2.getTableById(tableId);
+            await table2.readRecords();
+            
+            offsetTableEntry = table2.records[recordIndex]._fields.RawData.offset;
+
+            expect(table2.records[recordIndex].isEmpty).to.be.false;
+            expect(table2.records[recordIndex].RawData).to.eql(JSON.stringify(newData));
+            expect(table2.records[recordIndex]._fields.RawData.unformattedValue.getBits(offsetTableEntry.offset, offsetTableEntry.length)).to.not.equal(oldOffset1);
+            expect(table2.records[recordIndex]._fields.RawData.thirdTableField.offset).to.not.equal(oldOffset2);
+            done();
+          });
+        });
+      });
+
       describe('handles scenario where data exists between the table3 size & data', () => {
         let table, file3;
 
