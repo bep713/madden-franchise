@@ -91,6 +91,20 @@ describe('Madden 22 FTC end to end tests', function () {
                 expect(table2.header.table2Length).to.equal(oldTable2Length + newRecordValue.length - oldRecordValue.length);
                 expect(table2.header.tableTotalLength).to.equal(oldTableTotalLength + newRecordValue.length - oldRecordValue.length);
             });
+
+            it('doesnt duplicate changed tables', async () => {
+                table.records[0].DisplayName = 'testnamechangeagain';
+                await file.save(filePaths.saveTest.ftc);
+
+                let file2 = new FranchiseFile(filePaths.saveTest.ftc);
+                await new Promise((resolve, reject) => {
+                    file2.on('ready', () => {
+                        resolve();
+                    });
+                });
+
+                expect(file.tables.length).to.eql(file2.tables.length);
+            });
         });
 
         describe('Tuning dash issue', () => {

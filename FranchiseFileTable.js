@@ -56,7 +56,11 @@ class FranchiseFileTable extends EventEmitter {
   updateBuffer() {
     // need to check table2 & table3 data first because it may change offsets of the legit records.
     let table2Data = this.strategy.getTable2BinaryData(this.table2Records, this.data.slice(this.header.table2StartIndex));
-    let table3Data = this.strategy.getTable3BinaryData(this.table3Records, this.data.slice(this.header.table3StartIndex));
+    let table3Data = [];
+    
+    if (this.header.table3StartIndex) {
+      table3Data = this.strategy.getTable3BinaryData(this.table3Records, this.data.slice(this.header.table3StartIndex));
+    }
     
     // update table2 length and table total length in table header (only if records have been read)
     if (this.recordsRead) {
