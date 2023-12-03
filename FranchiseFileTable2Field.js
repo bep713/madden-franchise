@@ -2,7 +2,7 @@ const EventEmitter = require('events').EventEmitter;
 const utilService = require('./services/utilService');
 
 class FranchiseFileTable2Field {
-  constructor (index, maxLength, parent) {
+  constructor(index, maxLength, parent) {
     this._value = '';
     this.rawIndex = index;
     this.isChanged = false;
@@ -15,11 +15,11 @@ class FranchiseFileTable2Field {
     this._parent = parent;
   };
 
-  get unformattedValue () {
+  get unformattedValue() {
     return this._unformattedValue;
   };
 
-  set unformattedValue (value) {
+  set unformattedValue(value) {
     this._unformattedValue = value;
 
     if (this.lengthAtLastSave === null) {
@@ -32,52 +32,55 @@ class FranchiseFileTable2Field {
     }
   };
 
-  get value () {
+  get value() {
     if (this._value === null) {
-      this._value = this._unformattedValue.toString().replace(/\0.*$/g,'');
+      this._value = this._unformattedValue.toString().replace(/\0.*$/g, '');
     }
 
     return this._value;
   };
 
-  set value (value) {
+  set value(value) {
     this._value = value;
 
     if (value.length > this.maxLength) {
       value = value.substring(0, this.maxLength);
     }
-    
+
     this._unformattedValue = this._strategy.setUnformattedValueFromFormatted(value, this.maxLength);
 
     if (this.lengthAtLastSave === null) {
       this.lengthAtLastSave = getLengthOfUnformattedValue(this._unformattedValue);
     }
-    
+
     this._parent.onEvent('change', this);
   };
 
-  get hexData () {
+  get hexData() {
     return this._unformattedValue;
   };
 
-  get strategy () {
+  get strategy() {
     return this._strategy;
   };
 
-  set strategy (strategy) {
+  set strategy(strategy) {
     this._strategy = strategy;
   };
 
-  get offset () {
+  get offset() {
     return this._offset;
   };
 
-  set offset (offset) {
+  set offset(offset) {
+    const offsetChanged = this._offset !== offset;
     this._offset = offset;
     this.index = offset;
 
-    if (this.fieldReference) {
+    if (offsetChanged && this.fieldReference) {
       this.fieldReference.unformattedValue.setBits(this.fieldReference.offset.offset, offset, 32);
+      this.fieldReference.isChanged = true;
+      this.fieldReference._bubbleChangeToParent();
     }
   };
 
@@ -93,5 +96,5 @@ class FranchiseFileTable2Field {
 module.exports = FranchiseFileTable2Field;
 
 function getLengthOfUnformattedValue(value) {
-    return value.length;
+  return value.length;
 };

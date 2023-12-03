@@ -2,7 +2,9 @@ let CommonAlgorithms = {};
 
 CommonAlgorithms.save = (units, oldData) => {
     // first check if any records changed. If not, we can return immediately because nothing changed.
-    const changedUnits = units.find((unit) => { return unit.isChanged; });
+    const changedUnits = units.find((unit) => {
+        return unit.isChanged;
+    });
 
     if (!changedUnits) {
         return oldData;
@@ -14,7 +16,9 @@ CommonAlgorithms.save = (units, oldData) => {
     let bufferArrays = [];
 
     // Ensure the units are sorted by index in the actual file. Otherwise, we may overwrite data
-    units.sort((a, b) => { return a.index - b.index; });
+    units.sort((a, b) => {
+        return a.index - b.index;
+    });
 
     units.forEach((unit, index) => {
         if (unit.offset === 0 && index > 0) {
@@ -50,7 +54,7 @@ CommonAlgorithms.save = (units, oldData) => {
             unit.isChanged = false;
         }
     });
-    
+
     // Next, we need to push the remainder of data onto the array.
 
     // For example, think if a user changed the 3rd record out of 100.

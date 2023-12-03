@@ -3,18 +3,18 @@ const expect = require('chai').expect;
 const FranchiseFile = require('../../FranchiseFile');
 const FranchiseFileTable = require('../../FranchiseFileTable');
 const filePaths = {
-  'compressed': {
-    'ftc': 'tests/data/FTC_COMPRESS.FTC',
-    'm22': 'tests/data/M22_FTC_COMPRESS.FTC',
-    'tuning': 'tests/data/M22_TUNING_COMPRESS.FTC'
-  },
-  'uncompressed': {
-    'ftc': 'tests/data/FTC_UNCOMPRESS',
-    'm22': 'tests/data/M22_FTC_UNCOMPRESS.frt'
-  },
-  'saveTest': {
-    'ftc': 'tests/data/CAREER-TESTSAVE'
-  }
+    'compressed': {
+        'ftc': 'tests/data/FTC_COMPRESS.FTC',
+        'm22': 'tests/data/M22_FTC_COMPRESS.FTC',
+        'tuning': 'tests/data/M22_TUNING_COMPRESS.FTC'
+    },
+    'uncompressed': {
+        'ftc': 'tests/data/FTC_UNCOMPRESS',
+        'm22': 'tests/data/M22_FTC_UNCOMPRESS.frt'
+    },
+    'saveTest': {
+        'ftc': 'tests/data/CAREER-TESTSAVE'
+    }
 };
 
 let file, tuningFile;
@@ -27,7 +27,7 @@ describe('Madden 22 FTC end to end tests', function () {
             file = new FranchiseFile(filePaths.compressed.m22, {
                 'schemaDirectory': path.join(__dirname, '../data/test-schemas')
             });
-    
+
             const franchiseFTCPromise = await new Promise((resolve) => {
                 file.on('ready', () => {
                     resolve();
@@ -68,6 +68,8 @@ describe('Madden 22 FTC end to end tests', function () {
                 const oldTable2Length = table.header.table2Length;
                 const oldRecordValue = table.records[0].DisplayName;
                 const nextRecordValue = table.records[1].DisplayName;
+                const nextRecordOldOffset = table.records[1].fields.DisplayName.secondTableField.index;
+
                 const newRecordValue = 'testnamechange';
 
                 table.records[0].DisplayName = newRecordValue;
@@ -90,6 +92,16 @@ describe('Madden 22 FTC end to end tests', function () {
                 expect(table2.records[1].DisplayName).to.equal(nextRecordValue);
                 expect(table2.header.table2Length).to.equal(oldTable2Length + newRecordValue.length - oldRecordValue.length);
                 expect(table2.header.tableTotalLength).to.equal(oldTableTotalLength + newRecordValue.length - oldRecordValue.length);
+
+                // check that the table2 offset updated correctly in all places
+                const expectedOffset = nextRecordOldOffset + newRecordValue.length - oldRecordValue.length;
+                expect(table.records[1].fields.DisplayName.secondTableField.index).to.equal(expectedOffset);
+                expect(table.records[1].fields.DisplayName.secondTableField.offset).to.equal(expectedOffset);
+                expect(table.records[1].fields.DisplayName.unformattedValue.getBits(table.records[1].fields.DisplayName.offset.offset, 32)).to.equal(expectedOffset);
+
+                expect(table2.records[1].fields.DisplayName.secondTableField.index).to.equal(expectedOffset);
+                expect(table2.records[1].fields.DisplayName.secondTableField.offset).to.equal(expectedOffset);
+                expect(table2.records[1].fields.DisplayName.unformattedValue.getBits(table2.records[1].fields.DisplayName.offset.offset, 32)).to.equal(expectedOffset);
             });
 
             it('doesnt duplicate changed tables', async () => {
@@ -134,6 +146,49 @@ describe('Madden 22 FTC end to end tests', function () {
 
                 expect(table2.records[2].ShortName).to.equal('TestTest');
                 expect(table2.records[3].ShortName).to.equal('-');
+            });
+
+            it('can make multiple saves on a table2 field', async () => {
+                const tableId = 543;
+
+                let table = tuningFile.getTableById(tableId);
+                await table.readRecords();
+
+                const record4Value = table.records[4].ShortName;
+                const oldRecord4StringOffset = table.records[4].fields.ShortName.secondTableField.offset;
+
+                const oldRecord1Value = table.records[1].ShortName;
+                table.records[1].ShortName = 'Modified';
+                await tuningFile.save(filePaths.saveTest.ftc);
+
+                const oldRecord3Value = table.records[3].ShortName;
+                table.records[3].ShortName = 'Modified';
+                await tuningFile.save(filePaths.saveTest.ftc);
+
+                let file2 = new FranchiseFile(filePaths.saveTest.ftc, {
+                    'schemaDirectory': path.join(__dirname, '../data/test-schemas')
+                });
+
+                await new Promise((resolve, reject) => {
+                    file2.on('ready', () => {
+                        resolve();
+                    });
+                });
+
+                const table2 = file2.getTableById(tableId);
+                await table2.readRecords();
+
+                expect(table2.records[1].ShortName).to.equal('Modified');
+                expect(table2.records[3].ShortName).to.equal('Modified');
+
+                const expectedOffset = oldRecord4StringOffset + (8 - oldRecord1Value.length) + (8 - oldRecord3Value.length);
+                expect(table.records[4].fields.ShortName.secondTableField.offset).to.equal(expectedOffset);
+                expect(table.records[4].fields.ShortName.unformattedValue.getBits(table.records[4].fields.ShortName.offset.offset, 32)).to.equal(expectedOffset);
+
+                expect(table2.records[4].fields.ShortName.unformattedValue.getBits(table2.records[4].fields.ShortName.offset.offset, 32)).to.equal(expectedOffset);
+                expect(table2.records[4].fields.ShortName.secondTableField.offset).to.equal(expectedOffset);
+
+                expect(table2.records[4].ShortName).to.equal(record4Value);
             });
         });
 
