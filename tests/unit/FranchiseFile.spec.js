@@ -272,4 +272,16 @@ describe('Franchise File unit tests', () => {
             expect(zlibSpy.inflateSync.called).to.be.false;
         });
     });
+
+    describe('create() helper', () => {
+        it('returns the file after parse completes', async () => {
+            const file = await FranchiseFile.create(filePaths.compressed.m21);
+            expect(file.packedFileContents).to.not.be.undefined;
+        });
+
+        it('returns the file with autoParse set to false', async () => {
+            const file = await FranchiseFile.create(filePaths.compressed.m21, franchiseFileOptions);
+            expect(file.packedFileContents).to.not.be.undefined;
+        });
+    })
 });

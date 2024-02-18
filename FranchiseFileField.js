@@ -1,6 +1,4 @@
-const {
-  BitView
-} = require('bit-buffer');
+const { BitView } = require('bit-buffer');
 
 const utilService = require('./services/utilService');
 const FranchiseFileTable2Field = require('./FranchiseFileTable2Field');
@@ -149,11 +147,6 @@ class FranchiseFileField {
         }
       }
 
-      // this._value = setFormattedValue(value, this._offset);
-      // this._unformattedValue = parseFormattedValue(value, this._offset);
-
-
-      // this.emit('change');
       this._parent.onEvent('change', this);
     }
   };
@@ -179,6 +172,14 @@ class FranchiseFileField {
   set isChanged(changed) {
     this._isChanged = changed;
   };
+
+  getValueAs(offset) {
+    if (this._unformattedValue === null) {
+      this._setUnformattedValueIfEmpty();
+    }
+    
+    return this._parseFieldValue(this._unformattedValue, offset);
+  }
 
   _bubbleChangeToParent() {
     this._parent.onEvent('change', this);
@@ -232,7 +233,7 @@ class FranchiseFileField {
     } else if (offset.valueInThirdTable) {
       return this.thirdTableField.value;
     } else if (offset.enum) {
-      const enumUnformattedValue = utilService.dec2bin(this.unformattedValue.getBits(this.offset.offset, this.offset.length), offset.enum._maxLength);
+      const enumUnformattedValue = utilService.dec2bin(unformatted.getBits(offset.offset, offset.length), offset.enum._maxLength);
 
       try {
         const theEnum = offset.enum.getMemberByUnformattedValue(enumUnformattedValue);
@@ -246,8 +247,14 @@ class FranchiseFileField {
 
       return enumUnformattedValue;
     } else if (offset.isReference) {
-      const referenceData = utilService.getReferenceDataFromBitview(this._unformattedValue, this.offset.offset);
-      return utilService.getBinaryReferenceData(referenceData.tableId, referenceData.rowNumber);
+      try {
+        const referenceData = utilService.getReferenceDataFromBitview(unformatted, offset.offset);
+        return utilService.getBinaryReferenceData(referenceData.tableId, referenceData.rowNumber);
+      } catch (err) {
+        console.warn(`Tried to read ${offset.name} as a reference, but received an error.`);
+        // tried to read a reference, but the offset was incorrect
+        return unformatted.getBits(offset.offset, offset.length);
+      }
     } else {
       switch (offset.type) {
         case 's_int':

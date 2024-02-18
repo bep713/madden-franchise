@@ -34,7 +34,8 @@ class FranchiseFileTable extends EventEmitter {
   };
 
   set schema(schema) {
-    // console.time('set schema');
+    if (schema?.attributes?.length !== this.header.numMembers) { return; }
+
     this._schema = schema;
     const modifiedHeaderAttributes = this.strategy.parseHeaderAttributesFromSchema(schema, this.data, this.header);
 
@@ -42,11 +43,35 @@ class FranchiseFileTable extends EventEmitter {
     this.header.record1Size = modifiedHeaderAttributes.record1Size;
     this.header.table1StartIndex = modifiedHeaderAttributes.table1StartIndex;
     this.header.table2StartIndex = modifiedHeaderAttributes.table2StartIndex;
-    // console.timeEnd('set schema');
+
+    this.recordsRead = false;
+
+    this.offsetTable = [];
+    this.loadedOffsets = [];
+
+    this.records = [];
+    this.table2Records = [];
+    this.table3Records = [];
+    this.emptyRecords = new Map();
   };
 
   get schema() {
     return this._schema;
+  };
+
+  _generateGenericSchema() {
+    let attributes = [];
+
+    for (let i = 0; i < this.header.numMembers; i++) {
+      attributes.push({
+        'name': `Field_${i}`,
+        'type': 'int',
+        'minValue': 1,  // set to 1 to avoid a weird case with int[] see: FranchiseFileField _parseFieldValue(...) function.
+        'maxValue': 1
+      });
+    }
+
+    return { attributes };
   };
 
   getBinaryReferenceToRecord(index) {
@@ -242,9 +267,7 @@ class FranchiseFileTable extends EventEmitter {
   readRecords(attribsToLoad) {
     return new Promise((resolve, reject) => {
       if (!this.recordsRead || isLoadingNewOffsets(this.loadedOffsets, attribsToLoad, this.offsetTable)) {
-        if (this.schema) {
-          this.offsetTable = readOffsetTable(this.data, this.schema, this.header);
-        } else if (this.isArray) {
+        if (this.isArray) {
           const numberOfFields = this.header.record1Size / 4;
           let offsetTable = [];
           let arraySizes = [];
@@ -266,9 +289,8 @@ class FranchiseFileTable extends EventEmitter {
               'valueInThirdTable': false,
             }
 
-            offset.isReference = !offset.enum && (offset.type[0] == offset.type[0].toUpperCase() || offset.type.includes('[]')) ? true : false,
-
-              offsetTable.push(offset);
+            offset.isReference = !offset.enum && (offset.type[0] == offset.type[0].toUpperCase() || offset.type.includes('[]')) ? true : false;
+            offsetTable.push(offset);
           }
 
           for (let i = 0; i < this.header.data1RecordCount; i++) {
@@ -277,8 +299,13 @@ class FranchiseFileTable extends EventEmitter {
 
           this.offsetTable = offsetTable;
           this.arraySizes = arraySizes;
-        } else {
-          reject('Cannot read records: Schema is not defined.');
+        } else { 
+          if (!this.schema) {
+            console.warn('Schema doesn\'t exist for this table. Generating generic schema from table header...');
+            this.schema = this._generateGenericSchema();
+          }
+
+          this.offsetTable = readOffsetTable(this.data, this.schema, this.header);
         }
 
         let offsetTableToUse = this.offsetTable;
@@ -688,12 +715,16 @@ function readOffsetTable(data, schema, header) {
 
   function parseOffsetTableFromData() {
     let table = [];
+    let seenIndexOffsets = new Set();
 
     schema.attributes.forEach((attribute, index) => {
       const minValue = parseInt(attribute.minValue);
       const maxValue = parseInt(attribute.maxValue);
 
-      table.push({
+      const indexOffset = utilService.byteArrayToLong(data.slice(currentIndex, currentIndex + 4), true);
+      const isRepeatedIndexOffset = seenIndexOffsets.has(indexOffset);
+
+      const entry = {
         'index': index,
         'originalIndex': parseInt(attribute.index),
         'name': attribute.name,
@@ -705,11 +736,22 @@ function readOffsetTable(data, schema, header) {
         'minValue': minValue,
         'maxValue': maxValue,
         'maxLength': attribute.maxLength ? parseInt(attribute.maxLength) : null,
-        'final': attribute.final === 'true' ? true : false,
-        'indexOffset': utilService.byteArrayToLong(data.slice(currentIndex, currentIndex + 4), true),
+        'final': attribute.final === 'true' || isRepeatedIndexOffset,
+        'indexOffset': indexOffset,
         'enum': attribute.enum,
-        'const': attribute.const
-      });
+        'const': attribute.const,
+      }
+
+      table.push(entry);
+
+      // determine if the offset should be skipped. For normal schemas, this is determined by final, const, or type.
+      // For generated schemas, an offset is skipped if the indexOffset has been seen before.
+      const isSkipped = isSkippedOffset(entry);
+
+      if (!isSkipped) {
+        seenIndexOffsets.add(indexOffset);
+      }
+
       currentIndex += 4;
     });
 

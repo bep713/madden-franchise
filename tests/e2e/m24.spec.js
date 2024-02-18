@@ -78,13 +78,9 @@ describe('Madden 24 end to end tests', function () {
   });
 
   describe('post-open tests', () => {
-    before((done) => {
-      file = new FranchiseFile(filePathToUse, {
+    before(async () => {
+      file = await FranchiseFile.create(filePathToUse, {
         'schemaDirectory': path.join(__dirname, '../data/test-schemas')
-      });
-
-      file.on('ready', () => {
-        done();
       })
     });
 

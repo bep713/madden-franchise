@@ -198,6 +198,47 @@ describe('FranchiseFileField unit tests', () => {
         field = new FranchiseFileField(key, unformattedValue, offset);
         expect(field.value).to.eql('AirJordan');
       });
+
+      it('can get a value as if it were another type - int', () => {
+        offset = {
+          'type': 'GameStats',
+          'isReference': true,
+          'length': 32,
+          'offset': 0
+        };
+
+        field = new FranchiseFileField(key, Buffer.from([0x36, 0xD4, 0x00, 0x01]), offset);
+
+        let newOffset = {
+          ...offset,
+          'type': 'int',
+          'minValue': 1,
+          'isReference': false,
+        };
+
+        expect(field.getValueAs(newOffset)).to.equal(919863297);
+      })
+
+      it('can get a value as if it were another type - ref', () => {
+        offset = {
+          'type': 'int',
+          'minValue': 1,
+          'isReference': false,
+          'length': 32,
+          'offset': 0
+        };
+
+        field = new FranchiseFileField(key, Buffer.from([0x36, 0xD4, 0x00, 0x01]), offset);
+
+        let newOffset = {
+          ...offset,
+          'type': 'Ref',
+          'minValue': 1,
+          'isReference': true,
+        };
+
+        expect(field.getValueAs(newOffset)).to.equal('00110110110101000000000000000001');
+      })
     });
   });
 
