@@ -1,6 +1,3 @@
-const EventEmitter = require('events').EventEmitter;
-const utilService = require('./services/utilService');
-
 class FranchiseFileTable2Field {
   constructor(index, maxLength, parent) {
     this._value = '';
