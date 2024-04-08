@@ -1,7 +1,6 @@
 const fs = require("fs");
 const zlib = require("zlib");
 const Constants = require("./Constants");
-// const debug = require('debug')('madden-franchise');
 const EventEmitter = require("events").EventEmitter;
 const FranchiseSchema = require("./FranchiseSchema");
 const utilService = require("./services/utilService");
@@ -11,8 +10,24 @@ const FranchiseFileSettings = require("./FranchiseFileSettings");
 const schemaPickerService = require("./services/schemaPicker");
 
 const COMPRESSED_DATA_OFFSET = 0x52;
+/** 
+ * @typedef {Object} AssetTable 
+ * @param {number} assetId 
+ * @param {number} reference 
+ */
+/**
+   * @typedef {Object} RecordReference
+   * @param {number} tableId
+   * @param {number} rowNumber
+   */
 
 class FranchiseFile extends EventEmitter {
+  /**
+   * 
+   * @param {string} filePath 
+   * @param {FranchiseFileSettings?} [settings] 
+   * @returns {Promise<FranchiseFile>}
+   */
   static create(filePath, settings) {
     return new Promise((resolve, reject) => {
       const file = new FranchiseFile(filePath, settings);
@@ -26,27 +41,43 @@ class FranchiseFile extends EventEmitter {
     });
   }
 
+  /**
+   * 
+   * @param {string} filePath 
+   * @param {FranchiseFileSettings} settings 
+   */
   constructor(filePath, settings) {
     super();
+    /** @private @type {FranchiseFileSettings} */
     this._settings = new FranchiseFileSettings(settings);
     this.isLoaded = false;
 
     if (Array.isArray(filePath)) {
+      /** @private @type {string} */
       this._filePath = filePath[0];
     } else {
       this._filePath = filePath;
     }
 
+    /** @private @type {Buffer} */
     this._rawContents = fs.readFileSync(filePath);
+
+    /** @private @type {FileType} */
     this._type = getFileType(this._rawContents);
+
+    /** @private @type {string} */
     this._gameYear = this._type.year;
+
+    /** @private @type {SchemaMetadata} */
     this._expectedSchemaVersion = getSchemaMetadata(
       this.rawContents,
       this._type
     );
 
     if (this._type.compressed) {
+      /** @type {Buffer} */
       this.packedFileContents = this._rawContents;
+      /** @type {Buffer} */
       this.unpackedFileContents = unpackFile(this._rawContents, this._type);
 
       if (this._type.format === Constants.FORMAT.FRANCHISE_COMMON) {
@@ -67,6 +98,9 @@ class FranchiseFile extends EventEmitter {
     }
   }
 
+  /**
+   * @returns {Promise<void>}
+   */
   parse() {
     const that = this;
     this.strategy = StrategyPicker.pick(this.type);
@@ -136,6 +170,7 @@ class FranchiseFile extends EventEmitter {
         }
       }
 
+      /** @type {Array<FranchiseFileTable>} */
       this.tables = [];
 
       for (let i = 0; i < tableIndicies.length; i++) {
@@ -175,6 +210,7 @@ class FranchiseFile extends EventEmitter {
     });
 
     let assetTablePromise = new Promise((resolve, reject) => {
+      /** @type {Array<AssetTable>} */
       this.assetTable = [];
 
       const assetTableOffset = this.unpackedFileContents.readUInt32BE(4);
@@ -218,10 +254,22 @@ class FranchiseFile extends EventEmitter {
       });
   }
 
+  /**
+   * 
+   * @param {string} outputFilePath 
+   * @param {object} options 
+   * @returns {Promise<string>}
+   */
   save(outputFilePath, options) {
     return this.packFile(outputFilePath, options);
   }
 
+  /**
+   * 
+   * @param {string} outputFilePath 
+   * @param {object} options 
+   * @returns {Promise<string>}
+   */
   packFile(outputFilePath, options) {
     const that = this;
     this.emit("saving");
@@ -262,6 +310,9 @@ class FranchiseFile extends EventEmitter {
     });
   }
 
+  /**
+   * @returns {Buffer}
+   */
   get rawContents() {
     return this._rawContents;
   }
@@ -270,26 +321,44 @@ class FranchiseFile extends EventEmitter {
     return this._openedFranchiseFile;
   }
 
+  /**
+   * @returns {string}
+   */
   get filePath() {
     return this._filePath;
   }
 
+  /**
+   * @returns {FranchiseSchema}
+   */
   get schema() {
     return this.schemaList;
   }
 
+  /**
+   * @returns {SchemaMetadata}
+   */
   get expectedSchemaVersion() {
     return this._expectedSchemaVersion;
   }
 
+  /**
+   * @returns {FranchiseFileSettings}
+   */
   get settings() {
     return this._settings;
   }
 
+  /**
+   * @returns {string}
+   */
   get gameYear() {
     return this._gameYear;
   }
 
+  /**
+   * @returns {FileType}
+   */
   get type() {
     return this._type;
   }
@@ -302,39 +371,74 @@ class FranchiseFile extends EventEmitter {
     this._settings = new FranchiseFileSettings(settings);
   }
 
+  /**
+   * 
+   * @param {string} name 
+   * @returns {FranchiseFileTable?}
+   */
   getTableByName(name) {
     return this.tables.find((table) => {
       return table.name === name;
     });
   }
 
+  /**
+   * 
+   * @param {string} name 
+   * @returns {Array<FranchiseFileTable>}
+   */
   getAllTablesByName(name) {
     return this.tables.filter((table) => {
       return table.name === name;
     });
   }
 
+  /**
+   * 
+   * @param {number} id 
+   * @returns {FranchiseFileTable?}
+   */
   getTableById(id) {
     return this.tables.find((table) => {
       return table.header && table.header.tableId === id;
     });
   }
 
+  /**
+   * 
+   * @param {number} index 
+   * @returns {FranchiseFileTable?}
+   */
   getTableByIndex(index) {
     return this.tables[index];
   }
 
+  /**
+   * 
+   * @param {number} id 
+   * @returns {FranchiseFileTable?}
+   */
   getTableByUniqueId(id) {
     return this.tables.find((table) => {
       return table.header && table.header.uniqueId === id;
     });
   }
 
+  /**
+   * 
+   * @param {string} referenceValue 
+   * @returns {RecordReference}
+   */
   getReferencedRecord(referenceValue) {
     const reference = utilService.getReferenceData(referenceValue);
     return this.getTableById(reference.tableId)?.records[reference.rowNumber];
   }
 
+  /**
+   * 
+   * @param {number} assetId 
+   * @returns {RecordReference?}
+   */
   getReferenceFromAssetId(assetId) {
     const assetEntry = this.assetTable.find((assetEntry) => {
       return assetEntry.assetId === assetId;
@@ -350,6 +454,18 @@ class FranchiseFile extends EventEmitter {
     }
   }
 
+  /**
+   * @typedef {Object} TableRecordReference
+   * @param {number} tableId
+   * @param {string} name
+   * @param {FranchiseFileTable} table
+   */
+  /**
+   * 
+   * @param {number} tableId 
+   * @param {number} recordIndex 
+   * @returns {Array<TableRecordReference>}
+   */
   getReferencesToRecord(tableId, recordIndex) {
     const referencedTable = this.getTableById(tableId);
 
@@ -455,6 +571,18 @@ function _saveSync(destination, packedContents) {
   fs.writeFileSync(destination, packedContents);
 }
 
+/**
+ * @typedef {Object} FileType
+ * @property {string} format
+ * @property {number} year
+ * @property {boolean} compressed
+ */
+
+/**
+ * 
+ * @param {Buffer} data 
+ * @returns {FileType}
+ */
 function getFileType(data) {
   const isDataCompressed = isCompressed(data);
   const format = getFormat(data, isDataCompressed);
@@ -467,6 +595,11 @@ function getFileType(data) {
   };
 }
 
+/**
+ * 
+ * @param {Buffer} data 
+ * @returns {Boolean}
+ */
 function isCompressed(data) {
   const DECOMPRESSED_HEADER = Buffer.from([0x46, 0x72, 0x54, 0x6b]); // FrTk
 
@@ -477,6 +610,12 @@ function isCompressed(data) {
   return true;
 }
 
+/**
+ * 
+ * @param {Buffer} data 
+ * @param {Boolean} isCompressed 
+ * @returns {string}
+ */
 function getFormat(data, isCompressed) {
   if (isCompressed) {
     const ZLIB_HEADER = Buffer.from([0x78, 0x9c]);
@@ -497,6 +636,13 @@ function getFormat(data, isCompressed) {
   }
 }
 
+/**
+ * 
+ * @param {Buffer} data 
+ * @param {Boolean} isCompressed 
+ * @param {string} format 
+ * @returns {number}
+ */
 function getGameYear(data, isCompressed, format) {
   const schemaMax = [
     {
@@ -560,6 +706,20 @@ function getGameYear(data, isCompressed, format) {
   }
 }
 
+/**
+ * @typedef {Object} SchemaMetadata
+ * @property {string?} gameYear
+ * @property {number?} major
+ * @property {number?} minor
+ * @property {string?} path
+ */
+
+/**
+ * 
+ * @param {Buffer} data 
+ * @param {FileType} type 
+ * @returns {SchemaMetadata}
+ */
 function getSchemaMetadata(data, type) {
   let schemaMeta = {
     gameYear: type.year,
@@ -590,6 +750,17 @@ function getSchemaMetadata(data, type) {
   return schemaMeta;
 }
 
+/**
+ * @typedef PartialSchemaMetadata
+ * @property {number} major
+ * @property {number} minor
+ */
+
+/**
+ * 
+ * @param {Buffer} data 
+ * @returns {PartialSchemaMetadata}
+ */
 function getCompressedSchema(data) {
   return {
     major: data.readUInt32LE(0x3e),

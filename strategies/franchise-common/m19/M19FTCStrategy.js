@@ -3,6 +3,9 @@ const M19FTCTableStrategy = require('./M19FTCTableStrategy');
 const M19FTCTable2FieldStrategy = require('./M19FTCTable2FieldStrategy');
 const M24Table3Strategy = require('../../franchise/m24/M24Table3FieldStrategy');
 
+/**
+ * @type {GameStrategy}
+ */
 module.exports = {
     'name': 'M19FTCStrategy',
     'file': M19FTCFileStrategy,

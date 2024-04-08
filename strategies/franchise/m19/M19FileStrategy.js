@@ -1,5 +1,8 @@
 const FranchiseFileStrategy = require('../../common/file/FranchiseFileStrategy');
 
+/**
+ * @type {FileStrategy}
+ */
 let M19FileStrategy = {};
 
 M19FileStrategy.postPackFile = FranchiseFileStrategy.postPackFile;

@@ -2,15 +2,23 @@ const utilService = require('./services/utilService');
 const FranchiseFileField = require('./FranchiseFileField');
 
 class FranchiseFileRecord {
+  /** @param {Buffer} data @param {number} index @param {OffsetTableEntry} offsetTable, @param {FranchiseFileTable} parent */
   constructor(data, index, offsetTable, parent) {
+    /** @type {Buffer}  */
     this._data = data;
+    /** @type {OffsetTableEntry} */
     this._offsetTable = offsetTable;
+    /** @type {number} */
     this.index = index;
+    /** @private @type {Array<FranchiseFileField>} */
     this._fieldsArray = [];
+    /** @private @type {Record<string, FranchiseFileField>} */
     this._fields = this.parseRecordFields();
     this._isChanged = false;
+    /** @type {number} */
     this.arraySize = null;
     this.isEmpty = false;
+    /** @type {FranchiseFileTable} */
     this._parent = parent;
 
     return new Proxy(this, {
@@ -30,22 +38,27 @@ class FranchiseFileRecord {
     })
   };
 
+  /** @returns {Buffer} */
   get hexData () {
     return this._data;
   };
 
+  /** @returns {Record<string, FranchiseFileField>} */
   get fields () {
     return this._fields;
   };
 
+  /** @returns {Array<FranchiseFileField>} */
   get fieldsArray () {
     return this._fieldsArray;
   };
 
+  /** @returns {Buffer} */
   get data() {
     return this._data;
   };
 
+  /** @param {Buffer} data */
   set data (data) {
     this._data = data;
 
@@ -59,6 +72,7 @@ class FranchiseFileRecord {
     return this._isChanged;
   };
 
+  /** @param {boolean} changed */
   set isChanged(changed) {
     this._isChanged = changed;
 
@@ -69,20 +83,24 @@ class FranchiseFileRecord {
     }
   }
 
+  /** @param {string} key @returns {FranchiseFileField?} */
   getFieldByKey(key) {
     return this._fields[key];
   };
 
+  /** @param {string} key @returns {*?} */
   getValueByKey(key) {
     let field = this.getFieldByKey(key);
     return field ? field.value : null;
   };
 
+  /** @param {string} key @returns {RecordReference?} */
   getReferenceDataByKey(key) {
     let field = this.getFieldByKey(key);
     return field ? field.referenceData : null;
   };
 
+  /** @returns {Record<string, FranchiseFileField>} */
   parseRecordFields() {
     let fields = {};
     this._fieldsArray = [];
@@ -105,6 +123,7 @@ class FranchiseFileRecord {
     this.isEmpty = true;
   };
 
+  /** @param {string} name @param {FranchiseFileField} field */
   onEvent(name, field) {
     if (name === 'change') {
       // this._data = utilService.replaceAt(this._data, field.offset.offset, field.unformattedValue);

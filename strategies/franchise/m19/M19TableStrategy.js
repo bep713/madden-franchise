@@ -1,6 +1,9 @@
 const FranchiseTableStrategy = require('../../common/table/FranchiseTableStrategy');
 const M19TableHeaderStrategy = require('../../common/header/m19/M19TableHeaderStrategy');
 
+/**
+ * @type {TableStrategy}
+ */
 let M19TableStrategy = {};
 
 M19TableStrategy.parseHeader = M19TableHeaderStrategy.parseHeader;

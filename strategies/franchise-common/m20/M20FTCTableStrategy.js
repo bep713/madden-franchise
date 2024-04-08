@@ -2,6 +2,9 @@ const M20TableHeaderStrategy = require('../../common/header/m20/M20TableHeaderSt
 const M24TableHeaderStrategy = require('../../common/header/m24/M24TableHeaderStrategy');
 const FTCTableStrategy = require('../../common/table/FTCTableStrategy');
 
+/**
+ * @type {TableStrategy}
+ */
 let M20FTCTableStrategy = {};
 
 M20FTCTableStrategy.parseHeader = M24TableHeaderStrategy.parseHeader;

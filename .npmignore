@@ -66,3 +66,6 @@ tests/
 # Dont include test schemas or preloaded frt files
 data/preloaded-tables/
 data/schemas/*.xml
+
+.vscode
+custom-scripts/

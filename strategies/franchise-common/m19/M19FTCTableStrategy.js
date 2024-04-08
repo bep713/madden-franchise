@@ -1,6 +1,9 @@
 const M19TableHeaderStrategy = require('../../common/header/m19/M19TableHeaderStrategy');
 const FTCTableStrategy = require('../../common/table/FTCTableStrategy');
 
+/**
+ * @type {TableStrategy}
+ */
 let M19FTCTableStrategy = {};
 
 M19FTCTableStrategy.parseHeader = M19TableHeaderStrategy.parseHeader;

@@ -3,39 +3,130 @@ const utilService = require('./services/utilService');
 const FranchiseFileRecord = require('./FranchiseFileRecord');
 const FranchiseFileTable2Field = require('./FranchiseFileTable2Field');
 const FranchiseFileTable3Field = require('./FranchiseFileTable3Field');
+const FranchiseFileSettings = require('./FranchiseFileSettings');
+
+/**
+ * @typedef {Object} FranchiseFileTableHeader
+ * @param {string} name
+ * @param {boolean} isArray
+ * @param {number} tableId
+ * @param {number} tablePad1
+ * @param {number} uniqueId
+ * @param {number} tableUnknown1
+ * @param {number} tableUnknown2
+ * @param {string} data1Id
+ * @param {number} data1Type
+ * @param {number} data1Unknown1
+ * @param {number} data1Flag1
+ * @param {number} data1Flag2
+ * @param {number} data1Flag3
+ * @param {number} data1Flag4
+ * @param {number} tableStoreLength
+ * @param {string} tableStoreName
+ * @param {number} data1Offset
+ * @param {string} data1TableId
+ * @param {number} data1RecordCount
+ * @param {number} data1Pad2
+ * @param {number} table1Length
+ * @param {number} table2Length
+ * @param {number} data1Pad3
+ * @param {number} data1Pad4
+ * @param {number} headerSize
+ * @param {number} headerOffset
+ * @param {number} record1SizeOffset
+ * @param {number} record1SizeLength
+ * @param {number} record1Size
+ * @param {number} offsetStart
+ * @param {string} data2Id
+ * @param {number} table1Length2
+ * @param {number} tableTotalLength
+ * @param {boolean} hasSecondTable
+ * @param {number} table1StartIndex
+ * @param {number} table2StartIndex
+ * @param {number} recordWords
+ * @param {number} recordCapacity
+ * @param {number} numMembers
+ * @param {number} nextRecordToUse
+ * @param {boolean} hasThirdTable
+ */
+
+/**
+ * @typedef {Object} OffsetTableEntry
+ * @param {number} index
+ * @param {number} originalIndex
+ * @param {string} name
+ * @param {string} type
+ * @param {boolean} isReference
+ * @param {boolean} valueInSecondTable
+ * @param {boolean} valueInThirdTable
+ * @param {boolean} isSigned
+ * @param {number} minValue
+ * @param {number} maxValue
+ * @param {number} maxLength
+ * @param {boolean} final
+ * @param {number} indexOffset
+ * @param {FranchiseEnum} enum
+ * @param {boolean} const
+ * @param {number} offset
+ */
+
+/**
+ * @typedef EmptyRecordEntry
+ * @param {number} previous
+ * @param {number} next
+ */
 
 class FranchiseFileTable extends EventEmitter {
   constructor(data, offset, gameYear, strategy, settings) {
     super();
     this.index = -1;
+    /** @type {Buffer} */
     this.data = data;
+    /** @type {number} */
     this.lengthAtLastSave = data.length;
+    /** @type {number} */
     this.offset = offset;
+    /** @type {GameStrategy} */
     this.strategyBase = strategy;
+    /** @type {TableStrategy} */
     this.strategy = this.strategyBase.table;
     this.recordsRead = false;
+    /** @type {number} */
     this._gameYear = gameYear;
+    /** @type {FranchiseFileTableHeader} */
     this.header = this.strategy.parseHeader(this.data);
+    /** @type {string} */
     this.name = this.header.name;
+    /** @type {boolean} */
     this.isArray = this.header.isArray;
+    /** @type {Array<OffsetTableEntry>} */
     this.loadedOffsets = [];
     this.isChanged = false;
+    /** @type {Array<FranchiseFileRecord>} */
     this.records = [];
+    /** @type {Array<FranchiseFileTable2Field>} */
     this.table2Records = [];
+    /** @type {Array<FranchiseFileTable3Field>} */
     this.table3Records = [];
+    /** @type {Array<number>} */
     this.arraySizes = [];
+    /** @type {Map<EmptyRecordEntry>} */
     this.emptyRecords = new Map();
+    /** @type {FranchiseFileSettings} */
     this._settings = settings;
   };
 
+  /** @returns {Buffer} */
   get hexData() {
     this.updateBuffer();
     return this.data;
   };
 
+  /** @param {TableSchema} schema */
   set schema(schema) {
     if (schema?.attributes?.length !== this.header.numMembers) { return; }
 
+    /** @private @type {TableSchema} */
     this._schema = schema;
     const modifiedHeaderAttributes = this.strategy.parseHeaderAttributesFromSchema(schema, this.data, this.header);
 
@@ -55,6 +146,7 @@ class FranchiseFileTable extends EventEmitter {
     this.emptyRecords = new Map();
   };
 
+  /** @type {TableSchema} */
   get schema() {
     return this._schema;
   };
@@ -74,6 +166,7 @@ class FranchiseFileTable extends EventEmitter {
     return { attributes };
   };
 
+  /** @param {number} index @returns {string} */
   getBinaryReferenceToRecord(index) {
     return utilService.getBinaryReferenceData(this.header.tableId, index);
   };
@@ -162,6 +255,7 @@ class FranchiseFileTable extends EventEmitter {
     this.data = Buffer.concat(bufferArrays);
   };
 
+  /** @param {number} index @param {boolean} resetEmptyRecordMap */
   setNextRecordToUse(index, resetEmptyRecordMap) {
     this._setNextRecordToUseBuffer(index);
 
@@ -175,6 +269,7 @@ class FranchiseFileTable extends EventEmitter {
     this.emit('change');
   };
 
+  /** @param {number} index */
   _setNextRecordToUseBuffer(index) {
     // We need to update the table header to use this row next
     this.header.nextRecordToUse = index;
@@ -239,6 +334,7 @@ class FranchiseFileTable extends EventEmitter {
     }
   };
 
+  /** @param {Buffer} buf @param {boolean} shouldReadRecords @returns {Promise<FranchiseFileTable>?} */
   async replaceRawData(buf, shouldReadRecords) {
     this.data = buf;
 
@@ -264,6 +360,7 @@ class FranchiseFileTable extends EventEmitter {
   };
 
   // attribsToLoad is an array of attribute names (strings) to load. It is optional - if nothing is provided to the function it will load all attributes.
+  /** @param {Array<string>?} [attribsToLoad] @returns {Promise<FranchiseFileTable>} */
   readRecords(attribsToLoad) {
     return new Promise((resolve, reject) => {
       if (!this.recordsRead || isLoadingNewOffsets(this.loadedOffsets, attribsToLoad, this.offsetTable)) {
@@ -354,6 +451,7 @@ class FranchiseFileTable extends EventEmitter {
     });
   };
 
+  /** @returns {Map<EmptyRecordEntry>} */
   _parseEmptyRecords() {
     let emptyRecords = new Map();
     const firstEmptyRecord = this.header.nextRecordToUse;
@@ -379,6 +477,7 @@ class FranchiseFileTable extends EventEmitter {
     return emptyRecords;
   };
 
+  /** @param {FranchiseFileRecord} */
   _onRecordEmpty(record) {
     // First, check if the record is already empty. If so, don't do anything...
     // If not empty, then we need to empty it.
@@ -429,6 +528,7 @@ class FranchiseFileTable extends EventEmitter {
     }
   };
 
+  /** @param {Buffer} data @param {FranchiseFileTableHeader} header @param {Array<FranchiseFileRecord>} records */
   _parseTable2Values(data, header, records) {
     const that = this;
     const secondTableData = data.slice(header.table2StartIndex);
@@ -447,6 +547,7 @@ class FranchiseFileTable extends EventEmitter {
     });
   };
 
+  /** @param {Buffer} data @param {FranchiseFileTableHeader} header @param {Array<FranchiseFileRecord>} records */
   _parseTable3Values(data, header, records) {
     const that = this;
     const thirdTableData = data.slice(header.table3StartIndex);
@@ -465,17 +566,20 @@ class FranchiseFileTable extends EventEmitter {
     });
   };
 
+  /** @param {number} index @param {number} emptyRecordReference */
   _changeRecordBuffers(index, emptyRecordReference) {
     this._setBufferToEmptyRecordReference(index, emptyRecordReference);
     this._setRecordInternalBuffer(index, emptyRecordReference);
   };
 
+  /** @param {number} index @param {number} emptyRecordReference */
   _setBufferToEmptyRecordReference(index, emptyRecordReference) {
     const recordStartIndex = this.header.table1StartIndex + (index * this.header.record1Size)
     this.data.writeUInt32BE(emptyRecordReference, recordStartIndex);
     // that.data.fill(0, recordStartIndex + 4, recordStartIndex + that.header.record1Size);
   };
 
+  /** @param {number} index @param {number} emptyRecordReference */
   _setRecordInternalBuffer(index, emptyRecordReference) {
     // let newData = utilService.dec2bin(emptyRecordReference, 32);
 
@@ -489,6 +593,7 @@ class FranchiseFileTable extends EventEmitter {
     this.records[index]._data.writeUInt32BE(emptyRecordReference, 0);
   };
 
+  /** @param {string} name @param {*} object */
   onEvent(name, object) {
     if (object instanceof FranchiseFileRecord) {
       if (name === 'change') {

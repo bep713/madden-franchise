@@ -5,6 +5,7 @@ const SCHEMA_DIRECTORY = path.join(__dirname, '../data/schemas');
 
 let schemaPicker = {};
 
+/** @param {number} gameYear @param {number} major @param {number} minor @param {FranchiseFileSettings?} [settings] @returns {SchemaMetadata?} */
 schemaPicker.pick = (gameYear, major, minor, settings) => {
   let schemaDirectories = [SCHEMA_DIRECTORY];
 
@@ -16,6 +17,7 @@ schemaPicker.pick = (gameYear, major, minor, settings) => {
   return findApplicableSchema(schemasMeta, gameYear, major, minor);
 };
 
+/** @param {string} customDirectory @returns {Array<SchemaMetadata>} */
 schemaPicker.retrieveSchemas = (customDirectory) => {
   let dirsToRead = [SCHEMA_DIRECTORY];
 

@@ -1,5 +1,8 @@
 const FranchiseTable3FieldStrategy = require('../../common/table3Field/FranchiseTable3FieldStrategy');
 
+/**
+ * @type {Table3FieldStrategy}
+ */
 let M24Table3Strategy = {};
 
 M24Table3Strategy.getInitialUnformattedValue = FranchiseTable3FieldStrategy.getInitialUnformattedValue;

@@ -3,6 +3,9 @@ const M20TableStrategy = require('./M20TableStrategy');
 const M20Table2FieldStrategy = require('./M20Table2FieldStrategy');
 const M24Table3FieldStrategy = require('../m24/M24Table3FieldStrategy');
 
+/**
+ * @type {GameStrategy}
+ */
 module.exports = {
     'name': 'M20Strategy',
     'file': M20FileStrategy,

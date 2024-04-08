@@ -1,12 +1,17 @@
 const FranchiseEnumValue = require('./FranchiseEnumValue');
 
 class FranchiseEnum {
+  /** @param {string | FranchiseEnum} name @param {number} assetId @param {boolean} isRecordPersistent */
   constructor(name, assetId, isRecordPersistent) {
     if (typeof name === 'object') {
       const theEnum = name;
+      /** @private */
       this._name = theEnum._name;
+      /** @private */
       this._assetId = theEnum._assetId;
+      /** @private */
       this._isRecordPersistent = theEnum._isRecordPersistent;
+      /** @private */
       this._members = [];
 
       for (let i = 0; i < theEnum._members.length; i++) {
@@ -24,26 +29,32 @@ class FranchiseEnum {
     }
   };
 
+  /** @returns {string} */
   get name () {
     return this._name;
   };
 
+  /** @returns {number} */
   get assetId () {
     return this._assetId;
   };
 
+  /** @returns {boolean} */
   get isRecordPersistent () {
     return this._isRecordPersistent;
   };
 
+  /** @returns {Array<FranchiseEnumValue>} */
   get members () {
     return this._members;
   }
 
+  /** @param {string} name @param {number} index @param {string} value @param {string?} [unformattedValue] */
   addMember(name, index, value, unformattedValue) {
     this._members.push(new FranchiseEnumValue(name, index, value, unformattedValue));
   };
 
+  /** @param {string} value @returns {FranchiseEnumValue?} */
   getMemberByValue(value) {
     const matches = this._members.filter((member) => { return member.name !== 'First_' && member.name !== 'Last_' && member.value === value; });
     if (matches.length === 0) { throw new Error(`Argument is not a valid enum value for this field. You passed in ${value}. Field name: ${this.name}`); }
@@ -52,6 +63,7 @@ class FranchiseEnum {
     return matchesNoUnderscore ? matchesNoUnderscore : matches[0];
   };
 
+  /** @param {string} value @returns {FranchiseEnumValue?} */
   getMemberByUnformattedValue(value) {
     if (value.length > this._maxLength) {
       const valueToCutOff = value.substring(0, value.length - this._maxLength);
@@ -72,6 +84,7 @@ class FranchiseEnum {
     return matchesNoUnderscore ? matchesNoUnderscore : matches[0];
   };
   
+  /** @param {string} name @returns {FranchiseEnumValue?} */
   getMemberByName(name) {
     return this._members.find((member) => { return member.name.toLowerCase() === name.toLowerCase(); });
   };

@@ -1,5 +1,8 @@
 const FTCTable2FieldStrategy = require('../../common/table2Field/FTCTable2FieldStrategy');
 
+/**
+ * @type {Table2FieldStrategy}
+ */
 let M19FTCTable2FieldStrategy = {};
 
 M19FTCTable2FieldStrategy.getInitialUnformattedValue = FTCTable2FieldStrategy.getInitialUnformattedValue;

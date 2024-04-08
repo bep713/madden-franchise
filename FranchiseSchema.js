@@ -5,6 +5,30 @@ const FranchiseEnum = require('./FranchiseEnum');
 const EventEmitter = require('events').EventEmitter;
 const schemaGenerator = require('./services/schemaGenerator');
 
+/** 
+   * @typedef SchemaAttribute
+   * @param {string} index
+   * @param {string} name
+   * @param {string} type
+   * @param {string} minValue
+   * @param {string} maxValue
+   * @param {string} maxLength
+   * @param {string} default
+   * @param {string} final
+   * @param {FranchiseEnum?} [enum]
+   * @param {string}
+*/
+
+/**
+   * @typedef TableSchema
+   * @param {number} assetId
+   * @param {number} ownerAssetId
+   * @param {number} numMembers
+   * @param {string} name
+   * @param {string} base
+   * @param {Array<SchemaAttribute>} attributes
+*/
+
 class FranchiseSchema extends EventEmitter {
   constructor (filePath) {
     super();

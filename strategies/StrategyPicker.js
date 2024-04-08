@@ -7,6 +7,9 @@ const M20FTCStrategy = require('./franchise-common/m20/M20FTCStrategy');
 
 let StrategyPicker = {};
 
+/**
+ * @returns GameStrategy
+ */
 StrategyPicker.pick = (type) => {
     if (type.format === Constants.FORMAT.FRANCHISE) {
         switch(type.year) {

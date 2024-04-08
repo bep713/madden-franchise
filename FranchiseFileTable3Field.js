@@ -1,11 +1,17 @@
 class FranchiseFileTable3Field {
+    /** @param {number} index @param {number} maxLength @param {FranchiseFileTable} parent */
   constructor (index, maxLength, parent) {
+    /** @private */
     this._value = '';
+    /** @type {number} */
     this.rawIndex = index;
     this.isChanged = false;
     this.maxLength = maxLength;
+    /** @type {FranchiseFileField} */
     this.fieldReference = null;
+    /** @type {number} */
     this.lengthAtLastSave = null;
+    /** @private */
     this._unformattedValue = null;
     this.index = index;
     this._offset = this.index;
@@ -52,18 +58,22 @@ class FranchiseFileTable3Field {
     return this._unformattedValue;
   };
 
+  /** @type {Table3FieldStrategy} */
   get strategy () {
     return this._strategy;
   };
 
+  /** @param {Table3FieldStrategy} strategy */
   set strategy (strategy) {
     this._strategy = strategy;
   };
 
+  /** @returns {number} */
   get offset () {
     return this._offset;
   };
 
+  /** @param {number} offset */
   set offset (offset) {
     this._offset = offset;
     this.index = offset;
@@ -77,6 +87,7 @@ class FranchiseFileTable3Field {
     return this._parent;
   };
 
+  /** @param {FranchiseFileTable} parent */
   set parent(parent) {
     this._parent = parent;
   };

@@ -5,33 +5,45 @@ const FranchiseFileTable2Field = require('./FranchiseFileTable2Field');
 const FranchiseFileTable3Field = require('./FranchiseFileTable3Field');
 
 class FranchiseFileField {
+  /** @param {string} key @param {Buffer} value @param {OffsetTableEntry} offset @param {FranchiseFileRecord} parent */
   constructor(key, value, offset, parent) {
+    /** @private */
     this._key = key;
+    /** @private */
     this._recordBuffer = value;
+    /** @private */
     this._unformattedValue = null;
+    /** @private */
     this._offset = offset;
+    /** @private */
     this._parent = parent;
+    /** @private */
     this._isChanged = false;
 
     if (offset.valueInSecondTable) {
+      /** @type {FranchiseFileTable2Field?} */
       this.secondTableField = new FranchiseFileTable2Field(this._recordBuffer.readUInt32BE(offset.offset / 8), offset.maxLength);
       this.secondTableField.fieldReference = this;
     }
 
     if (offset.valueInThirdTable) {
+      /** @type {FranchiseFileTable3Field?} */
       this.thirdTableField = new FranchiseFileTable3Field(this._recordBuffer.readUInt32BE(offset.offset / 8), offset.maxLength);
       this.thirdTableField.fieldReference = this;
     }
   };
 
+  /** @returns {string} */
   get key() {
     return this._key;
   };
 
+  /** @returns {OffsetTableEntry} */
   get offset() {
     return this._offset;
   };
 
+  /** @returns {*} */
   get value() {
     if (this._unformattedValue === null) {
       this._setUnformattedValueIfEmpty();
@@ -44,10 +56,12 @@ class FranchiseFileField {
     return this._value;
   };
 
+  /** @returns {boolean} */
   get isReference() {
     return this._offset.isReference;
   };
 
+  /** @returns {RecordReference?} */
   get referenceData() {
     if (this._unformattedValue === null) {
       this._setUnformattedValueIfEmpty();
@@ -151,6 +165,7 @@ class FranchiseFileField {
     }
   };
 
+  /** @returns {BitView} */
   get unformattedValue() {
     if (this._unformattedValue === null) {
       this._setUnformattedValueIfEmpty();
@@ -159,20 +174,24 @@ class FranchiseFileField {
     return this._unformattedValue;
   };
 
+  /** @param {BitView} unformattedValue */
   set unformattedValue(unformattedValue) {
     this.setUnformattedValueWithoutChangeEvent(unformattedValue);
     this._value = null;
     this._parent.onEvent('change', this);
   };
 
+  /** @returns {boolean} */
   get isChanged() {
     return this._isChanged;
   };
 
+  /** @param {boolean} changed */
   set isChanged(changed) {
     this._isChanged = changed;
   };
 
+  /** @param {OffsetTableEntry} offset */
   getValueAs(offset) {
     if (this._unformattedValue === null) {
       this._setUnformattedValueIfEmpty();
@@ -196,6 +215,7 @@ class FranchiseFileField {
     this._unformattedValue.bigEndian = true;
   };
 
+  /** @param {BitView} unformattedValue @param {boolean} suppressErrors */
   setUnformattedValueWithoutChangeEvent(unformattedValue, suppressErrors) {
     if (!(unformattedValue instanceof BitView)) {
       throw new Error(`Argument must be of type BitView. You passed in a(n) ${typeof unformattedValue}.`);
@@ -205,6 +225,7 @@ class FranchiseFileField {
     }
   }
 
+  /** @returns {FranchiseEnumValue?} */
   _getEnumFromValue(value) {
     const enumName = this.offset.enum.getMemberByName(value);
 
@@ -227,6 +248,7 @@ class FranchiseFileField {
     }
   };
 
+  /** @param {BitView} unformatted, @param {OffsetTableEntry} offset */
   _parseFieldValue(unformatted, offset) {
     if (offset.valueInSecondTable) {
       return this.secondTableField.value;

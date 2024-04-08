@@ -1,5 +1,8 @@
 const FranchiseTable2FieldStrategy = require('../../common/table2Field/FranchiseTable2FieldStrategy');
 
+/**
+ * @type {Table2FieldStrategy}
+ */
 let M20Table2Strategy = {};
 
 M20Table2Strategy.getInitialUnformattedValue = FranchiseTable2FieldStrategy.getInitialUnformattedValue;

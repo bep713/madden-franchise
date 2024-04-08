@@ -10,11 +10,13 @@ const EventEmitter = require('events').EventEmitter;
 let schemaGenerator = {};
 schemaGenerator.eventEmitter = new EventEmitter();
 
+/** @param {string} inputFile @param {boolean?} [showOutput] @param {string?} [outputFile] */
 schemaGenerator.generate = (inputFile, showOutput, outputFile) => {
   const stream = fs.createReadStream(inputFile);
   schemaGenerator.generateFromStream(stream, showOutput, outputFile);
 };
 
+/** @param {ReadableStream} stream @param {boolean?} [showOutput] @param {string?} [outputFile] */
 schemaGenerator.generateFromStream = (stream, showOutput, outputFile) => {
   schemaGenerator.root = {}
   schemaGenerator.schemas = [];
@@ -183,10 +185,12 @@ schemaGenerator.generateFromStream = (stream, showOutput, outputFile) => {
   };
 };
 
+/** @returns {Record<string, any>} */
 schemaGenerator.getExtraSchemas = () => {
   return JSON.parse(JSON.stringify(require(path.join(__dirname, '../data/schemas/extra-schemas.json'))));
 };
 
+/** @param {Array<TableSchema>} schemaList */
 schemaGenerator.calculateInheritedSchemas = (schemaList) => {
   const schemasWithBase = schemaList.filter((schema) => { return schema.base && schema.base.indexOf("()") === -1; });
   schemasWithBase.forEach((schema) => {
