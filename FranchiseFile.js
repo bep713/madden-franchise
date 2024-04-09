@@ -65,7 +65,7 @@ class FranchiseFile extends EventEmitter {
     /** @private @type {FileType} */
     this._type = getFileType(this._rawContents);
 
-    /** @private @type {string} */
+    /** @private @type {number} */
     this._gameYear = this._type.year;
 
     /** @private @type {SchemaMetadata} */
@@ -350,7 +350,7 @@ class FranchiseFile extends EventEmitter {
   }
 
   /**
-   * @returns {string}
+   * @returns {number}
    */
   get gameYear() {
     return this._gameYear;

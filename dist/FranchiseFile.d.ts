@@ -32,7 +32,7 @@ declare class FranchiseFile {
     private _rawContents;
     /** @private @type {FileType} */
     private _type;
-    /** @private @type {string} */
+    /** @private @type {number} */
     private _gameYear;
     /** @private @type {SchemaMetadata} */
     private _expectedSchemaVersion;
@@ -88,9 +88,9 @@ declare class FranchiseFile {
      */
     get settings(): FranchiseFileSettings;
     /**
-     * @returns {string}
+     * @returns {number}
      */
-    get gameYear(): string;
+    get gameYear(): number;
     /**
      * @returns {FileType}
      */
