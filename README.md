@@ -1,6 +1,9 @@
 # madden-franchise
 Read and write Madden Franchise files using NodeJS.
 
+## Installation
+    npm i madden-franchise
+
 ## Usage
     const Franchise = require('madden-franchise');
 
