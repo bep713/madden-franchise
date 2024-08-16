@@ -650,7 +650,7 @@ function getGameYear(data, isCompressed, format) {
       max: 95,
     },
     {
-      year: 24,
+      year: 25,
       max: 999,
     },
   ];
@@ -682,6 +682,9 @@ function getGameYear(data, isCompressed, format) {
       return 23;
     } else if (yearIdentifier[2] === 0x34 || yearIdentifier[2] === "d") {
       return 24;
+    } else if (data[0x2A] === 0x35) {
+      // M25 has year indicator in a different location
+      return 25;
     } else {
       const schemaMajor = getCompressedSchema(data).major;
       const year = schemaMax.find((schema) => {

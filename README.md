@@ -29,6 +29,7 @@ Read and write Madden Franchise files using NodeJS.
 | Madden 22 | ✅ Full |
 | Madden 23 | ✅ Full |
 | Madden 24 | ✅ Full |
+| Madden 25 | 🟡 Partial (everything except Character Visuals) |
 
 ### Quick Start
 #### Initializing

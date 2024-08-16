@@ -22,6 +22,7 @@ StrategyPicker.pick = (type) => {
             default:
                 return M20Strategy;
             case 24:
+            case 25:
                 return M24Strategy;
         }
     }
