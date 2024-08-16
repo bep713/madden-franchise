@@ -680,7 +680,7 @@ function getGameYear(data, isCompressed, format) {
       return 22;
     } else if (yearIdentifier[2] === 0x33) {
       return 23;
-    } else if (yearIdentifier[2] === 0x34 || yearIdentifier[2] === "d") {
+    } else if (yearIdentifier[2] === 0x34 || yearIdentifier[2] === "d" || data[0x2A] === 0x34) {
       return 24;
     } else if (data[0x2A] === 0x35) {
       // M25 has year indicator in a different location

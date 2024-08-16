@@ -61,7 +61,7 @@ schemaGenerator.generateFromStream = (stream, showOutput, outputFile) => {
 
       if (outputFile) {
         zlib.gzip(JSON.stringify(schemaGenerator.root), function (_, data) {
-          fs.writeFileSync(`${outputFile}\\${majorVersion}_${minorVersion}.gz`, data);
+          fs.writeFileSync(path.join(outputFile, `${majorVersion}_${minorVersion}.gz`), data);
         });
       }
 
