@@ -183,6 +183,11 @@ function readValue() {
 
 	if (valueType === ISON_INTERNED_STRING) {
 		const stringKey = readBytes(2).readUInt16LE(0);
+
+		if(!stringLookup.hasOwnProperty(stringKey))
+		{
+			return "UnkString";
+		}
 		return stringLookup[stringKey]; // Return the interned string from the lookup
 	} else if (valueType === ISON_STRING) {
 		const stringLength = readBytes(4).readUInt32LE(0);
