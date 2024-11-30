@@ -1,5 +1,7 @@
 # madden-franchise
-Read and write Madden Franchise files using NodeJS.
+[![npm](https://img.shields.io/npm/v/madden-franchise)](https://www.npmjs.com/package/madden-franchise)
+
+madden-franchise is a Madden franchise file parser written in NodeJS that allows you to read and modify your PC franchise file saves.
 
 ## Installation
     npm i madden-franchise
@@ -32,7 +34,7 @@ Read and write Madden Franchise files using NodeJS.
 | Madden 22 | ✅ Full |
 | Madden 23 | ✅ Full |
 | Madden 24 | ✅ Full |
-| Madden 25 | 🟡 Partial (everything except Character Visuals) |
+| Madden 25 | ✅ Full |
 
 ### Quick Start
 #### Initializing
