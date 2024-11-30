@@ -6,6 +6,7 @@ const { BitView } = require('bit-buffer');
 const FranchiseFile = require('../../FranchiseFile');
 const FranchiseFileTable = require('../../FranchiseFileTable');
 const filePaths = require('../util/filePathUtil');
+const isonFunctions = require('../../services/isonFunctions');
 
 const playerTableId = 4204;
 const playerArrayTableIdToTest = 5755;
@@ -2080,80 +2081,88 @@ describe('Madden 25 end to end tests', function () {
         expect(table.table3Records.length).to.equal(3950);
       });
 
-      // it('can get the uncompressed JSON data from the field', () => {
-      //   const data = table.records[0].RawData;
-      //   expect(data[0]).to.equal('{');
-      //   expect(data.length).to.equal(864);
-      // });
+      it('can get the uncompressed JSON data from the field', () => {
+        const data = table.records[0].RawData;
+        expect(data[0]).to.equal('{');
+        expect(data.length).to.equal(470);
+      });
 
-      // it('can get the table3 record from the field', () => {
-      //   const thirdTableField = table.records[0]._fields.RawData.thirdTableField;
-      //   const data = thirdTableField.value;
-      //   expect(data[0]).to.equal('{');
-      //   expect(data.length).to.equal(864);
-      // });
+      it('can get the table3 record from the field', () => {
+        const thirdTableField = table.records[0]._fields.RawData.thirdTableField;
+        const data = thirdTableField.value;
+        expect(data[0]).to.equal('{');
+        expect(data.length).to.equal(470);
+      });
 
-      // it('can get the table3 unformatted data', () => {
-      //   const thirdTableField = table.records[0]._fields.RawData.thirdTableField;
-      //   const data = thirdTableField.unformattedValue;
-      //   expect(data.length).to.equal(0x480);
-      //   expect(data.readUInt16LE(0)).to.equal(0x161);   // size of gzipped data in first 2 bytes
-      //   expect(data.readUInt16LE(2)).to.equal(0x8B1F);  // gzip signature
-      // });
+      it('can parse the table3 record as JSON', () => {
+        let existingData = JSON.parse(table.records[0].RawData);
+        expect(existingData.skinTone).to.equal(6);
+        expect(existingData.loadouts.length).to.equal(1);
+        expect(existingData.loadouts[0].loadoutCategory).to.equal('CoachApparel');
+        expect(existingData.loadouts[0].loadoutElements.length).to.equal(6);
+      });
 
-      // it('can set the table3 data', () => {
-      //   let existingData = JSON.parse(table.records[0].RawData);
-      //   existingData.firstName = 'Test';
-      //   existingData.lastName = 'Test';
+      it('can get the table3 unformatted data', () => {
+        const thirdTableField = table.records[0]._fields.RawData.thirdTableField;
+        const data = thirdTableField.unformattedValue;
+        expect(data.length).to.equal(503);
+        expect(data.readUInt16LE(0)).to.equal(0x66);   // size of gzipped data in first 2 bytes
+        expect(data.readUInt16LE(2)).to.equal(0x8B1F);  // gzip signature
+      });
 
-      //   table.records[0].RawData = JSON.stringify(existingData);
+      it('can set the table3 data', () => {
+        let existingData = JSON.parse(table.records[0].RawData);
+        existingData.skinTone = 1;
+        existingData.loadouts[0].loadoutCategory = 'CoachTest';
+
+        table.records[0].RawData = JSON.stringify(existingData);
         
-      //   expect(table.records[0].RawData).to.eql(JSON.stringify(existingData));
-      //   expect(table.records[0]._fields.RawData.thirdTableField.value).to.eql(JSON.stringify(existingData));
-      // });
+        expect(table.records[0].RawData).to.eql(JSON.stringify(existingData));
+        expect(table.records[0]._fields.RawData.thirdTableField.value).to.eql(JSON.stringify(existingData));
+      });
 
-      // it('can set the table3 data without JSON.stringify', () => {
-      //   let existingData = JSON.parse(table.records[0].RawData);
-      //   existingData.firstName = 'Test';
-      //   existingData.lastName = 'Test';
+      it('can set the table3 data without JSON.stringify', () => {
+        let existingData = JSON.parse(table.records[0].RawData);
+        existingData.skinTone = 1;
+        existingData.loadouts[0].loadoutCategory = 'CoachTest';
 
-      //   table.records[0].RawData = existingData;
+        table.records[0].RawData = existingData;
         
-      //   expect(table.records[0].RawData).to.eql(JSON.stringify(existingData));
-      //   expect(table.records[0]._fields.RawData.thirdTableField.value).to.eql(JSON.stringify(existingData));
-      // });
+        expect(table.records[0].RawData).to.eql(JSON.stringify(existingData));
+        expect(table.records[0]._fields.RawData.thirdTableField.value).to.eql(JSON.stringify(existingData));
+      });
 
-      // it('populates unformatted value correctly after setting the value', () => {
-      //   let existingData = JSON.parse(table.records[0].RawData);
-      //   existingData.firstName = 'Test';
-      //   existingData.lastName = 'Test';
+      it('populates unformatted value correctly after setting the value', () => {
+        let existingData = JSON.parse(table.records[0].RawData);
+        existingData.skinTone = 1;
+        existingData.loadouts[0].loadoutCategory = 'CoachTest';
 
-      //   table.records[0].RawData = existingData;
+        table.records[0].RawData = existingData;
 
-      //   expect(table.records[0]._fields.RawData.thirdTableField.unformattedValue).to.be.an.instanceOf(Buffer);
-      //   expect(table.records[0]._fields.RawData.thirdTableField.unformattedValue.length).to.equal(0x480);
+        expect(table.records[0]._fields.RawData.thirdTableField.unformattedValue).to.be.an.instanceOf(Buffer);
+        expect(table.records[0]._fields.RawData.thirdTableField.unformattedValue.length).to.equal(0x1F7);
 
-      //   const data = zlib.gunzipSync(table.records[0]._fields.RawData.thirdTableField.unformattedValue.subarray(2));
-      //   expect(JSON.parse(data.toString())).to.eql(existingData);
-      // });
+        const data = zlib.gunzipSync(table.records[0]._fields.RawData.thirdTableField.unformattedValue.subarray(2));
+        expect(isonFunctions.isonVisualsToJson(data)).to.eql(existingData);
+      });
 
-      // it('saves properly after edit', (done) => {
-      //   let existingData = JSON.parse(table.records[0].RawData);
-      //   existingData.firstName = 'Test';
-      //   existingData.lastName = 'Test';
+      it('saves properly after edit', (done) => {
+        let existingData = JSON.parse(table.records[0].RawData);
+        existingData.skinTone = 1;
+        existingData.loadouts[0].loadoutCategory = 'CoachTest';
 
-      //   table.records[0].RawData = existingData;
-      //   file.save(filePathToSave).then(() => {
-      //     let file2 = new FranchiseFile(filePathToSave);
-      //     file2.on('ready', async () => {
-      //       let table2 = file2.getTableByUniqueId(characterVisualsUniqueId);
-      //       await table2.readRecords();
+        table.records[0].RawData = existingData;
+        file.save(filePathToSave).then(() => {
+          let file2 = new FranchiseFile(filePathToSave);
+          file2.on('ready', async () => {
+            let table2 = file2.getTableByUniqueId(characterVisualsUniqueId);
+            await table2.readRecords();
   
-      //       expect(table2.records[0].RawData).to.eql(JSON.stringify(existingData));
-      //       done();
-      //     });
-      //   });
-      // });
+            expect(table2.records[0].RawData).to.eql(JSON.stringify(existingData));
+            done();
+          });
+        });
+      });
 
       it('handles empty scenario', () => {
         const prevData = table.records[0].RawData;
