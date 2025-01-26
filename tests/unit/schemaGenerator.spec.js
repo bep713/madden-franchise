@@ -14,6 +14,10 @@ const SCHEMA_PATHS = {
         xml: path.join(TEST_SCHEMA_FOLDER, 'M22_329_0.FTX'),
         gz: path.join(TEST_SCHEMA_FOLDER, 'M22_329_0.gz'),
         outputTest: path.join(TEST_SCHEMA_FOLDER, 'output-test/M22_328_1.gz')
+    },
+    m25: {
+        xml: path.join(TEST_SCHEMA_FOLDER, 'M25_222_6_test.ftx'),
+        gz: path.join(TEST_SCHEMA_FOLDER, 'M25_222_6.gz'),
     }
 };
 
@@ -83,17 +87,20 @@ describe('schema generator unit tests', () => {
 
         it('correctly parses a max length attribute', () => {
             const schema = schemaRoot.schemaMap.AdvanceStageRequest;
-            expect(schema.attributes[32].maxLength).to.equal('33');
+            const attr = schema.attributes.find(attr => attr.maxLength);
+            expect(attr.maxLength).to.equal('13');
         });
 
         it('correctly parses a const attribute', () => {
             const schema = schemaRoot.schemaMap.AdvanceStageRequest;
-            expect(schema.attributes[32].const).to.equal('true');
+            const constAttr = schema.attributes.find(attr => attr.const);
+            expect(constAttr.const).to.equal('true');
         });
 
         it('correctly parses an enum attribute', () => {
             const schema = schemaRoot.schemaMap.AdvanceStageRequest;
-            expect(schema.attributes[12].enum).to.eql({
+            const reqStyle = schema.attributes.find(attr => attr.name === 'RequestStyle');
+            expect(reqStyle.enum).to.eql({
                 _name: 'RequestStyle',
                 _assetId: '116422',
                 _isRecordPersistent: 'true',
@@ -129,6 +136,14 @@ describe('schema generator unit tests', () => {
     });
 
     it('correct output', async () => {
+        schemaGenerator.generate(SCHEMA_PATHS.m25.xml);
+        
+        let schemaRoot = await new Promise((resolve) => {
+            schemaGenerator.eventEmitter.on('schemas:done', (schema) => {
+                resolve(schema);
+            });
+        });
+
         const newData = {
             'meta': schemaRoot.meta,
             'schemas': schemaRoot.schemas
@@ -136,7 +151,7 @@ describe('schema generator unit tests', () => {
 
         const compareData = JSON.parse(JSON.stringify(newData));
 
-        const expectedGzip = fs.readFileSync(SCHEMA_PATHS.m22.gz);
+        const expectedGzip = fs.readFileSync(SCHEMA_PATHS.m25.gz);
         const expectedData = JSON.parse(zlib.gunzipSync(expectedGzip).toString());
 
         expect(compareData.meta).to.eql(expectedData.meta);

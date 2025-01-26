@@ -53,9 +53,9 @@ describe('Madden 25 end to end tests', function () {
 
         expect(file.tables).to.not.be.undefined;
         expect(file.schemaList).to.not.be.undefined;
-        expect(file.schemaList.meta.major).to.equal(219);
-        expect(file.schemaList.meta.minor).to.equal(2);
-        expect(file.schemaList.path).to.contain('M25_219_2.gz')
+        expect(file.schemaList.meta.major).to.equal(222);
+        expect(file.schemaList.meta.minor).to.equal(6);
+        expect(file.schemaList.path).to.contain('M25_222_6.gz')
 
         done();
       });
@@ -1821,7 +1821,7 @@ describe('Madden 25 end to end tests', function () {
         const references = file.getReferencesToRecord(5417, 0);
         const overallPercentageTable = file.getTableById(4097);
 
-        expect(references.length).to.equal(1);
+        expect(references.length).to.equal(2);
         expect(references[0].tableId).to.eql(4097);
         expect(references[0].name).to.eql('OverallPercentage');
         expect(references[0].table).to.eql(overallPercentageTable);
@@ -1833,15 +1833,21 @@ describe('Madden 25 end to end tests', function () {
         const seasonGameTable = file.getTableById(4143);
         const teamArrayTable = file.getTableById(4665);
 
-        expect(references.length).to.equal(17);
+        expect(references.length).to.equal(18);
 
         expect(references[0].tableId).to.eql(4143);
         expect(references[0].name).to.eql('SeasonGame');
         expect(references[0].table).to.eql(seasonGameTable);
 
-        expect(references[5].tableId).to.eql(4665);
-        expect(references[5].name).to.eql('Team[]');
-        expect(references[5].table).to.eql(teamArrayTable);
+        expect(references[6].tableId).to.eql(4665);
+        expect(references[6].name).to.eql('Team[]');
+        expect(references[6].table).to.eql(teamArrayTable);
+      });
+
+      it('expected result - FranchiseUser', () => {
+        // FranchiseUser is referenced with generic type `record` in some tables
+        const references = file.getReferencesToRecord(4269, 0);
+        expect(references.length).to.equal(8);
       });
     });
 

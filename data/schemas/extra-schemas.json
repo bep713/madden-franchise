@@ -48,238 +48,175 @@
         ]
     },
     {
-        "numMembers": "20",
+        "numMembers": "32",
         "assetId": null,
         "name": "Request",
         "base": "none()",
         "attributes": [{
-                "index": "0",
-                "name": "IsBlocking",
-                "type": "bool",
-                "minValue": null,
-                "maxValue": null,
-                "maxLength": null,
-                "default": null,
-                "final": null,
-                "enum": null,
-                "const": null
-            },
-            {
-                "index": "1",
-                "name": "IsConnectionRequired",
-                "type": "bool",
-                "minValue": null,
-                "maxValue": null,
-                "maxLength": null,
-                "default": null,
-                "final": null,
-                "enum": null,
-                "const": null
-            },
-            {
-                "index": "2",
-                "name": "IsPersistent",
-                "type": "bool",
-                "minValue": null,
-                "maxValue": null,
-                "maxLength": null,
-                "default": null,
-                "final": null,
-                "enum": null,
-                "const": null
-            },
-            {
-                "index": "3",
-                "name": "IsResponseRequired",
-                "type": "bool",
-                "minValue": null,
-                "maxValue": null,
-                "maxLength": null,
-                "default": null,
-                "final": null,
-                "enum": null,
-                "const": null
-            },
-            {
-                "index": "4",
-                "name": "IsSubmittable",
-                "type": "bool",
-                "minValue": null,
-                "maxValue": null,
-                "maxLength": null,
-                "default": null,
-                "final": null,
-                "enum": null,
-                "const": null
-            },
-            {
-                "index": "5",
-                "name": "CpuResponseDuration",
-                "type": "int",
-                "minValue": 0,
-                "maxValue": 16777215,
-                "maxLength": null,
-                "default": 0,
-                "final": null,
-                "enum": null,
-                "const": null
-            },
-            {
-                "index": "6",
-                "name": "CpuResponseMaxDuration",
-                "type": "int",
-                "minValue": 0,
-                "maxValue": 16777215,
-                "maxLength": null,
-                "default": 0,
-                "final": null,
-                "enum": null,
-                "const": null
-            },
-            {
-                "index": "7",
-                "name": "CpuResponseMinDuration",
-                "type": "int",
-                "minValue": 0,
-                "maxValue": 16777215,
-                "maxLength": null,
-                "default": 0,
-                "final": null,
-                "enum": null,
-                "const": null
-            },
-            {
-                "index": "8",
-                "name": "DefaultResponse",
-                "type": "ResponseForm",
-                "minValue": null,
-                "maxValue": null,
-                "maxLength": null,
-                "default": null,
-                "final": null,
-                "enum": null,
-                "const": null
-            },
-            {
-                "index": "9",
-                "name": "Issue",
-                "type": "Request_Issue",
-                "minValue": null,
-                "maxValue": null,
-                "maxLength": null,
-                "default": null,
-                "final": null,
-                "enum": null,
-                "const": null
-            },
-            {
-                "index": "10",
-                "name": "RequestData",
-                "type": "record",
-                "minValue": null,
-                "maxValue": null,
-                "maxLength": null,
-                "default": null,
-                "final": null,
-                "enum": null,
-                "const": null
-            },
-            {
-                "index": "11",
-                "name": "RequestForm",
-                "type": "ResponseForm",
-                "minValue": null,
-                "maxValue": null,
-                "maxLength": null,
-                "default": null,
-                "final": null,
-                "enum": null,
-                "const": null
-            },
-            {
-                "index": "12",
-                "name": "RequestStyle",
-                "type": "RequestStyle",
-                "minValue": null,
-                "maxValue": null,
-                "maxLength": null,
-                "default": null,
-                "final": null,
-                "enum": "RequestStyle",
-                "const": null
-            },
-            {
-                "index": "13",
-                "name": "Response",
-                "type": "ResponseForm",
-                "minValue": null,
-                "maxValue": null,
-                "maxLength": null,
-                "default": null,
-                "final": null,
-                "enum": null,
-                "const": null
-            },
-            {
-                "index": "14",
-                "name": "ResponseForms",
-                "type": "ResponseForm[]",
-                "minValue": null,
-                "maxValue": null,
-                "maxLength": null,
-                "default": null,
-                "final": null,
-                "enum": null,
-                "const": null
-            },
-            {
-                "index": "15",
-                "name": "Priority",
-                "type": "int",
-                "minValue": 0,
-                "maxValue": 255,
-                "maxLength": null,
-                "default": 0,
-                "final": null,
-                "enum": null,
-                "const": null
-            },
-            {
-                "index": "16",
-                "name": "Commands",
-                "type": "Command[]",
-                "minValue": null,
-                "maxValue": null,
-                "maxLength": null,
-                "default": null,
-                "final": null,
-                "enum": null,
-                "const": null
-            },
-            {
-                "index": "17",
-                "name": "ExpirationDuration",
-                "type": "int",
-                "minValue": 0,
-                "maxValue": 16777215,
-                "maxLength": null,
-                "default": 0,
-                "final": null,
-                "enum": null,
-                "const": null
-            },
-            {
-                "index": "18",
-                "name": "SeenByUser",
-                "type": "bool",
-                "minValue": null,
-                "maxValue": null,
-                "maxLength": null,
-                "default": null,
-                "final": null,
-                "enum": null,
-                "const": null
+            "name": "IsResponseRequired",
+            "type": "bool",
+            "default": "False"
+          }, {
+            "name": "IsConnectionRequired",
+            "type": "bool",
+            "default": "False"
+          }, {
+            "name": "IsBlocking",
+            "type": "bool",
+            "default": "False"
+          }, {
+            "name": "IsPersistent",
+            "type": "bool",
+            "default": "False"
+          }, {
+            "name": "CanUpdateResponse",
+            "type": "bool",
+            "default": "False"
+          }, {
+            "name": "ExpirationDuration",
+            "type": "int",
+            "minValue": "0",
+            "maxValue": "16777215",
+            "default": "0"
+          }, {
+            "index": "7",
+            "name": "CpuResponseMinDuration",
+            "type": "int",
+            "minValue": "0",
+            "maxValue": "16777215",
+            "default": "0"
+          }, {
+            "name": "CpuResponseMaxDuration",
+            "type": "int",
+            "minValue": "0",
+            "maxValue": "16777215",
+            "default": "0"
+          }, {
+            "name": "RequestData",
+            "type": "record"
+          }, {
+            "name": "RequestForm",
+            "type": "ResponseForm"
+          }, {
+            "name": "ResponseForms",
+            "type": "ResponseForm[]"
+          }, {
+            "name": "DefaultResponse",
+            "type": "ResponseForm"
+          }, {
+            "name": "RequestId",
+            "type": "int",
+            "minValue": "-100",
+            "maxValue": "100",
+            "default": "-1"
+          }, {
+            "name": "TargetUser",
+            "type": "User"
+          }, {
+            "name": "IssueTime",
+            "type": "int",
+            "minValue": "0",
+            "maxValue": "100",
+            "default": "0"
+          }, {
+            "name": "Priority",
+            "type": "int",
+            "minValue": "0",
+            "maxValue": "255",
+            "default": "0"
+          }, {
+            "name": "ResolveTime",
+            "type": "int",
+            "minValue": "0",
+            "maxValue": "100",
+            "default": "0"
+          }, {
+            "name": "CpuResponseDuration",
+            "type": "int",
+            "minValue": "0",
+            "maxValue": "16777215",
+            "default": "0"
+          }, {
+            "name": "Resolution",
+            "type": "int",
+            "minValue": "0",
+            "maxValue": "100",
+            "default": "0"
+          }, {
+            "name": "Response",
+            "type": "ResponseForm"
+          }, {
+            "name": "Issue",
+            "type": "Request_Issue"
+          }, {
+            "name": "Dismiss",
+            "type": "none()"
+          }, {
+            "name": "ClearResponse",
+            "type": "none()",
+            "final": "true"
+          }, {
+            "name": "Refresh",
+            "type": "none()",
+            "final": "true"
+          }, {
+            "name": "IsResolutionPending",
+            "type": "bool()"
+          }, {
+            "name": "HasResolution",
+            "type": "bool()"
+          }, {
+            "name": "HandleResponse",
+            "type": "none()",
+            "default": "FranchiseUser user = TargetUser;\r\nif(user != null)\r\n{\r\n    user.ReadyToAdvance = true;\r\n}",
+            "final": "true"
+          }, {
+            "name": "CanSubmitResponse",
+            "type": "bool",
+            "default": "True"
+          }, {
+            "name": "Commands",
+            "type": "Command[]"
+          }, {
+            "name": "IsSubmittable",
+            "type": "bool",
+            "default": "True"
+          }, {
+            "name": "RequestStyle",
+            "type": "RequestStyle",
+            "default": "RequestStyle:Default",
+            "enum": {
+              "_name": "RequestStyle",
+              "_assetId": "6210747",
+              "_isRecordPersistent": "true",
+              "_members": [{
+                "_name": "Default",
+                "_index": 0,
+                "_value": 0,
+                "_unformattedValue": "00"
+              }, {
+                "_name": "Primary",
+                "_index": 1,
+                "_value": 1,
+                "_unformattedValue": "01"
+              }, {
+                "_name": "Notification",
+                "_index": 2,
+                "_value": 2,
+                "_unformattedValue": "10"
+              }, {
+                "_name": "Blocker",
+                "_index": 3,
+                "_value": 3,
+                "_unformattedValue": "11"
+              }],
+              "_maxLength": 2
             }
+          }, {
+            "name": "SeenByUser",
+            "type": "bool",
+            "default": "True"
+          }
         ]
     },
     {

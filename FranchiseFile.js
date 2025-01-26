@@ -482,7 +482,9 @@ class FranchiseFile extends EventEmitter {
             return (
               table.schema &&
               table.schema.attributes.find((attribute) => {
-                return attribute.type === referencedTable.name;
+                // Generic record types can contain any table type
+                return attribute.type === referencedTable.name 
+                  || attribute.type === 'record';
               })
             );
           } else if (table.isArray && referencedTable.schema) {

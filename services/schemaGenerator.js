@@ -200,7 +200,7 @@ schemaGenerator.calculateInheritedSchemas = (schemaList) => {
 
       if (baseSchema) {
         baseSchema.attributes.forEach((baseAttribute, index) => {
-          let oldIndex = schema.attributes.findIndex((schemaAttribute) => { return schemaAttribute.name === baseAttribute.name; });
+          let oldIndex = schema.attributes.findIndex((schemaAttribute) => { return schemaAttribute?.name === baseAttribute?.name; });
           utilService.arrayMove(schema.attributes, oldIndex, index);
         });
       }

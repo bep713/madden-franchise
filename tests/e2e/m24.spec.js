@@ -1817,7 +1817,7 @@ describe('Madden 24 end to end tests', function () {
         const references = file.getReferencesToRecord(5620, 0);
         const overallPercentageTable = file.getTableById(4097);
 
-        expect(references.length).to.equal(1);
+        expect(references.length).to.equal(2);
         expect(references[0].tableId).to.eql(4097);
         expect(references[0].name).to.eql('OverallPercentage');
         expect(references[0].table).to.eql(overallPercentageTable);
@@ -1829,7 +1829,7 @@ describe('Madden 24 end to end tests', function () {
         const seasonGameTable = file.getTableById(4152);
         const teamArrayTable = file.getTableById(4621);
 
-        expect(references.length).to.equal(12);
+        expect(references.length).to.equal(13);
 
         expect(references[0].tableId).to.eql(4152);
         expect(references[0].name).to.eql('SeasonGame');
