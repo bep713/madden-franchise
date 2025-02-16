@@ -1,0 +1,216 @@
+{
+  "assetName": "PenixJrMichael_298",
+  "firstName": "Michael",
+  "jerseyNumber": 4,
+  "lastName": "Penix Jr",
+  "genericHeadName": "gen_6_B_N_03",
+  "genericHead": 173,
+  "heightInches": 75,
+  "loadouts": [
+    {
+      "loadoutCategory": "Base",
+      "loadoutElements": [
+        {
+          "blends": [
+            {
+              "barycentricBlend": 1,
+              "baseBlend": 0.27000001072883606
+            }
+          ],
+          "slotType": "Chest"
+        },
+        {
+          "blends": [
+            {
+              "barycentricBlend": 1,
+              "baseBlend": 1
+            }
+          ],
+          "slotType": "Gut"
+        },
+        {
+          "blends": [
+            {
+              "barycentricBlend": 1,
+              "baseBlend": 1
+            }
+          ],
+          "slotType": "Glute"
+        },
+        {
+          "blends": [
+            {
+              "barycentricBlend": 1,
+              "baseBlend": 1
+            }
+          ],
+          "slotType": "Thighs"
+        },
+        {
+          "blends": [
+            {
+              "barycentricBlend": 1,
+              "baseBlend": 1
+            }
+          ],
+          "slotType": "CalfBlend"
+        },
+        {
+          "blends": [
+            {
+              "barycentricBlend": 1,
+              "baseBlend": 1
+            }
+          ],
+          "slotType": "Feet"
+        },
+        {
+          "blends": [
+            {
+              "barycentricBlend": 1,
+              "baseBlend": 0.5799999833106995
+            }
+          ],
+          "slotType": "ArmSize"
+        }
+      ]
+    },
+    {
+      "loadoutType": "PlayerOnField",
+      "loadoutElements": [
+        {
+          "itemAssetName": "GearFaceMask_Speedflex2Bar",
+          "slotType": "Facemask"
+        },
+        {
+          "itemAssetName": "GearVisor_None",
+          "slotType": "Visor"
+        },
+        {
+          "itemAssetName": "Gear_JerseyStyle_SleeveTight",
+          "slotType": "JerseyStyle"
+        },
+        {
+          "itemAssetName": "GearMouthpiece_None",
+          "slotType": "Mouthpiece"
+        },
+        {
+          "itemAssetName": "Socks_MiniCrewCut",
+          "slotType": "GearSocks"
+        },
+        {
+          "itemAssetName": "GearSpats_none",
+          "slotType": "LeftSpat"
+        },
+        {
+          "itemAssetName": "v_LNR_2023_Shoes_Hyperform_colorway_BLA",
+          "slotType": "LeftShoe"
+        },
+        {
+          "itemAssetName": "v_LNR_2023_Shoes_Hyperform_colorway_BLA",
+          "slotType": "RightShoe"
+        },
+        {
+          "itemAssetName": "ArmSleeve_None",
+          "slotType": "LeftArm"
+        },
+        {
+          "itemAssetName": "ArmSleeve_None",
+          "slotType": "RightArm"
+        },
+        {
+          "itemAssetName": "ElbowGear_None",
+          "slotType": "RightElbowGear"
+        },
+        {
+          "itemAssetName": "ElbowGear_None",
+          "slotType": "LeftElbowGear"
+        },
+        {
+          "itemAssetName": "GearWrist_wristTapedNormal_SecondaryColor",
+          "slotType": "LeftWristGear"
+        },
+        {
+          "itemAssetName": "GearHand_None",
+          "slotType": "LeftHandgear"
+        },
+        {
+          "itemAssetName": "GearHand_None",
+          "slotType": "RightHandgear"
+        },
+        {
+          "blends": [],
+          "itemAssetName": "Small_Pads",
+          "slotType": "Shoulderpads"
+        },
+        {
+          "itemAssetName": "Towel_None",
+          "slotType": "Towel"
+        },
+        {
+          "itemAssetName": "Handwarmer_Standard",
+          "slotType": "HandWarmer"
+        },
+        {
+          "itemAssetName": "HandwarmerStyle_Front",
+          "slotType": "HandWarmerMod"
+        },
+        {
+          "itemAssetName": "GearNeckpad_None",
+          "slotType": "Neckpad"
+        },
+        {
+          "blends": [
+            {
+              "barycentricBlend": 1,
+              "baseBlend": 1
+            }
+          ],
+          "itemAssetName": "Flakjacket_On",
+          "slotType": "FlakJacket"
+        },
+        {
+          "itemAssetName": "Undershirt_Untucked",
+          "slotType": "Undershirt"
+        },
+        {
+          "itemAssetName": "FaceMarks_EyePaint2",
+          "slotType": "FacePaint"
+        },
+        {
+          "itemAssetName": "GearWrist_wristTapedNormal_SecondaryColor",
+          "slotType": "RightWristGear"
+        },
+        {
+          "itemAssetName": "GearSpats_none",
+          "slotType": "RightSpat"
+        },
+        {
+          "blends": [],
+          "itemAssetName": "KneePad_Regular",
+          "slotType": "KneeItem"
+        },
+        {
+          "itemAssetName": "GearHelmet_Speed_Flex",
+          "slotType": "GearHelmet"
+        },
+        {
+          "itemAssetName": "U_FootballPants_Starter_B_BLK",
+          "slotType": "PantsGear"
+        },
+        {
+          "itemAssetName": "Narrative_Pants_Casual1",
+          "slotType": "BottomBase"
+        },
+        {
+          "blends": [],
+          "itemAssetName": "ThighPad_Regular",
+          "slotType": "ThighGear"
+        }
+      ]
+    }
+  ],
+  "skinTone": 7,
+  "skinToneScale": -8388608,
+  "weightPounds": 213
+}

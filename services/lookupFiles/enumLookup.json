@@ -1,0 +1,29 @@
+{
+  "loadoutCategory": {
+    "GearOnly": 0,
+    "UniformOnly": 1,
+    "AvatarFull": 2,
+    "Combined": 3,
+    "Head": 4,
+    "Base": 5,
+    "CoachApparel": 6,
+    "Casual": 7,
+    "Invalid": 8
+  },
+  "loadoutType": {
+    "Base": 0,
+    "PlayerOnField": 1,
+    "CoachOnField": 2,
+    "TeamLight": 3,
+    "Head": 4,
+    "YardLight": 5,
+    "TeamDark": 6,
+    "Misc": 7,
+    "TeamUniform": 8,
+    "YardDark": 9,
+    "Merged": 10,
+    "Casual": 11,
+    "Max": 12,
+    "Invalid": 254
+  }
+}
