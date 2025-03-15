@@ -5,6 +5,7 @@ const expect = require('chai').expect;
 const { BitView } = require('bit-buffer');
 const FranchiseFile = require('../../FranchiseFile');
 const FranchiseFileTable = require('../../FranchiseFileTable');
+const TDB2Converter = require('../../services/TDB2Converter');
 
 const filePaths = {
   'compressed': {
@@ -2239,9 +2240,9 @@ describe('Madden 24 end to end tests', function () {
         let table, file3;
 
         before((done) => {
-          file3 = new FranchiseFile('tests/data/CAREER-24Table3Data');
+          file3 = new FranchiseFile('tests/data/CAREER-24Table3TDB2Data');
           file3.on('ready', () => {
-            table = file3.getTableById(tableId);
+            table = file3.getTableById(4210);
             table.readRecords().then(() => {
               done();
             });
@@ -2249,8 +2250,16 @@ describe('Madden 24 end to end tests', function () {
         });
 
         it('can read the data', () => {
-          expect(table.records[1400].RawData.length).to.be.greaterThan(0);
-          expect(table.records[1400]._fields.RawData.thirdTableField.unformattedValue.readUInt8(2)).to.eql(7);
+          expect(table.records[43].RawData.length).to.be.greaterThan(0);
+          let parsedData = JSON.parse(table.records[43].RawData);
+          expect(parsedData.assetName).to.eql('AlexanderJaire_13109');
+          expect(table.records[43]._fields.RawData.thirdTableField.unformattedValue.readUInt8(2)).to.eql(7);
+
+          const decompressedData = zlib.gunzipSync(table.records[43]._fields.RawData.thirdTableField.unformattedValue.subarray(3));
+
+          const convertedData = JSON.stringify(TDB2Converter.readChviRecord(decompressedData));
+
+          expect(table.records[43].RawData).to.eql(convertedData);
         });
 
         it('can set the data', (done) => {
@@ -2259,15 +2268,15 @@ describe('Madden 24 end to end tests', function () {
             lastName: 'Test'
           };
 
-          table.records[1400].RawData = newData;
+          table.records[43].RawData = newData;
 
           file3.save(filePathToSave).then(() => {
             let file2 = new FranchiseFile(filePathToSave);
             file2.on('ready', async () => {
-              let table2 = file2.getTableById(tableId);
+              let table2 = file2.getTableById(4210);
               await table2.readRecords();
-    
-              expect(table2.records[1400].RawData).to.eql(JSON.stringify(newData));
+              
+              expect(table2.records[43].RawData).to.eql(JSON.stringify(newData));
               done();
             });
           });

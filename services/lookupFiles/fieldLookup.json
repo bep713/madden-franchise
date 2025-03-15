@@ -1,0 +1,86 @@
+{
+  "assetName": {
+    "key": "ASNM",
+    "type": 1
+  },
+  "bodyType": {
+    "key": "BTYP",
+    "type": 0
+  },
+  "firstName": {
+    "key": "CFNM",
+    "type": 1
+  },
+  "jerseyNumber": {
+    "key": "CJNO",
+    "type": 0
+  },
+  "lastName": {
+    "key": "CLNM",
+    "type": 1
+  },
+  "containerId": {
+    "key": "CNID",
+    "type": 0
+  },
+  "genericHeadName": {
+    "key": "GENR",
+    "type": 1
+  },
+  "genericHead": {
+    "key": "GNHD",
+    "type": 0
+  },
+  "heightInches": {
+    "key": "HINC",
+    "type": 0
+  },
+  "loadouts": {
+    "key": "LOUT",
+    "type": 4
+  },
+  "loadoutCategory": {
+    "key": "LDCT",
+    "type": 0
+  },
+  "loadoutType": {
+    "key": "LDTY",
+    "type": 0
+  },
+  "loadoutElements": {
+    "key": "PINS",
+    "type": 4
+  },
+  "blends": {
+    "key": "IBLD",
+    "type": 4
+  },
+  "baseBlend": {
+    "key": "BASE",
+    "type": 10
+  },
+  "barycentricBlend": {
+    "key": "BARY",
+    "type": 10
+  },
+  "slotType": {
+    "key": "SLOT",
+    "type": 0
+  },
+  "itemAssetName": {
+    "key": "ITAN",
+    "type": 1
+  },
+  "skinTone": {
+    "key": "SKNT",
+    "type": 0
+  },
+  "skinToneScale": {
+    "key": "USKT",
+    "type": 0
+  },
+  "weightPounds": {
+    "key": "WLBS",
+    "type": 0
+  }
+}
