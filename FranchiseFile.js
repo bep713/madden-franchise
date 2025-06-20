@@ -121,7 +121,11 @@ class FranchiseFile extends EventEmitter {
             ).path;
 
       try {
-        this.schemaList = new FranchiseSchema(schemaPath);
+        this.schemaList = new FranchiseSchema(schemaPath, {
+          extraSchemas: this.settings.extraSchemas,
+          fileMap: this.settings.schemaFileMap,
+          useNewSchemaGeneration: this.settings.useNewSchemaGeneration
+        });
         this.schemaList.on("schemas:done", () => {
           resolve();
         });

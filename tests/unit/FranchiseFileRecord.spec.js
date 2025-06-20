@@ -3,7 +3,6 @@ const proxyquire = require('proxyquire');
 
 const chai = require('chai');
 const expect = chai.expect;
-chai.use(require('chai-eventemitter'));
 
 const EventEmitter = require('events').EventEmitter;
 
@@ -133,25 +132,6 @@ describe('FranchiseFileRecord unit tests', () => {
       expect(record.PercentageSpline).to.equal('test');
       expect(record.fieldsArray[0].value).to.equal('test');
     });
-
-    // it('sets listener for field change', () => {
-    //   record = new FranchiseFileRecord(data, 0, offsetTable);
-
-    //   expect(() => {
-    //     record.fields[0].emit('change');
-    //   }).to.emitFrom(record, 'change');
-
-    //   expect(utilService.replaceAt.callCount).to.equal(1);
-    //   expect(utilService.replaceAt.firstCall.args).to.eql([data, offsetTable[0].offset, '101010101']);
-    // });
-
-    // it('sets listener for table2-change', () => {
-    //   record = new FranchiseFileRecord(data, 0, offsetTable);
-
-    //   expect(() => {
-    //     record.fields[0].emit('table2-change');
-    //   }).to.emitFrom(record, 'table2-change');
-    // });
   });
 
   describe('hexData', () => {

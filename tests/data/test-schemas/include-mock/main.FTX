@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<FranTkData databaseName="Madden26_Gen5_CFM.Football_Dev_ML" dataMajorVersion="634" dataMinorVersion="3">
+  <Includes>
+    <IncludeFile fileName="Football-Schemas" />
+  </Includes>
+  <schemas>
+    <schema name="TestEnum" assetId="1" isRecordPersistent="true">
+        <attribute name="Test" idx="0" type="IncludedEnum" />
+    </enum>
+  </schemas>
+</FranTkData>

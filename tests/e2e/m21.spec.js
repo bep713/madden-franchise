@@ -49,7 +49,10 @@ describe('Madden 21 end to end tests', function () {
           'schemaOverride': false,
           'schemaDirectory': path.join(__dirname, '../data/test-schemas'),
           'autoParse': true,
-          'autoUnempty': false
+          'autoUnempty': false,
+          'useNewSchemaGeneration': false,
+          'schemaFileMap': {},
+          'extraSchemas': []
         });
 
         expect(file.isLoaded).to.be.true;

@@ -4,6 +4,7 @@ const zlib = require('zlib');
 const FranchiseEnum = require('./FranchiseEnum');
 const EventEmitter = require('events').EventEmitter;
 const schemaGenerator = require('./services/schemaGenerator');
+const { generateSchemaV2 } = require('./services/schemaGeneratorV2');
 
 /** 
    * @typedef SchemaAttribute
@@ -30,12 +31,15 @@ const schemaGenerator = require('./services/schemaGenerator');
 */
 
 class FranchiseSchema extends EventEmitter {
-  constructor (filePath) {
+  constructor (filePath, { useNewSchemaGeneration = false, extraSchemas = [], fileMap = {} } = {}) {
     super();
     this.schemas = [];
     this.path = filePath;
+    this.useNewSchemaGeneration = useNewSchemaGeneration;
+    this.extraSchemas = extraSchemas;
+    this.fileMap = fileMap;
   };
-
+  
   evaluate () {
     const fileExtension = path.extname(this.path).toLowerCase();
 
@@ -109,15 +113,28 @@ class FranchiseSchema extends EventEmitter {
   };
 
   evaluateSchemaXml() {
-    schemaGenerator.eventEmitter.on('schemas:done', (schema) => {
-      this.schema = schema;
-      this.meta = schema.meta;
-      this.schemas = schema.schemas;
-      this.schemaMap = schema.schemaMap;
-      this.emit('schemas:done');
-    });
-
-    schemaGenerator.generate(this.path);
+    if (this.useNewSchemaGeneration) {
+      generateSchemaV2({
+        fileMap: this.fileMap,
+        extraSchemas: this.extraSchemas
+      }).then((schema) => {
+        this.schema = schema;
+        this.meta = schema.meta;
+        this.schemas = schema.schemas;
+        this.schemaMap = schema.schemaMap;
+        this.emit('schemas:done');
+      });
+    } else {
+      schemaGenerator.eventEmitter.on('schemas:done', (schema) => {
+        this.schema = schema;
+        this.meta = schema.meta;
+        this.schemas = schema.schemas;
+        this.schemaMap = schema.schemaMap;
+        this.emit('schemas:done');
+      });
+  
+      schemaGenerator.generate(this.path);
+    }
   };
 };
 

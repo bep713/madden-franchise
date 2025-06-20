@@ -1,3 +1,4 @@
+const fs = require('fs');
 const path = require('path');
 const expect = require('chai').expect;
 const FranchiseSchema = require('../../FranchiseSchema');
@@ -103,5 +104,60 @@ describe('FranchiseSchema unit tests', () => {
       });
 
     schema.evaluate();
+  });
+
+  describe('new schema generation', () => {
+    it('can load a xml file', (done) => {
+      const schema = new FranchiseSchema('tests/data/test-schemas/schema-19.xml', {
+        useNewSchemaGeneration: true,
+        fileMap: {
+          main: 'tests/data/test-schemas/schema-19.xml'
+        }
+      })
+        .once('schemas:done', () => {
+          expect(schema.meta.major).to.equal(95);
+          expect(schema.meta.minor).to.equal(7);
+          expect(schema.meta.gameYear).to.equal(19);
+          expect(schema.schemas.length).to.equal(2413);
+          done();
+        });
+  
+      schema.evaluate();
+    });
+
+    it('can load a xml file - extra schemas', (done) => {
+      const extraSchemas = JSON.parse(fs.readFileSync(path.join(__dirname, '../../data/schemas/extra-schemas.json'), 'utf8'));
+      const schema = new FranchiseSchema('tests/data/test-schemas/schema-19.xml', {
+        useNewSchemaGeneration: true,
+        fileMap: {
+          main: 'tests/data/test-schemas/schema-19.xml'
+        },
+        extraSchemas: extraSchemas.slice(0, extraSchemas.length - 1) // remove last schema to test extra schemas
+      })
+        .once('schemas:done', () => {
+          expect(schema.schemas.length).to.equal(2412);
+          done();
+        });
+  
+      schema.evaluate();
+    });
+  
+    it('can load a ftx file', (done) => {
+      const schema = new FranchiseSchema(path.join(__dirname, '../data/test-schemas/367_1.FTX'), {
+        useNewSchemaGeneration: true,
+        fileMap: {
+          main: path.join(__dirname, '../data/test-schemas/367_1.FTX')
+        }
+      })
+        .once('schemas:done', () => {
+          expect(schema.meta.major).to.equal(367);
+          expect(schema.meta.minor).to.equal(1);
+          expect(schema.meta.gameYear).to.equal(20);
+          expect(schema.schemas.length).to.equal(2646);
+          done();
+        });
+  
+      schema.evaluate();
+    });
   });
 });

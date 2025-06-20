@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<FranTkData databaseName="Football-Schemas" dataMajorVersion="1" dataMinorVersion="0">
+  <schemas>
+    <enum name="IncludedEnum" assetId="2" isRecordPersistent="true">
+        <attribute name="Test" idx="0" type="string" />
+    </enum>
+    <schema name="IncludedSchema" assetId="3">
+        <attribute name="Test1" type="string" maxLen="2" />
+    </schema>
+  </schemas>
+</FranTkData>

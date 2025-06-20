@@ -4,7 +4,6 @@ const proxyquire = require('proxyquire');
 const chai = require('chai');
 const { BitView } = require('bit-buffer');
 const expect = chai.expect;
-chai.use(require('chai-eventemitter'));
 
 let bin2DecResponse = 1;
 let bin2FloatResponse = 0.500;
@@ -738,19 +737,6 @@ describe('FranchiseFileField unit tests', () => {
       expect(FranchiseFileTable2Field.callCount).to.equal(1);
       expect(FranchiseFileTable2Field.firstCall.args[0]).to.eql(16, offset);
     });
-
-    // it('changes field value when second table field changes', () => {
-    //   listenerFns[0]();
-    //   expect(field.value).to.equal('test');
-    // });
-
-    // it('emits the table2-change event when the second table field changes', () => {      
-    //   field = new FranchiseFileField(key, unformattedValue, offset);
-
-    //   expect(() => {
-    //     listenerFns[1]();
-    //   }).to.emitFrom(field, 'table2-change');
-    // });
 
     it('sets the second table field when .value is set', () => {
       field.value = 'hello';

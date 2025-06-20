@@ -90,6 +90,10 @@ class FranchiseEnum {
   };
 
   setMemberLength() {
+    if (this._members.length === 0) {
+      return;
+    }
+
     const maxValue = this._members.reduce((accum, currentVal) => {
       return (accum.value > currentVal.value ? accum : currentVal);
     });

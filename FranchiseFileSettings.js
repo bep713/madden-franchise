@@ -17,6 +17,12 @@ class FranchiseFileSettings {
     /** @type {string | false} */
     this.schemaDirectory = settings && settings.schemaDirectory ? settings.schemaDirectory : false;
     /** @type {boolean} */
+    this.useNewSchemaGeneration = settings?.useNewSchemaGeneration ?? false;
+    /** @type {Object} */
+    this.schemaFileMap = settings?.schemaFileMap || {};
+    /** @type {Object[]} */
+    this.extraSchemas = settings?.extraSchemas || undefined;
+    /** @type {boolean} */
     this.autoParse = settings && (settings.autoParse !== null && settings.autoParse !== undefined) ? settings.autoParse : true;
     /** @type {boolean} */
     this.autoUnempty = settings && (settings.autoUnempty !== null && settings.autoUnempty !== undefined) ? settings.autoUnempty : false;
