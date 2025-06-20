@@ -65,6 +65,19 @@ madden-franchise is a Madden franchise file parser written in NodeJS that allows
       // AUTO UNEMPTY - specify if you want the system to automatically determine if an empty field should become un-empty once you edit it.
       // Warning: may have unintended side-effects if you batch import. Enable with caution.
       autoUnempty: true/false [default: false]
+
+      // USE NEW SCHEMA GENERATION - use v2 schema generation, may cause issues
+      useNewSchemaGeneration: true/false [default: false]
+
+      // SCHEMA FIELD MAP - used with v2 schema generation - specify all schema input files. Object key should be either `main` to specify the main schema, or the name of the file as specified in the `<IncludeFile>`. Values should be absolute paths to the schema files.
+      schemaFileMap: {
+        main: '/abs/path/to/franchise-schemas.ftx',
+        'core-schemas': '/abs/path/to/core-schemas.ftx',
+        ...
+      }
+
+      // EXTRA SCHEMAS - used with v2 schema generation to specify extra schemas to include other than the defaults. Warning: if these are included, the default extra schemas will NOT be included and vice-versa.
+      extraSchemas: [...]
     }
 
 #### Terminology
