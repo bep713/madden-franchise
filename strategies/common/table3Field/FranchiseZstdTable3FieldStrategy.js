@@ -6,6 +6,7 @@ const ISON_FUNCTIONS = require('../../../services/isonFunctions')
 
 let FranchiseTable3FieldStrategy = {};
 let dictionary = fs.readFileSync(path.join(__dirname, '../../../data/zstd-dicts/26/dict.bin'));
+const zstdDecoder = new Decoder(dictionary);
 
 FranchiseTable3FieldStrategy.getZstdDataStartIndex = (unformattedValue) => {
     return unformattedValue.indexOf(Buffer.from([0x28, 0xB5, 0x2F, 0xFD]));
@@ -19,7 +20,6 @@ FranchiseTable3FieldStrategy.getInitialUnformattedValue = (field, data) => {
 FranchiseTable3FieldStrategy.getFormattedValueFromUnformatted = (unformattedValue) => {
     // First two bytes are the size of the zipped data, so skip those and get the raw ISON buffer
     const zstdDataStartIndex = FranchiseTable3FieldStrategy.getZstdDataStartIndex(unformattedValue);
-    const zstdDecoder = new Decoder(dictionary);
 
     // Zstd decoder cannot handle extra padding bytes, so we need to get the exact number of bytes
     const length = unformattedValue.readUInt16LE(0);

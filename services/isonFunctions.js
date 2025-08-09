@@ -3,7 +3,7 @@ const path = require("path");
 const fs = require("fs");
 const zlib = require("zlib");
 
-// Read and parse the JSON file
+// Read in all available interned string lookups
 let internedLookups = {};
 const gameYears = [25, 26];
 for (let year of gameYears) 
@@ -16,7 +16,7 @@ for (let year of gameYears)
 
 }
 
-// Default to 25 lookup and 26 dictionary until we know the game year
+// Default to 25 lookup until we know the game year
 let stringLookup = internedLookups[25];
 let reverseStringLookup = {};
 populateReverseStringLookup(); 
