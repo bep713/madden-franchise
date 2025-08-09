@@ -149,7 +149,7 @@ class FranchiseFileField {
             // return (formatted == 1 || (formatted.toString().toLowerCase() == 'true')) ? '1' : '0';
             actualValue = (value == 1 || (value.toString().toLowerCase() == 'true'));
             this._value = actualValue;
-            this._unformattedValue.setBits(this.offset.offset, actualValue, 1);
+            this._unformattedValue.setBits(this.offset.offset + (this.offset.length - 1), actualValue, 1);
             break;
           case 'float':
             actualValue = parseFloat(value);
@@ -299,7 +299,7 @@ class FranchiseFileField {
             }
           }
           case 'bool':
-            return unformatted.getBits(offset.offset, 1) ? true : false;
+            return unformatted.getBits(offset.offset + (offset.length - 1), 1) ? true : false;
           case 'float':
             // return utilService.bin2Float(unformatted);
             return unformatted.getFloat32(offset.offset, offset.length);

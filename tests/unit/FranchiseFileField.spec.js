@@ -484,6 +484,31 @@ describe('FranchiseFileField unit tests', () => {
         field.value = true;
         expect(unformattedValue).to.eql(Buffer.from([0x01]));
       });
+
+      it('parses trailing bools correctly - true', () => {
+        offset = {
+          'type': 'bool',
+          'offset': 4, // Full length is 16 bits (2 bytes on line 495), so making offset 4 & length 12 to read the bool at the end
+          'length': 12
+        };
+  
+        unformattedValue = Buffer.from([0x00, 0x01]);
+  
+        field = new FranchiseFileField(key, unformattedValue, offset, parent);
+        expect(field.value).to.be.true;
+
+        field.value = 'true';
+        expect(unformattedValue).to.eql(Buffer.from([0x00, 0x01]));
+  
+        field.value = 1;
+        expect(unformattedValue).to.eql(Buffer.from([0x00, 0x01]));
+  
+        field.value = true;
+        expect(unformattedValue).to.eql(Buffer.from([0x00, 0x01]));
+
+        field.value = false;
+        expect(unformattedValue).to.eql(Buffer.from([0x00, 0x00]));
+      });
   
       it('parses floats correctly', () => {
         offset = {

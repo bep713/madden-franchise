@@ -1,6 +1,6 @@
 {
   "name": "madden-franchise",
-  "version": "3.7.1",
+  "version": "3.7.2",
   "description": "Tools to read a madden franchise file and get data from it",
   "main": "FranchiseFile.js",
   "scripts": {
