@@ -18,7 +18,7 @@ FranchiseTable3FieldStrategy.getFormattedValueFromUnformatted = (unformattedValu
     const isonBuf = zlib.gunzipSync(unformattedValue.subarray(zlibDataStartIndex));
 
     // Convert the ISON buffer to a JSON object
-    const jsonObj = ISON_FUNCTIONS.isonVisualsToJson(isonBuf);
+    const jsonObj = ISON_FUNCTIONS.isonVisualsToJson(isonBuf, 25);
 
     return JSON.stringify(jsonObj);   
 };
@@ -28,7 +28,7 @@ FranchiseTable3FieldStrategy.setUnformattedValueFromFormatted = (formattedValue,
     let jsonObj = JSON.parse(formattedValue);
 
     // Convert the object into an ISON buffer
-    let isonBuf = ISON_FUNCTIONS.jsonVisualsToIson(jsonObj);
+    let isonBuf = ISON_FUNCTIONS.jsonVisualsToIson(jsonObj, 25);
 
     let padding = Buffer.alloc(maxLength - isonBuf.length);  // table3s all have the same length and are zero padded to the end.
 

@@ -3,18 +3,35 @@ const path = require("path");
 const fs = require("fs");
 const zlib = require("zlib");
 
-// Required lookup files
-const filePath = path.resolve(
-  __dirname,
-  "lookupFiles",
-  "internedStringLookup.json"
-);
-
 // Read and parse the JSON file
-const stringLookup = JSON.parse(fs.readFileSync(filePath, "utf8"));
-const reverseStringLookup = {}; // Create a reverse lookup for JSON -> ISON
-for (let key in stringLookup) {
-  reverseStringLookup[stringLookup[key].toLowerCase()] = parseInt(key); // Create reverse lookup
+let internedLookups = {};
+const gameYears = [25, 26];
+for (let year of gameYears) 
+{
+	const lookupFilePath = path.join(__dirname, `../data/interned-strings/${year.toString()}/lookup.json`);
+	if (fs.existsSync(lookupFilePath)) 
+	{
+		internedLookups[year] = JSON.parse(fs.readFileSync(lookupFilePath, 'utf8'));
+	}
+
+}
+
+// Default to 25 lookup and 26 dictionary until we know the game year
+let stringLookup = internedLookups[25];
+let reverseStringLookup = {};
+populateReverseStringLookup(); 
+
+function populateReverseStringLookup() {
+  // Create a reverse lookup for JSON -> ISON
+  for (let key in stringLookup) {
+    reverseStringLookup[stringLookup[key].toLowerCase()] = parseInt(key); // Create reverse lookup
+  }
+}
+
+function initGameSpecific(gameYear) {
+  stringLookup = internedLookups[gameYear];
+  reverseStringLookup = {};
+  populateReverseStringLookup();
 }
 
 // ISON constants
@@ -33,7 +50,9 @@ const ISON_END = 0x11;
 let fileData;
 let isonOffset = 0;
 
-function isonVisualsToJson(fileBuf, maxLength) {
+function isonVisualsToJson(fileBuf, gameYear = 25) {
+  initGameSpecific(gameYear);
+  
   isonOffset = 0;
 
   fileData = fileBuf;
@@ -57,10 +76,14 @@ function isonVisualsToJson(fileBuf, maxLength) {
   return obj;
 }
 
-function jsonVisualsToIson(jsonObj) {
+function jsonVisualsToIson(jsonObj, gameYear = 25) {
+  initGameSpecific(gameYear);
+  
   const isonBuffer = writeIsonFromJson(jsonObj);
 
-  return writeTable3IsonData(isonBuffer);
+  // For 26 onwards, return the raw ISON buffer (strategy will handle compression).
+  // For 25, return the compressed buffer since it's just simple gzip
+  return gameYear >= 26 ? isonBuffer : writeTable3IsonData(isonBuffer);
 }
 
 // Function to write the ISON data to a compressed buffer
@@ -145,7 +168,7 @@ function jsonToIson(json, buffer, offset = 0) {
 }
 
 // Function to convert JSON to ISON and write it to a file
-function writeIsonFromJson(jsonObj) {
+function writeIsonFromJson(jsonObj) {  
   // Estimate the buffer size; this can be optimized based on specific requirements.
   let buffer = Buffer.alloc(1024 * 1024); // 1MB buffer for now
   let offset = 0;
