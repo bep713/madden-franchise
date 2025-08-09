@@ -19,6 +19,7 @@ for (let year of gameYears)
 // Default to 25 lookup until we know the game year
 let stringLookup = internedLookups[25];
 let reverseStringLookup = {};
+let currentGameYear = 25; // Track current game year to avoid unnecessary rebuilds
 populateReverseStringLookup(); 
 
 function populateReverseStringLookup() {
@@ -29,9 +30,13 @@ function populateReverseStringLookup() {
 }
 
 function initGameSpecific(gameYear) {
-  stringLookup = internedLookups[gameYear];
-  reverseStringLookup = {};
-  populateReverseStringLookup();
+  // Only rebuild if the game year has changed, prevents performance slowdown
+  if (currentGameYear !== gameYear) {
+    stringLookup = internedLookups[gameYear];
+    reverseStringLookup = {};
+    currentGameYear = gameYear;
+    populateReverseStringLookup();
+  }
 }
 
 // ISON constants

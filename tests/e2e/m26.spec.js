@@ -18,8 +18,6 @@ const filePathToSave = filePaths.saveTest.m26;
 let file;
 
 describe('Madden 26 end to end tests', function () {
-  this.timeout(30000); // The final table3 test is taking a long time for some reason
-
   describe('open files', () => {
     it('can open a M26 compressed file', () => {
       file = new FranchiseFile(filePathToUse);
