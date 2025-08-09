@@ -52,7 +52,8 @@ describe('Madden 21 end to end tests', function () {
           'autoUnempty': false,
           'useNewSchemaGeneration': false,
           'schemaFileMap': {},
-          'extraSchemas': []
+          'extraSchemas': undefined,
+          'gameYearOverride': null
         });
 
         expect(file.isLoaded).to.be.true;

@@ -63,7 +63,7 @@ class FranchiseFile extends EventEmitter {
     this._rawContents = fs.readFileSync(filePath);
 
     /** @private @type {FileType} */
-    this._type = getFileType(this._rawContents);
+    this._type = getFileType(this._rawContents, this._settings);
 
     /** @private @type {number} */
     this._gameYear = this._type.year;
@@ -81,7 +81,7 @@ class FranchiseFile extends EventEmitter {
       this.unpackedFileContents = unpackFile(this._rawContents, this._type);
 
       if (this._type.format === Constants.FORMAT.FRANCHISE_COMMON) {
-        const newType = getFileType(this.unpackedFileContents);
+        const newType = getFileType(this.unpackedFileContents, this._settings);
         this._type.year = newType.year;
         this._gameYear = this._type.year;
         this._expectedSchemaVersion = getSchemaMetadata(
@@ -587,12 +587,13 @@ function _saveSync(destination, packedContents) {
 /**
  * 
  * @param {Buffer} data 
+ * @param {FranchiseFileSettings} settings
  * @returns {FileType}
  */
-function getFileType(data) {
+function getFileType(data, settings) {
   const isDataCompressed = isCompressed(data);
   const format = getFormat(data, isDataCompressed);
-  const year = getGameYear(data, isDataCompressed, format);
+  const year = settings?.gameYearOverride ?? getGameYear(data, isDataCompressed, format);
 
   return {
     format: format,
@@ -656,7 +657,7 @@ function getGameYear(data, isCompressed, format) {
       max: 95,
     },
     {
-      year: 25,
+      year: 26,
       max: 999,
     },
   ];
@@ -691,6 +692,8 @@ function getGameYear(data, isCompressed, format) {
     } else if (data[0x2A] === 0x35) {
       // M25 has year indicator in a different location
       return 25;
+    } else if (data[0x2A] === 0x36) {
+      return 26;
     } else {
       const schemaMajor = getCompressedSchema(data).major;
       const year = schemaMax.find((schema) => {

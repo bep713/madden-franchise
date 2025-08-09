@@ -17,13 +17,13 @@ let done = false;
         .filter(f => f.name !== mainSchemaName)
         .reduce((acc, file) => {
             const name = file.name.replace(/\.FTX$/i, '');
-            acc[name] = path.join(file.parentPath, file.name);
+            acc[name] = path.join(process.argv[2], file.name);
             return acc;
         }, {});
 
     const schema = await generateSchemaV2({
         fileMap: {
-            main: path.join(main.parentPath, main.name),
+            main: path.join(process.argv[2], main.name),
             ...otherSchemas
         },
         extraSchemas: process.argv[5] ? JSON.parse(await fs.readFile(process.argv[5], 'utf8')) : undefined

@@ -61,7 +61,7 @@ describe('schema picker service unit tests', () => {
 
   it('returns a list of saved schemas', () => {
     const schemas = schemaPicker.retrieveSchemas();
-    expect(schemas.length).to.equal(7);
+    expect(schemas.length).to.equal(8);
     expect(schemas[0].major).to.equal(95);
     expect(schemas[1].major).to.equal(371);
     expect(schemas[2].major).to.equal(220);

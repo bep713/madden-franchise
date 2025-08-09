@@ -35,6 +35,7 @@ madden-franchise is a Madden franchise file parser written in NodeJS that allows
 | Madden 23 | ✅ Full |
 | Madden 24 | ✅ Full |
 | Madden 25 | ✅ Full |
+| Madden 26 | 🟡 Everything but CharacterVisuals |
 
 ### Quick Start
 #### Initializing
@@ -78,6 +79,9 @@ madden-franchise is a Madden franchise file parser written in NodeJS that allows
 
       // EXTRA SCHEMAS - used with v2 schema generation to specify extra schemas to include other than the defaults. Warning: if these are included, the default extra schemas will NOT be included and vice-versa.
       extraSchemas: [...]
+
+      // GAME YEAR OVERRIDE - use to override the game year to adjust schema picker logic. Helpful for FTC files and other files that can't auto-detect year accurately.
+      gameYearOverride: number
     }
 
 #### Terminology

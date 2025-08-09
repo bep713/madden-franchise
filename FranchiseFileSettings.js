@@ -26,6 +26,8 @@ class FranchiseFileSettings {
     this.autoParse = settings && (settings.autoParse !== null && settings.autoParse !== undefined) ? settings.autoParse : true;
     /** @type {boolean} */
     this.autoUnempty = settings && (settings.autoUnempty !== null && settings.autoUnempty !== undefined) ? settings.autoUnempty : false;
+    /** @type {number} */
+    this.gameYearOverride = settings && (settings.gameYearOverride !== null && settings.gameYearOverride !== undefined) ? settings.gameYearOverride : null;
   }
 };
 
