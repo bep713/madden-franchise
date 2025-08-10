@@ -2,41 +2,44 @@ const zlib = require('zlib');
 const fs = require('fs');
 const path = require('path');
 const { Decoder } = require('@toondepauw/node-zstd');
-const ISON_FUNCTIONS = require('../../../services/isonFunctions')
+const { IsonProcessor } = require('../../../services/isonProcessor')
 
-let FranchiseTable3FieldStrategy = {};
+let FranchiseZstdTable3FieldStrategy = {};
 let dictionary = fs.readFileSync(path.join(__dirname, '../../../data/zstd-dicts/26/dict.bin'));
 const zstdDecoder = new Decoder(dictionary);
 
-FranchiseTable3FieldStrategy.getZstdDataStartIndex = (unformattedValue) => {
+// Create a single IsonProcessor instance for M26 and reuse it for better performance
+const isonProcessor = new IsonProcessor(26);
+
+FranchiseZstdTable3FieldStrategy.getZstdDataStartIndex = (unformattedValue) => {
     return unformattedValue.indexOf(Buffer.from([0x28, 0xB5, 0x2F, 0xFD]));
 };
 
-FranchiseTable3FieldStrategy.getInitialUnformattedValue = (field, data) => {
+FranchiseZstdTable3FieldStrategy.getInitialUnformattedValue = (field, data) => {
     return data.slice(field.thirdTableField.index, (field.thirdTableField.index + field.offset.maxLength + 2));
     // extend maxLength + 2 because the first 2 bytes are the size of the compressed data
 };
 
-FranchiseTable3FieldStrategy.getFormattedValueFromUnformatted = (unformattedValue) => {
+FranchiseZstdTable3FieldStrategy.getFormattedValueFromUnformatted = (unformattedValue) => {
     // First two bytes are the size of the zipped data, so skip those and get the raw ISON buffer
-    const zstdDataStartIndex = FranchiseTable3FieldStrategy.getZstdDataStartIndex(unformattedValue);
+    const zstdDataStartIndex = FranchiseZstdTable3FieldStrategy.getZstdDataStartIndex(unformattedValue);
 
     // Zstd decoder cannot handle extra padding bytes, so we need to get the exact number of bytes
     const length = unformattedValue.readUInt16LE(0);
     const isonBuf = zstdDecoder.decodeSync(unformattedValue.subarray(zstdDataStartIndex, zstdDataStartIndex + length));
 
-    // Convert the ISON buffer to a JSON object
-    const jsonObj = ISON_FUNCTIONS.isonVisualsToJson(isonBuf, 26);
+    // Convert the ISON buffer to a JSON object using the class instance
+    const jsonObj = isonProcessor.isonVisualsToJson(isonBuf);
 
     return JSON.stringify(jsonObj);   
 };
 
-FranchiseTable3FieldStrategy.setUnformattedValueFromFormatted = (formattedValue, oldUnformattedValue, maxLength) => {
+FranchiseZstdTable3FieldStrategy.setUnformattedValueFromFormatted = (formattedValue, oldUnformattedValue, maxLength) => {
     // Parse the JSON string into a JSON object
     let jsonObj = JSON.parse(formattedValue);
 
-    // Convert the object into an ISON buffer
-    let isonBuf = ISON_FUNCTIONS.jsonVisualsToIson(jsonObj, 26);
+    // Convert the object into an ISON buffer using the class instance
+    let isonBuf = isonProcessor.jsonVisualsToIson(jsonObj);
 
     // Create the zstd-compressed buffer (not using dictionary due to node limitations, game still reads it fine)
     const compressedBuf = zlib.zstdCompressSync(isonBuf);
@@ -49,4 +52,4 @@ FranchiseTable3FieldStrategy.setUnformattedValueFromFormatted = (formattedValue,
     return Buffer.concat([sizeBuf, compressedBuf, padding]);
 };
 
-module.exports = FranchiseTable3FieldStrategy;
+module.exports = FranchiseZstdTable3FieldStrategy;

@@ -6,7 +6,7 @@ const { BitView } = require('bit-buffer');
 const FranchiseFile = require('../../FranchiseFile');
 const FranchiseFileTable = require('../../FranchiseFileTable');
 const filePaths = require('../util/filePathUtil');
-const isonFunctions = require('../../services/isonFunctions');
+const isonProcessor = require('../../services/isonProcessor');
 
 const playerTableId = 4204;
 const playerArrayTableIdToTest = 5755;
@@ -2153,7 +2153,7 @@ describe('Madden 25 end to end tests', function () {
         expect(table.records[0]._fields.RawData.thirdTableField.unformattedValue.length).to.equal(0x1F7);
 
         const data = zlib.gunzipSync(table.records[0]._fields.RawData.thirdTableField.unformattedValue.subarray(2));
-        expect(isonFunctions.isonVisualsToJson(data)).to.eql(existingData);
+        expect(isonProcessor.isonVisualsToJson(data, 25)).to.eql(existingData);
       });
 
       it('saves properly after edit', (done) => {
