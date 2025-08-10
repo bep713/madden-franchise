@@ -35,7 +35,7 @@ madden-franchise is a Madden franchise file parser written in NodeJS that allows
 | Madden 23 | ✅ Full |
 | Madden 24 | ✅ Full |
 | Madden 25 | ✅ Full |
-| Madden 26 | 🟡 Everything but CharacterVisuals |
+| Madden 26 | ✅ Full |
 
 ### Quick Start
 #### Initializing
