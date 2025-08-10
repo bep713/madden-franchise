@@ -1,7 +1,10 @@
 const zlib = require('zlib');
-const ISON_FUNCTIONS = require('../../../services/isonFunctions')
+const { IsonProcessor } = require('../../../services/isonProcessor')
 
 let FranchiseTable3FieldStrategy = {};
+
+// Create a single IsonProcessor instance for M25 and reuse it for better performance
+const isonProcessor = new IsonProcessor(25);
 
 FranchiseTable3FieldStrategy.getZlibDataStartIndex = (unformattedValue) => {
     return unformattedValue.indexOf(Buffer.from([0x1F, 0x8B]));
@@ -17,8 +20,8 @@ FranchiseTable3FieldStrategy.getFormattedValueFromUnformatted = (unformattedValu
     const zlibDataStartIndex = FranchiseTable3FieldStrategy.getZlibDataStartIndex(unformattedValue);
     const isonBuf = zlib.gunzipSync(unformattedValue.subarray(zlibDataStartIndex));
 
-    // Convert the ISON buffer to a JSON object
-    const jsonObj = ISON_FUNCTIONS.isonVisualsToJson(isonBuf);
+    // Convert the ISON buffer to a JSON object using the class instance
+    const jsonObj = isonProcessor.isonVisualsToJson(isonBuf);
 
     return JSON.stringify(jsonObj);   
 };
@@ -27,8 +30,8 @@ FranchiseTable3FieldStrategy.setUnformattedValueFromFormatted = (formattedValue,
     // Parse the JSON string into a JSON object
     let jsonObj = JSON.parse(formattedValue);
 
-    // Convert the object into an ISON buffer
-    let isonBuf = ISON_FUNCTIONS.jsonVisualsToIson(jsonObj);
+    // Convert the object into an ISON buffer using the class instance
+    let isonBuf = isonProcessor.jsonVisualsToIson(jsonObj);
 
     let padding = Buffer.alloc(maxLength - isonBuf.length);  // table3s all have the same length and are zero padded to the end.
 

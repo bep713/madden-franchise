@@ -6,7 +6,8 @@ const { BitView } = require('bit-buffer');
 const FranchiseFile = require('../../FranchiseFile');
 const FranchiseFileTable = require('../../FranchiseFileTable');
 const filePaths = require('../util/filePathUtil');
-const isonFunctions = require('../../services/isonFunctions');
+const isonProcessor = require('../../services/isonProcessor');
+const { Decoder } = require('@toondepauw/node-zstd');
 
 const playerTableId = 4220;
 const playerArrayTableIdToTest = 5903;
@@ -17,8 +18,6 @@ const filePathToSave = filePaths.saveTest.m26;
 let file;
 
 describe('Madden 26 end to end tests', function () {
-  this.timeout(7000);
-
   describe('open files', () => {
     it('can open a M26 compressed file', () => {
       file = new FranchiseFile(filePathToUse);
@@ -2086,108 +2085,112 @@ describe('Madden 26 end to end tests', function () {
         expect(table.table3Records.length).to.equal(5056);
       });
 
-      // it('can get the uncompressed JSON data from the field', () => {
-      //   const data = table.records[0].RawData;
-      //   expect(data[0]).to.equal('{');
-      //   expect(data.length).to.equal(470);
-      // });
+      it('can get the uncompressed JSON data from the field', () => {
+        const data = table.records[0].RawData;
+        expect(data[0]).to.equal('{');
+        expect(data.length).to.equal(592);
+      });
 
-      // it('can get the table3 record from the field', () => {
-      //   const thirdTableField = table.records[0]._fields.RawData.thirdTableField;
-      //   const data = thirdTableField.value;
-      //   expect(data[0]).to.equal('{');
-      //   expect(data.length).to.equal(470);
-      // });
+      it('can get the table3 record from the field', () => {
+        const thirdTableField = table.records[0]._fields.RawData.thirdTableField;
+        const data = thirdTableField.value;
+        expect(data[0]).to.equal('{');
+        expect(data.length).to.equal(592);
+      });
 
-      // it('can parse the table3 record as JSON', () => {
-      //   let existingData = JSON.parse(table.records[0].RawData);
-      //   expect(existingData.skinTone).to.equal(6);
-      //   expect(existingData.loadouts.length).to.equal(1);
-      //   expect(existingData.loadouts[0].loadoutCategory).to.equal('CoachApparel');
-      //   expect(existingData.loadouts[0].loadoutElements.length).to.equal(6);
-      // });
+      it('can parse the table3 record as JSON', () => {
+        let existingData = JSON.parse(table.records[0].RawData);
+        expect(existingData.loadouts.length).to.equal(2);
+        expect(existingData.loadouts[0].loadoutCategory).to.equal('CoachApparel');
+        expect(existingData.loadouts[0].loadoutElements.length).to.equal(6);
+      });
 
-      // it('can get the table3 unformatted data', () => {
-      //   const thirdTableField = table.records[0]._fields.RawData.thirdTableField;
-      //   const data = thirdTableField.unformattedValue;
-      //   expect(data.length).to.equal(503);
-      //   expect(data.readUInt16LE(0)).to.equal(0x66);   // size of gzipped data in first 2 bytes
-      //   expect(data.readUInt16LE(2)).to.equal(0x8B1F);  // gzip signature
-      // });
+      it('can get the table3 unformatted data', () => {
+        const thirdTableField = table.records[0]._fields.RawData.thirdTableField;
+        const data = thirdTableField.unformattedValue;
+        expect(data.length).to.equal(377);
+        expect(data.readUInt16LE(0)).to.equal(0x43);   // size of gzipped data in first 2 bytes
+        expect(data.readUInt32BE(2)).to.equal(0x28B52FFD);  // zstd signature
+      });
 
-      // it('can set the table3 data', () => {
-      //   let existingData = JSON.parse(table.records[0].RawData);
-      //   existingData.skinTone = 1;
-      //   existingData.loadouts[0].loadoutCategory = 'CoachTest';
+      it('can set the table3 data', () => {
+        let existingData = JSON.parse(table.records[0].RawData);
+        existingData.skinTone = 1;
+        existingData.loadouts[0].loadoutCategory = 'CoachTest';
 
-      //   table.records[0].RawData = JSON.stringify(existingData);
+        table.records[0].RawData = JSON.stringify(existingData);
         
-      //   expect(table.records[0].RawData).to.eql(JSON.stringify(existingData));
-      //   expect(table.records[0]._fields.RawData.thirdTableField.value).to.eql(JSON.stringify(existingData));
-      // });
+        expect(table.records[0].RawData).to.eql(JSON.stringify(existingData));
+        expect(table.records[0]._fields.RawData.thirdTableField.value).to.eql(JSON.stringify(existingData));
+      });
 
-      // it('can set the table3 data without JSON.stringify', () => {
-      //   let existingData = JSON.parse(table.records[0].RawData);
-      //   existingData.skinTone = 1;
-      //   existingData.loadouts[0].loadoutCategory = 'CoachTest';
+      it('can set the table3 data without JSON.stringify', () => {
+        let existingData = JSON.parse(table.records[0].RawData);
+        existingData.skinTone = 1;
+        existingData.loadouts[0].loadoutCategory = 'CoachTest';
 
-      //   table.records[0].RawData = existingData;
-        
-      //   expect(table.records[0].RawData).to.eql(JSON.stringify(existingData));
-      //   expect(table.records[0]._fields.RawData.thirdTableField.value).to.eql(JSON.stringify(existingData));
-      // });
+        table.records[0].RawData = existingData;
+      
+        expect(table.records[0].RawData).to.eql(JSON.stringify(existingData));
+        expect(table.records[0]._fields.RawData.thirdTableField.value).to.eql(JSON.stringify(existingData));
+      });
 
-      // it('populates unformatted value correctly after setting the value', () => {
-      //   let existingData = JSON.parse(table.records[0].RawData);
-      //   existingData.skinTone = 1;
-      //   existingData.loadouts[0].loadoutCategory = 'CoachTest';
+      it('populates unformatted value correctly after setting the value', () => {
+        let existingData = JSON.parse(table.records[0].RawData);
+        existingData.skinTone = 1;
+        existingData.loadouts[0].loadoutCategory = 'CoachTest';
 
-      //   table.records[0].RawData = existingData;
+        table.records[0].RawData = existingData;
 
-      //   expect(table.records[0]._fields.RawData.thirdTableField.unformattedValue).to.be.an.instanceOf(Buffer);
-      //   expect(table.records[0]._fields.RawData.thirdTableField.unformattedValue.length).to.equal(0x1F7);
+        expect(table.records[0]._fields.RawData.thirdTableField.unformattedValue).to.be.an.instanceOf(Buffer);
+        expect(table.records[0]._fields.RawData.thirdTableField.unformattedValue.length).to.equal(377);
 
-      //   const data = zlib.gunzipSync(table.records[0]._fields.RawData.thirdTableField.unformattedValue.subarray(2));
-      //   expect(isonFunctions.isonVisualsToJson(data)).to.eql(existingData);
-      // });
+        const dictBuf = fs.readFileSync(path.join(__dirname, '../../data/zstd-dicts/26/dict.bin'));
+        const zstdDecoder = new Decoder(dictBuf);
 
-      // it('saves properly after edit', (done) => {
-      //   let existingData = JSON.parse(table.records[0].RawData);
-      //   existingData.skinTone = 1;
-      //   existingData.loadouts[0].loadoutCategory = 'CoachTest';
+        const length = table.records[0]._fields.RawData.thirdTableField.unformattedValue.readUInt16LE(0);
 
-      //   table.records[0].RawData = existingData;
-      //   file.save(filePathToSave).then(() => {
-      //     let file2 = new FranchiseFile(filePathToSave);
-      //     file2.on('ready', async () => {
-      //       let table2 = file2.getTableByUniqueId(characterVisualsUniqueId);
-      //       await table2.readRecords();
+        const data = zstdDecoder.decodeSync(table.records[0]._fields.RawData.thirdTableField.unformattedValue.subarray(2, length + 2));
+        expect(isonProcessor.isonVisualsToJson(data, 26)).to.eql(existingData);
+      });
+
+      it('saves properly after edit', (done) => {
+        let existingData = JSON.parse(table.records[0].RawData);
+        existingData.skinTone = 1;
+        existingData.loadouts[0].loadoutCategory = 'CoachTest';
+
+        table.records[0].RawData = existingData;
+        file.save(filePathToSave).then(() => {
+          let file2 = new FranchiseFile(filePathToSave);
+          file2.on('ready', async () => {
+            let table2 = file2.getTableByUniqueId(characterVisualsUniqueId);
+            await table2.readRecords();
   
-      //       expect(table2.records[0].RawData).to.eql(JSON.stringify(existingData));
-      //       done();
-      //     });
-      //   });
-      // });
+            expect(table2.records[0].RawData).to.eql(JSON.stringify(existingData));
+            done();
+          });
+        });
+      });
 
-      // it('handles empty scenario', () => {
-      //   const prevData = table.records[0].RawData;
-      //   table.records[0].empty();
-      //   expect(table.records[0].RawData).to.eql(prevData);
-      //   expect(table.records[0]._fields.RawData.thirdTableField.value).to.eql(prevData);
-      // });
+      it('handles empty scenario', () => {
+        const prevData = table.records[0].RawData;
+        table.records[0].empty();
+        expect(table.records[0].RawData).to.eql(prevData);
+        expect(table.records[0]._fields.RawData.thirdTableField.value).to.eql(prevData);
+      });
 
-      // it('handles un-empty scenario', () => {
-      //   const prevData = table.records[0].RawData;
-      //   const prevUnformatted = table.records[0]._fields.RawData.unformattedValue;
+      it('handles un-empty scenario', () => {
+        const prevData = table.records[0].RawData;
+        const prevUnformatted = table.records[0]._fields.RawData.unformattedValue;
 
-      //   table.records[0].empty();
-      //   expect(table.records[0].RawData).to.eql(prevData);
+        table.records[0].empty();
+        expect(table.records[0].RawData).to.eql(prevData);
 
-      //   table.records[0].Overflow = '00000000000000000000000000000000';
-      //   expect(table.records[0].RawData).to.eql(prevData);
-      //   expect(table.records[0]._fields.RawData.unformattedValue).to.eql(prevUnformatted);
-      //   expect(table.records[0]._fields.RawData.thirdTableField.value).to.eql(prevData);
-      // });
+        table.records[0].Overflow = '00000000000000000000000000000000';
+        expect(table.records[0].RawData).to.eql(prevData);
+        expect(table.records[0]._fields.RawData.unformattedValue).to.eql(prevUnformatted);
+        expect(table.records[0]._fields.RawData.thirdTableField.value).to.eql(prevData);
+      });
 
       // it('handles un-empty scenario (not manually emptying first)', (done) => {
       //   const recordIndex = 3720;
@@ -2224,64 +2227,66 @@ describe('Madden 26 end to end tests', function () {
       //   });
       // });
 
-      // it('handles scenario where all records change', (done) => {
-      //   for (let row = 0; row < table.header.recordCapacity; row++) {
-      //     table.records[row]['RawData'] = {};
-      //   }
+      it('handles scenario where all records change', (done) => {
+        for (let row = 0; row < table.header.recordCapacity; row++) {
+          table.records[row]['RawData'] = {};
+        }
 
-      //   file.save(filePathToSave).then(() => {
-      //     let file2 = new FranchiseFile(filePathToSave);
-      //     file2.on('ready', async () => {
-      //       let table2 = file2.getTableByUniqueId(characterVisualsUniqueId);
-      //       await table2.readRecords();
+        file.save(filePathToSave).then(() => {
+          let file2 = new FranchiseFile(filePathToSave);
+          file2.on('ready', async () => {
+            let table2 = file2.getTableByUniqueId(characterVisualsUniqueId);
+            await table2.readRecords();
             
-      //       for (let row = 0; row < table2.header.recordCapacity; row++) {
-      //         expect(table2.records[row]['RawData']).to.eql('{}');
-      //       }
+            for (let row = 0; row < table2.header.recordCapacity; row++) {
+              expect(table2.records[row]['RawData']).to.eql('{}');
+            }
 
-      //       done();
-      //     });
-      //   });
-      // });
+            done();
+          });
+        });
+      });
 
-      // describe('handles scenario where data exists between the table3 size & data', () => {
-      //   let table, file3;
+      /* Not relevant for M26 as this scenario does not exist
+      describe('handles scenario where data exists between the table3 size & data', () => {
+        let table, file3;
 
-      //   before((done) => {
-      //     file3 = new FranchiseFile('tests/data/CAREER-24Table3Data');
-      //     file3.on('ready', () => {
-      //       table = file3.getTableByUniqueId(characterVisualsUniqueId);
-      //       table.readRecords().then(() => {
-      //         done();
-      //       });
-      //     });
-      //   });
+        before((done) => {
+          file3 = new FranchiseFile('tests/data/CAREER-24Table3Data');
+          file3.on('ready', () => {
+            table = file3.getTableByUniqueId(characterVisualsUniqueId);
+            table.readRecords().then(() => {
+              done();
+            });
+          });
+        });
 
-      //   it('can read the data', () => {
-      //     expect(table.records[1400].RawData.length).to.be.greaterThan(0);
-      //     expect(table.records[1400]._fields.RawData.thirdTableField.unformattedValue.readUInt8(2)).to.eql(7);
-      //   });
+        it('can read the data', () => {
+          expect(table.records[1400].RawData.length).to.be.greaterThan(0);
+          expect(table.records[1400]._fields.RawData.thirdTableField.unformattedValue.readUInt8(2)).to.eql(7);
+        });
 
-      //   it('can set the data', (done) => {
-      //     const newData = {
-      //       firstName: 'Test',
-      //       lastName: 'Test'
-      //     };
+        it('can set the data', (done) => {
+          const newData = {
+            firstName: 'Test',
+            lastName: 'Test'
+          };
 
-      //     table.records[1400].RawData = newData;
+          table.records[1400].RawData = newData;
 
-      //     file3.save(filePathToSave).then(() => {
-      //       let file2 = new FranchiseFile(filePathToSave);
-      //       file2.on('ready', async () => {
-      //         let table2 = file2.getTableByUniqueId(characterVisualsUniqueId);
-      //         await table2.readRecords();
+          file3.save(filePathToSave).then(() => {
+            let file2 = new FranchiseFile(filePathToSave);
+            file2.on('ready', async () => {
+              let table2 = file2.getTableByUniqueId(characterVisualsUniqueId);
+              await table2.readRecords();
     
-      //         expect(table2.records[1400].RawData).to.eql(JSON.stringify(newData));
-      //         done();
-      //       });
-      //     });
-      //   });
-      // });
+              expect(table2.records[1400].RawData).to.eql(JSON.stringify(newData));
+              done();
+            });
+          });
+        });
+      });
+      */
     });
   });
 });

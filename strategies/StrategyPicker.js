@@ -3,6 +3,7 @@ const M19Strategy = require('./franchise/m19/M19Strategy');
 const M20Strategy = require('./franchise/m20/M20Strategy');
 const M24Strategy = require('./franchise/m24/M24Strategy');
 const M25Strategy = require('./franchise/m25/M25Strategy');
+const M26Strategy = require('./franchise/m26/M26Strategy');
 const M19FTCStrategy = require('./franchise-common/m19/M19FTCStrategy');
 const M20FTCStrategy = require('./franchise-common/m20/M20FTCStrategy');
 
@@ -25,8 +26,9 @@ StrategyPicker.pick = (type) => {
             case 24:
                 return M24Strategy;
             case 25:
-            case 26:
                 return M25Strategy;
+            case 26:
+                return M26Strategy;
         }
     }
     else {
