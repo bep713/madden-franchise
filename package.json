@@ -29,5 +29,8 @@
     "sinon": "^7.5.0",
     "typescript": "^5.4.4"
   },
-  "types": "dist/FranchiseFile.d.ts"
+  "types": "dist/FranchiseFile.d.ts",
+  "engines": {
+    "node": ">=22.15.0"
+  }
 }
