@@ -1,20 +1,18 @@
-const Constants = require('../Constants');
-const M19Strategy = require('./franchise/m19/M19Strategy');
-const M20Strategy = require('./franchise/m20/M20Strategy');
-const M24Strategy = require('./franchise/m24/M24Strategy');
-const M25Strategy = require('./franchise/m25/M25Strategy');
-const M26Strategy = require('./franchise/m26/M26Strategy');
-const M19FTCStrategy = require('./franchise-common/m19/M19FTCStrategy');
-const M20FTCStrategy = require('./franchise-common/m20/M20FTCStrategy');
-
+import Constants from "../Constants.js";
+import M19Strategy from "./franchise/m19/M19Strategy.js";
+import M20Strategy from "./franchise/m20/M20Strategy.js";
+import M24Strategy from "./franchise/m24/M24Strategy.js";
+import M25Strategy from "./franchise/m25/M25Strategy.js";
+import M26Strategy from "./franchise/m26/M26Strategy.js";
+import M19FTCStrategy from "./franchise-common/m19/M19FTCStrategy.js";
+import M20FTCStrategy from "./franchise-common/m20/M20FTCStrategy.js";
 let StrategyPicker = {};
-
 /**
  * @returns GameStrategy
  */
 StrategyPicker.pick = (type) => {
     if (type.format === Constants.FORMAT.FRANCHISE) {
-        switch(type.year) {
+        switch (type.year) {
             case 19:
                 return M19Strategy;
             case 20:
@@ -32,7 +30,7 @@ StrategyPicker.pick = (type) => {
         }
     }
     else {
-        switch(type.year) {
+        switch (type.year) {
             case 19:
                 return M19FTCStrategy;
             case 20:
@@ -42,5 +40,4 @@ StrategyPicker.pick = (type) => {
         }
     }
 };
-
-module.exports = StrategyPicker;
+export default StrategyPicker;

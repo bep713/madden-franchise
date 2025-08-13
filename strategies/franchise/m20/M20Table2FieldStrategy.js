@@ -1,11 +1,8 @@
-const FranchiseTable2FieldStrategy = require('../../common/table2Field/FranchiseTable2FieldStrategy');
-
+import FranchiseTable2FieldStrategy from "../../common/table2Field/FranchiseTable2FieldStrategy.js";
 /**
  * @type {Table2FieldStrategy}
  */
 let M20Table2Strategy = {};
-
 M20Table2Strategy.getInitialUnformattedValue = FranchiseTable2FieldStrategy.getInitialUnformattedValue;
 M20Table2Strategy.setUnformattedValueFromFormatted = FranchiseTable2FieldStrategy.setUnformattedValueFromFormatted;
-
-module.exports = M20Table2Strategy;
+export default M20Table2Strategy;

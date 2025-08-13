@@ -1,5 +1,5 @@
-const expect = require('chai').expect;
-const schemaPicker = require('../../services/schemaPicker');
+import { expect } from 'chai';
+import schemaPicker from '../../services/schemaPicker.js';
 
 const schemaPickerSettings = {
   'schemaDirectory': 'C:\\Projects\\madden-franchise\\tests\\data\\test-schemas'

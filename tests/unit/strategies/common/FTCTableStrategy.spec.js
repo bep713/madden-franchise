@@ -1,5 +1,5 @@
-const expect = require('chai').expect;
-const FTCTableStrategy = require('../../../../strategies/common/table/FTCTableStrategy');
+import { expect } from 'chai';
+import FTCTableStrategy from '../../../../strategies/common/table/FTCTableStrategy.js';
 
 describe('FTC Table Strategy unit tests', () => {
     describe('get table2 binary data', () => {

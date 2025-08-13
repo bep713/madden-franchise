@@ -1,8 +1,12 @@
-const path = require('path');
-const expect = require('chai').expect;
-const { BitView } = require('bit-buffer');
-const FranchiseFile = require('../../FranchiseFile');
-const FranchiseFileTable = require('../../FranchiseFileTable');
+import path, { dirname } from 'path';
+import { expect } from 'chai';
+import { BitView } from 'bit-buffer';
+import FranchiseFile from '../../FranchiseFile.js';
+import FranchiseFileTable from '../../FranchiseFileTable.js';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const filePaths = {
   'compressed': {
@@ -661,6 +665,8 @@ describe('Madden 20 end to end tests', function () {
     });
 
     describe('Player table', () => {
+      let table;
+
       beforeEach(() => {
         table = file.getTableById(4229);
       });
@@ -854,6 +860,8 @@ describe('Madden 20 end to end tests', function () {
     });
 
     describe('EndofSeasonResigningStartReaction', () => {
+      let table;
+
       beforeEach(() => {
         table = file.getTableByIndex(533);
       });
@@ -924,6 +932,8 @@ describe('Madden 20 end to end tests', function () {
     });
 
     describe('AnnualAwardsAvailablePeriodEndReaction', () => {
+      let table;
+
       before((done) => {
         table = file.getTableById(4362);
         table.readRecords().then(() => {
@@ -939,6 +949,8 @@ describe('Madden 20 end to end tests', function () {
     });
 
     describe('OverallPercentage', () => {
+      let table;
+
       before((done) => {
         table = file.getTableByName('OverallPercentage');
         table.readRecords().then(() => {
@@ -1016,6 +1028,8 @@ describe('Madden 20 end to end tests', function () {
     });
 
     describe('Stadium', () => {
+      let table;
+
       before((done) => {
         table = file.getTableByName('Stadium');
         table.readRecords(['STADIUM_FLAGBASEBALL']).then(() => {
@@ -1035,6 +1049,8 @@ describe('Madden 20 end to end tests', function () {
     });
 
     describe('Team', () => {
+      let table;
+
       before((done) => {
         table = file.getTableByIndex(3609);
         table.readRecords(['WeeklyDefenseMedal']).then(() => {
@@ -1052,6 +1068,8 @@ describe('Madden 20 end to end tests', function () {
     });
 
     describe('Spline', () => {
+        let table;
+
         before((done) => {
           table = file.getTableByName('Spline');
           table.readRecords().then(() => {
@@ -1067,6 +1085,8 @@ describe('Madden 20 end to end tests', function () {
     });
 
     describe('int[]', () => {
+      let table;
+      
       before((done) => {
         table = file.getTableById(7182); //OverallPercentage -> Spline -> int[]
         table.readRecords().then(() => {

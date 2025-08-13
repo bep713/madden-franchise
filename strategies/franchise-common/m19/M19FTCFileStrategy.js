@@ -1,11 +1,8 @@
-const FTCFileStrategy = require('../../common/file/FTCFileStrategy');
-
+import FTCFileStrategy from "../../common/file/FTCFileStrategy.js";
 /**
  * @type {FileStrategy}
  */
 let M19FTCFileStrategy = {};
-
 M19FTCFileStrategy.postPackFile = FTCFileStrategy.postPackFile;
 M19FTCFileStrategy.generateUnpackedContents = FTCFileStrategy.generateUnpackedContents;
-
-module.exports = M19FTCFileStrategy;
+export default M19FTCFileStrategy;

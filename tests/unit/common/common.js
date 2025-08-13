@@ -1,5 +1,5 @@
-const crypto = require('crypto');
-const expect = require('chai').expect;
+import crypto from 'crypto';
+import { expect } from 'chai';
 
 let common = {};
 
@@ -19,4 +19,4 @@ common.hashCompare = (left, right) => {
     expect(leftHash).to.eql(rightHash);
 };
 
-module.exports = common;
+export default common;

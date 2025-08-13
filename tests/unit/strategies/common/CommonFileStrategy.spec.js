@@ -1,6 +1,6 @@
-const expect = require('chai').expect;
-const common = require('../../common/common');
-const CommonFileStrategy = require('../../../../strategies/common/file/CommonFileStrategy');
+import { expect } from 'chai';
+import common from '../../common/common.js';
+import CommonFileStrategy from '../../../../strategies/common/file/CommonFileStrategy.js';
 
 describe('Common File Strategy unit tests', () => {
     describe('can save updates made to data', () => {

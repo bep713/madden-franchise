@@ -1,5 +1,5 @@
-const expect = require('chai').expect;
-const FranchiseFileSettings = require('../../FranchiseFileSettings');
+import { expect } from 'chai';
+import FranchiseFileSettings from '../../FranchiseFileSettings.js';
 
 const defaultSettings = {
     'saveOnChange': false,

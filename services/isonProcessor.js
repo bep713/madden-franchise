@@ -1,12 +1,16 @@
 // Required modules
-const path = require("path");
-const fs = require("fs");
-const zlib = require("zlib");
+import path, { dirname } from "path";
+import fs from "fs";
+import zlib from "zlib";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /**
  * ISON processor class that handles game year specific interned string lookups
  */
-class IsonProcessor {
+export class IsonProcessor {
   // ISON constants
   static ISON_HEADER = 0x0d;
   static ISON_OBJECT_START = 0x0f;
@@ -301,18 +305,12 @@ class IsonProcessor {
 }
 
 // Backward compatibility functions that create instances as needed. I don't think these will be needed but they're here just in case.
-function isonVisualsToJson(fileBuf, gameYear = 25) {
+export function isonVisualsToJson(fileBuf, gameYear = 25) {
   const processor = new IsonProcessor(gameYear);
   return processor.isonVisualsToJson(fileBuf);
 }
 
-function jsonVisualsToIson(jsonObj, gameYear = 25) {
+export function jsonVisualsToIson(jsonObj, gameYear = 25) {
   const processor = new IsonProcessor(gameYear);
   return processor.jsonVisualsToIson(jsonObj);
 }
-
-module.exports = {
-  IsonProcessor,
-  isonVisualsToJson,
-  jsonVisualsToIson,
-};

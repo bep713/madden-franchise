@@ -1,7 +1,11 @@
-const fs = require('fs');
-const path = require('path');
-const expect = require('chai').expect;
-const FranchiseSchema = require('../../FranchiseSchema');
+import fs from 'fs';
+import path, { dirname } from 'path';
+import { expect } from 'chai';
+import FranchiseSchema from '../../FranchiseSchema.js';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 describe('FranchiseSchema unit tests', () => {
   it('can load a gzip file', (done) => {

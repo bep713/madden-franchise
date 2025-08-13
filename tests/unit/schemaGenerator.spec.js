@@ -1,9 +1,13 @@
-const fs = require('fs');
-const zlib = require('zlib');
-const path = require('path');
-const crypto = require('crypto');
-const expect = require('chai').expect;
-const schemaGenerator = require('../../services/schemaGenerator');
+import fs from 'fs';
+import zlib from 'zlib';
+import path, { dirname } from 'path';
+import crypto from 'crypto';
+import { expect } from 'chai';
+import schemaGenerator from '../../services/schemaGenerator.js';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const NUM_CUSTOM_SCHEMAS = 16;
 

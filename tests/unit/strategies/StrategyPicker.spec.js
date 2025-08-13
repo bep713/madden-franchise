@@ -1,6 +1,6 @@
-const expect = require('chai').expect;
-const Constants = require('../../../Constants');
-const StrategyPicker = require('../../../strategies/StrategyPicker');
+import { expect } from 'chai';
+import Constants from '../../../Constants.js';
+import StrategyPicker from '../../../strategies/StrategyPicker.js';
 
 describe('Strategy Picker unit tests', () => {
     it('M19', () => {

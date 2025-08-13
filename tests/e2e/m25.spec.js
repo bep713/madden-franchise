@@ -1,12 +1,16 @@
-const fs = require('fs');
-const path = require('path');
-const zlib = require('zlib');
-const expect = require('chai').expect;
-const { BitView } = require('bit-buffer');
-const FranchiseFile = require('../../FranchiseFile');
-const FranchiseFileTable = require('../../FranchiseFileTable');
-const filePaths = require('../util/filePathUtil');
-const isonProcessor = require('../../services/isonProcessor');
+import fs from 'fs';
+import path, { dirname } from 'path';
+import zlib from 'zlib';
+import { expect } from 'chai';
+import { BitView } from 'bit-buffer';
+import FranchiseFile from '../../FranchiseFile.js';
+import FranchiseFileTable from '../../FranchiseFileTable.js';
+import filePaths from '../util/filePathUtil.js';
+import { fileURLToPath } from 'url';
+import { IsonProcessor } from '../../services/isonProcessor.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const playerTableId = 4204;
 const playerArrayTableIdToTest = 5755;
@@ -885,6 +889,7 @@ describe('Madden 25 end to end tests', function () {
     });
 
     describe('Player[] with table store', () => {
+      let table;
       const tableId = playerArrayTableIdToTest;
 
       before(async () => {
@@ -918,6 +923,7 @@ describe('Madden 25 end to end tests', function () {
     });
 
     describe('Player table', () => {
+      let table;
       const marcusMayeIndex = 1703;
       const bakerMayfieldIndex = 1705;
       const firstEmptyRecordIndex = 3020;
@@ -1140,6 +1146,7 @@ describe('Madden 25 end to end tests', function () {
     });
 
     describe('DraftClassStrengthAndTierToWeightMapping', () => {
+      let table;
       const tableUniqueId = 3292832385;
       before(async () => {
         table = file.getTableByUniqueId(tableUniqueId);
@@ -1168,6 +1175,7 @@ describe('Madden 25 end to end tests', function () {
     });
 
     describe('EndofSeasonResigningStartReaction', () => {
+      let table;
       beforeEach(() => {
         table = file.getTableByUniqueId(296796924);
       });
@@ -1238,6 +1246,7 @@ describe('Madden 25 end to end tests', function () {
     });
 
     describe('AnnualAwardsAvailablePeriodEndReaction', () => {
+      let table;
       before((done) => {
         table = file.getTableByUniqueId(4065784434);
         table.readRecords().then(() => {
@@ -1253,6 +1262,7 @@ describe('Madden 25 end to end tests', function () {
     });
 
     describe('OverallPercentage', () => {
+      let table;
       before((done) => {
         table = file.getTableByName('OverallPercentage');
         table.readRecords().then(() => {
@@ -1573,6 +1583,7 @@ describe('Madden 25 end to end tests', function () {
     });
 
     describe('Stadium', () => {
+      let table;
       before((done) => {
         table = file.getTableByName('Stadium');
         table.readRecords(['STADIUM_FLAGBASEBALL']).then(() => {
@@ -1612,6 +1623,7 @@ describe('Madden 25 end to end tests', function () {
     });
 
     describe('Team', () => {
+      let table;
       before((done) => {
         table = file.getTableByUniqueId(637929298);
         table.readRecords(['WeeklyDefenseMedal']).then(() => {
@@ -1631,6 +1643,7 @@ describe('Madden 25 end to end tests', function () {
     });
 
     describe('Spline', () => {
+        let table;
         before((done) => {
           table = file.getTableByName('Spline');
           table.readRecords().then(() => {
@@ -1646,6 +1659,7 @@ describe('Madden 25 end to end tests', function () {
     });
 
     describe('int[]', () => {
+      let table;
       const intArrayTableId = 5367;
 
       before((done) => {
@@ -1690,6 +1704,7 @@ describe('Madden 25 end to end tests', function () {
     });
 
     describe('PlayerPositionLookupTable', () => {
+      let table;
       const tableId = 5442;
 
       before(async () => {
@@ -1730,6 +1745,7 @@ describe('Madden 25 end to end tests', function () {
     });
 
     describe('Tweet', () => {
+      let table;
       const tweetTableId = 4258;
 
       before(async () => {
@@ -1856,6 +1872,7 @@ describe('Madden 25 end to end tests', function () {
     });
 
     describe('ResponseForm[] - last table', () => {
+      let table;
       const lastTableId = 5835;
 
       before(async () => {
@@ -1869,6 +1886,7 @@ describe('Madden 25 end to end tests', function () {
     });
 
     describe('TeamNeedEvaluation', () => {
+      let table;
       const tableId = 4102;
 
       before(async () => {
@@ -1912,6 +1930,7 @@ describe('Madden 25 end to end tests', function () {
     });
 
     describe('Coach', () => {
+      let table;
       const coachUniqueId = 1860529246;
 
       before(async () => {
@@ -2048,6 +2067,7 @@ describe('Madden 25 end to end tests', function () {
     });
 
     describe('TalentNodeStatus', () => {
+      let table;
       const talentNodeStatusUniqueId = 4148550679;
 
       before(async () => {
@@ -2070,6 +2090,7 @@ describe('Madden 25 end to end tests', function () {
     });
 
     describe('CharacterVisuals (table3)', () => {
+      let table;
       const characterVisualsUniqueId = 1429178382;
 
       before(async () => {
@@ -2153,7 +2174,7 @@ describe('Madden 25 end to end tests', function () {
         expect(table.records[0]._fields.RawData.thirdTableField.unformattedValue.length).to.equal(0x1F7);
 
         const data = zlib.gunzipSync(table.records[0]._fields.RawData.thirdTableField.unformattedValue.subarray(2));
-        expect(isonProcessor.isonVisualsToJson(data, 25)).to.eql(existingData);
+        expect(new IsonProcessor().isonVisualsToJson(data, 25)).to.eql(existingData);
       });
 
       it('saves properly after edit', (done) => {

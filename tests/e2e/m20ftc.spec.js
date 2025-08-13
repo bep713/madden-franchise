@@ -1,8 +1,11 @@
-const path = require('path');
-const expect = require('chai').expect;
-const { BitView } = require('bit-buffer');
-const FranchiseFile = require('../../FranchiseFile');
-const FranchiseFileTable = require('../../FranchiseFileTable');
+import path, { dirname } from 'path';
+import { expect } from 'chai';
+import FranchiseFile from '../../FranchiseFile.js';
+import FranchiseFileTable from '../../FranchiseFileTable.js';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const filePaths = {
   'compressed': {

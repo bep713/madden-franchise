@@ -1,9 +1,12 @@
-const fs = require('fs');
-const path = require('path');
-const zlib = require('zlib');
-const expect = require('chai').expect;
-const sinon = require('sinon');
-const { generateSchemaV2 } = require('../../services/schemaGeneratorV2');
+import fs from 'fs';
+import path, { dirname } from 'path';
+import zlib from 'zlib';
+import { expect } from 'chai';
+import { generateSchemaV2 } from '../../services/schemaGeneratorV2.js';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const NUM_CUSTOM_SCHEMAS = 16;
 const TEST_SCHEMA_FOLDER = path.join(__dirname, '../data/test-schemas/');

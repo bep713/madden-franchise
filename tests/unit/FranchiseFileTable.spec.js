@@ -1,15 +1,13 @@
-const fs = require("fs");
-const sinon = require('sinon');
-const { expect } = require("chai");
-const proxyquire = require('proxyquire');
+import fs from "fs";
+import sinon from 'sinon';
+import { expect } from "chai";
+import quibble from "quibble";
 
 const RecordStub = sinon.stub().callsFake(() => ({
   fieldsArray: []
 }));
 
-const FranchiseFileTable = proxyquire("../../FranchiseFileTable", {
-  './FranchiseFileRecord': RecordStub
-});
+let FranchiseFileTable;
 
 const expectedOffsetTables = {
   player: JSON.parse(fs.readFileSync("tests/data/offset-tables/M24_playerOffsetTable.json")),
@@ -48,7 +46,10 @@ function initializeTable(data, header) {
 describe("FranchiseFileTable unit tests", () => {
   let playerTable, tunableDataTable;
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    await quibble.esm('../../FranchiseFileRecord.js', {}, RecordStub);
+    FranchiseFileTable = (await import('../../FranchiseFileTable.js')).default;
+
     playerTable = initializeTable(tableData.player, {
       name: 'Player',
       offsetStart: 232,
@@ -70,7 +71,11 @@ describe("FranchiseFileTable unit tests", () => {
       table1StartIndex: 344,
       table2StartIndex: 400
     });
-  })
+  });
+
+  afterEach(() => {
+    quibble.reset();
+  });
 
   describe("offset table", () => {
     function assertGeneratedSchema(offsetTable, expectedOffsetTable) {

@@ -1,11 +1,7 @@
-const CommonFileStrategy = require('./CommonFileStrategy');
-
+import CommonFileStrategy from './CommonFileStrategy.js';
 let FTCFileStrategy = {};
-
 FTCFileStrategy.generateUnpackedContents = CommonFileStrategy.generateUnpackedContents;
-
 FTCFileStrategy.postPackFile = (originalData, newData) => {
     return newData;
 };
-
-module.exports = FTCFileStrategy;
+export default FTCFileStrategy;

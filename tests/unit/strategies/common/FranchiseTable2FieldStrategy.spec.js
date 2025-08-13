@@ -1,5 +1,5 @@
-const expect = require('chai').expect;
-const FranchiseTable2FieldStrategy = require('../../../../strategies/common/table2Field/FranchiseTable2FieldStrategy');
+import { expect } from 'chai';
+import FranchiseTable2FieldStrategy from '../../../../strategies/common/table2Field/FranchiseTable2FieldStrategy.js';
 
 describe('Franchise Table2 Field Strategy', () => {
     describe('get initial unformatted value', () => {

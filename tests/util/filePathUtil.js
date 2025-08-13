@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   'compressed': {
     'm21': 'tests/data/CAREER-21COMPRESS',
     'm23': 'tests/data/CAREER-23COMPRESS',

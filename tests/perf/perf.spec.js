@@ -1,8 +1,12 @@
-const fs = require('fs');
-const path = require('path');
-const { expect } = require('chai');
+import fs from 'fs';
+import path, { dirname } from 'path';
+import { expect } from 'chai';
+import FranchiseFile from '../../FranchiseFile.js';
+import { fileURLToPath } from 'url';
 
-const FranchiseFile = require('../../FranchiseFile');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const filePaths = {
     'compressed': {
       'm21': 'tests/data/CAREER-21COMPRESS'
@@ -165,6 +169,7 @@ describe('madden franchise performance tests', function () {
     describe('quick validation', () => {
         
         describe('overall percentage', () => {
+            let table;
             before(() => {
                 table = file.getTableById(4097);
             });
@@ -187,6 +192,7 @@ describe('madden franchise performance tests', function () {
         });
 
         describe('player', () => {
+            let table;
             before(() => {
                 table = file.getTableById(4226);
             });

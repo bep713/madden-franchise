@@ -1,19 +1,15 @@
-const fs = require('fs');
-const zlib = require('zlib');
-const sinon = require('sinon');
-const expect = require('chai').expect;
-const proxyquire = require('proxyquire');
-const common = require('./common/common');
-const Constants = require('../../Constants');
-const { deepStrictEqual } = require('assert');
+import fs from 'fs';
+import sinon from 'sinon';
+import { expect } from 'chai';
+import common from './common/common.js';
+import Constants from '../../Constants.js';
+import zlib from 'zlib';
+import quibble from 'quibble';
 
 const zlibSpy = {
-    'inflateSync': sinon.spy((data) => { return zlib.inflateSync(data); }),
+    inflateSync: sinon.spy((data) => { return zlib.inflateSync(data); }),
+    gunzipSync: sinon.spy((data) => { return zlib.gunzipSync(data); })
 };
-
-const FranchiseFile = proxyquire('../../FranchiseFile', {
-    'zlib': zlibSpy
-});
 
 const filePaths = {
     'compressed': {
@@ -57,8 +53,16 @@ const franchiseFileOptions = {
 };
 
 describe('Franchise File unit tests', () => {
-    beforeEach(() => {
+    let FranchiseFile;
+
+    beforeEach(async () => {
         zlibSpy.inflateSync.resetHistory();
+        await quibble.esm('zlib', zlibSpy, zlibSpy);
+        FranchiseFile = (await import('../../FranchiseFile.js')).default;
+    });
+
+    afterEach(() => {
+        quibble.reset();
     });
 
     describe('can identify a file\'s type', () => {

@@ -1,11 +1,15 @@
-const fs = require('fs');
-const path = require('path');
-const zlib = require('zlib');
-const expect = require('chai').expect;
-const { BitView } = require('bit-buffer');
-const FranchiseFile = require('../../FranchiseFile');
-const FranchiseFileTable = require('../../FranchiseFileTable');
-const TDB2Converter = require('../../services/TDB2Converter');
+import fs from 'fs';
+import path, { dirname } from 'path';
+import zlib from 'zlib';
+import { expect } from 'chai';
+import { BitView } from 'bit-buffer';
+import FranchiseFile from '../../FranchiseFile.js';
+import FranchiseFileTable from '../../FranchiseFileTable.js';
+import { readChviRecord } from '../../services/TDB2Converter.js';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const filePaths = {
   'compressed': {
@@ -901,6 +905,7 @@ describe('Madden 24 end to end tests', function () {
     });
 
     describe('Player[] with table store', () => {
+      let table;
       const tableId = playerArrayTableIdToTest;
 
       before(async () => {
@@ -934,6 +939,7 @@ describe('Madden 24 end to end tests', function () {
     });
 
     describe('Player table', () => {
+      let table;
       const marcusMayeIndex = 1830;
       const bakerMayfieldIndex = 1832;
       const firstEmptyRecordIndex = 3195;
@@ -1165,6 +1171,7 @@ describe('Madden 24 end to end tests', function () {
     });
 
     describe('EndofSeasonResigningStartReaction', () => {
+      let table;
       beforeEach(() => {
         table = file.getTableById(4594);
       });
@@ -1235,6 +1242,7 @@ describe('Madden 24 end to end tests', function () {
     });
 
     describe('AnnualAwardsAvailablePeriodEndReaction', () => {
+      let table;
       before((done) => {
         table = file.getTableById(4340);
         table.readRecords().then(() => {
@@ -1250,6 +1258,7 @@ describe('Madden 24 end to end tests', function () {
     });
 
     describe('OverallPercentage', () => {
+      let table;
       before((done) => {
         table = file.getTableByName('OverallPercentage');
         table.readRecords().then(() => {
@@ -1570,6 +1579,7 @@ describe('Madden 24 end to end tests', function () {
     });
 
     describe('Stadium', () => {
+      let table;
       before((done) => {
         table = file.getTableByName('Stadium');
         table.readRecords(['STADIUM_FLAGBASEBALL']).then(() => {
@@ -1609,6 +1619,7 @@ describe('Madden 24 end to end tests', function () {
     });
 
     describe('Team', () => {
+      let table;
       before((done) => {
         table = file.getTableById(6030);
         table.readRecords(['WeeklyDefenseMedal']).then(() => {
@@ -1628,6 +1639,8 @@ describe('Madden 24 end to end tests', function () {
     });
 
     describe('Spline', () => {
+        let table;
+
         before((done) => {
           table = file.getTableByName('Spline');
           table.readRecords().then(() => {
@@ -1643,6 +1656,7 @@ describe('Madden 24 end to end tests', function () {
     });
 
     describe('int[]', () => {
+      let table;
       const intArrayTableId = 5573;
 
       before((done) => {
@@ -1687,6 +1701,7 @@ describe('Madden 24 end to end tests', function () {
     });
 
     describe('PlayerPositionLookupTable', () => {
+      let table;
       const tableId = 5773;
 
       before(async () => {
@@ -1727,6 +1742,7 @@ describe('Madden 24 end to end tests', function () {
     });
 
     describe('Tweet', () => {
+      let table;
       const tweetTableId = 4296;
 
       before(async () => {
@@ -1847,6 +1863,7 @@ describe('Madden 24 end to end tests', function () {
     });
 
     describe('ResponseForm[] - last table', () => {
+      let table;
       const lastTableId = 6114;
 
       before(async () => {
@@ -1860,6 +1877,7 @@ describe('Madden 24 end to end tests', function () {
     });
 
     describe('TeamNeedEvaluation', () => {
+      let table;
       const tableId = 4102;
 
       before(async () => {
@@ -1903,6 +1921,7 @@ describe('Madden 24 end to end tests', function () {
     });
 
     describe('Coach', () => {
+      let table;
       const tableId = 4156;
 
       before(async () => {
@@ -2039,6 +2058,7 @@ describe('Madden 24 end to end tests', function () {
     });
 
     describe('TalentNodeStatus', () => {
+      let table;
       const tableId = 4302;
 
       before(async () => {
@@ -2069,6 +2089,7 @@ describe('Madden 24 end to end tests', function () {
     });
 
     describe('CharacterVisuals (table3)', () => {
+      let table;
       const tableId = 4209;
 
       before(async () => {
@@ -2261,7 +2282,7 @@ describe('Madden 24 end to end tests', function () {
 
           const decompressedData = zlib.gunzipSync(table.records[43]._fields.RawData.thirdTableField.unformattedValue.subarray(3));
 
-          const convertedData = JSON.stringify(TDB2Converter.readChviRecord(decompressedData));
+          const convertedData = JSON.stringify(readChviRecord(decompressedData));
 
           expect(table.records[43].RawData).to.eql(convertedData);
         });

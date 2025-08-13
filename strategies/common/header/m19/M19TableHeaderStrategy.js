@@ -1,64 +1,54 @@
-const utilService = require('../../../../services/utilService');
-
+import utilService from "../../../../services/utilService.js";
 let M19TableHeaderStrategy = {};
-
 M19TableHeaderStrategy.parseHeader = (data) => {
     const headerStart = 0x80;
     const tableName = readTableName(data);
     const isArray = tableName.indexOf('[]') >= 0;
-
     const tableId = data.readUInt32BE(headerStart);
-    const tablePad1 = data.readUInt32BE(headerStart+4);
-    const tableUnknown1 = data.readUInt32BE(headerStart+8);
-    const tableUnknown2 = data.readUInt32BE(headerStart+12);
-    const data1Id = readTableName(data.slice(headerStart+16, headerStart+20));
-    const data1Type = data.readUInt32BE(headerStart+20);
-    const data1Unknown1 = data.readUInt32BE(headerStart+24);
-    const data1Flag1 = data[headerStart+28];
-    const data1Flag2 = data[headerStart+29];
-    const data1Flag3 = data[headerStart+30];
-    const data1Flag4 = data[headerStart+31];
-    const tableStoreLength = data.readUInt32BE(headerStart+32);
-
-    let headerOffset = headerStart+36;
+    const tablePad1 = data.readUInt32BE(headerStart + 4);
+    const tableUnknown1 = data.readUInt32BE(headerStart + 8);
+    const tableUnknown2 = data.readUInt32BE(headerStart + 12);
+    const data1Id = readTableName(data.slice(headerStart + 16, headerStart + 20));
+    const data1Type = data.readUInt32BE(headerStart + 20);
+    const data1Unknown1 = data.readUInt32BE(headerStart + 24);
+    const data1Flag1 = data[headerStart + 28];
+    const data1Flag2 = data[headerStart + 29];
+    const data1Flag3 = data[headerStart + 30];
+    const data1Flag4 = data[headerStart + 31];
+    const tableStoreLength = data.readUInt32BE(headerStart + 32);
+    let headerOffset = headerStart + 36;
     let records1SizeOffset = 1689;
     let tableStoreName = null;
-
     if (tableStoreLength > 0) {
         headerOffset += tableStoreLength;
         records1SizeOffset += tableStoreLength * 8;
-        tableStoreName = readTableName(data.slice(headerStart+36, headerStart+36+tableStoreLength));
+        tableStoreName = readTableName(data.slice(headerStart + 36, headerStart + 36 + tableStoreLength));
     }
-
     const data1Offset = data.readUInt32BE(headerOffset);
-    const data1TableId = data.readUInt32BE(headerOffset+4);
-    const data1RecordCount = data.readUInt32BE(headerOffset+8);
-    const data1Pad2 = data.readUInt32BE(headerOffset+12);
-    const table1Length = data.readUInt32BE(headerOffset+16);
-    const table2Length = data.readUInt32BE(headerOffset+20);
-    const data1Pad3 = data.readUInt32BE(headerOffset+24);
-    const data1Pad4 = data.readUInt32BE(headerOffset+28);
-    const data2Id = readTableName(data.slice(headerOffset+32, headerOffset+36));
-    const table1Length2 = data.readUInt32BE(headerOffset+36);
-    const tableTotalLength = data.readUInt32BE(headerOffset+40);
-    const data2RecordWords = data.readUInt32BE(headerOffset+44);
-    const data2RecordCapacity = data.readUInt32BE(headerOffset+48);
-    const data2IndexEntries = data.readUInt32BE(headerOffset+52);
-    const unknown4 = data.readUInt32BE(headerOffset+56);
-    const nextRecordToUse = data.readUInt32BE(headerOffset+60);
-
+    const data1TableId = data.readUInt32BE(headerOffset + 4);
+    const data1RecordCount = data.readUInt32BE(headerOffset + 8);
+    const data1Pad2 = data.readUInt32BE(headerOffset + 12);
+    const table1Length = data.readUInt32BE(headerOffset + 16);
+    const table2Length = data.readUInt32BE(headerOffset + 20);
+    const data1Pad3 = data.readUInt32BE(headerOffset + 24);
+    const data1Pad4 = data.readUInt32BE(headerOffset + 28);
+    const data2Id = readTableName(data.slice(headerOffset + 32, headerOffset + 36));
+    const table1Length2 = data.readUInt32BE(headerOffset + 36);
+    const tableTotalLength = data.readUInt32BE(headerOffset + 40);
+    const data2RecordWords = data.readUInt32BE(headerOffset + 44);
+    const data2RecordCapacity = data.readUInt32BE(headerOffset + 48);
+    const data2IndexEntries = data.readUInt32BE(headerOffset + 52);
+    const unknown4 = data.readUInt32BE(headerOffset + 56);
+    const nextRecordToUse = data.readUInt32BE(headerOffset + 60);
     let offsetStart = 0xE4 + tableStoreLength;
     const hasSecondTable = tableTotalLength > table1Length;
-
     let headerSize = 0;
     let records1Size = 0;
-
     if (isArray) {
         headerSize = 0xE4 + tableStoreLength;
         // const binaryData = utilService.getBitArray(data.slice(0, headerSize));
         records1Size = data2RecordWords * 4;
     }
-
     return {
         'name': tableName,
         'isArray': isArray,
@@ -103,7 +93,6 @@ M19TableHeaderStrategy.parseHeader = (data) => {
         'hasThirdTable': false
     };
 };
-
 M19TableHeaderStrategy.parseHeaderAttributesFromSchema = (schema, data, header) => {
     if (header.isArray) {
         return {
@@ -111,13 +100,12 @@ M19TableHeaderStrategy.parseHeaderAttributesFromSchema = (schema, data, header) 
             'record1Size': header.record1Size,
             'table1StartIndex': header.table1StartIndex,
             'table2StartIndex': header.table2StartIndex
-        }
+        };
     }
     else {
-        headerSize = header.headerOffset + (schema.numMembers * 4) + header.tableStoreLength;
+        let headerSize = header.headerOffset + (schema.numMembers * 4) + header.tableStoreLength;
         const binaryData = utilService.getBitArray(data.slice(0, headerSize));
-        records1Size = utilService.bin2dec(binaryData.slice(header.record1SizeOffset, header.record1SizeOffset + header.record1SizeLength));
-
+        let records1Size = utilService.bin2dec(binaryData.slice(header.record1SizeOffset, header.record1SizeOffset + header.record1SizeLength));
         return {
             'headerSize': headerSize,
             'record1Size': records1Size,
@@ -126,19 +114,14 @@ M19TableHeaderStrategy.parseHeaderAttributesFromSchema = (schema, data, header) 
         };
     }
 };
-
-module.exports = M19TableHeaderStrategy;
-
 function readTableName(data) {
     let name = '';
-
     let i = 0;
-
     do {
         name += String.fromCharCode(data[i]);
         i += 1;
-    }
-    while (i < data.length && data[i] !== 0);
-
+    } while (i < data.length && data[i] !== 0);
     return name;
-};
+}
+;
+export default M19TableHeaderStrategy;

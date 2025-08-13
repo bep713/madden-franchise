@@ -1,7 +1,11 @@
-const path = require('path');
-const expect = require('chai').expect;
-const FranchiseFile = require('../../FranchiseFile');
-const FranchiseFileTable = require('../../FranchiseFileTable');
+import path, { dirname } from 'path';
+import { expect } from 'chai';
+import FranchiseFile from '../../FranchiseFile.js';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const filePaths = {
     'compressed': {
         'ftc': 'tests/data/FTC_COMPRESS.FTC',

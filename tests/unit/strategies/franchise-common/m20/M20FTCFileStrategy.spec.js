@@ -1,20 +1,25 @@
-const sinon = require('sinon');
-const expect = require('chai').expect;
-const proxyquire = require('proxyquire');
+import sinon from 'sinon';
+import { expect } from 'chai';
+import quibble from 'quibble';
 
 const strategySpy = {
     'postPackFile': sinon.spy(),
     'generateUnpackedContents': sinon.spy()
 };
 
-const M19FTCFileStrategy = proxyquire('../../../../../strategies/franchise-common/m20/M20FTCFileStrategy', {
-    '../../common/file/FTCFileStrategy': strategySpy
-});
-
 describe('M20 FTC File Strategy unit tests', () => {
-    beforeEach(() => {
+    let M20FTCFileStrategy;
+
+    beforeEach(async () => {
         strategySpy.postPackFile.resetHistory();
         strategySpy.generateUnpackedContents.resetHistory();
+
+        await quibble.esm('../../../../../strategies/common/file/FTCFileStrategy.js', {}, strategySpy);
+        M20FTCFileStrategy = (await import('../../../../../strategies/franchise-common/m20/M20FTCFileStrategy.js')).default;
+    });
+
+    afterEach(() => {
+        quibble.reset();
     });
 
     describe('can save updates made to data', () => {
@@ -35,7 +40,7 @@ describe('M20 FTC File Strategy unit tests', () => {
                 return table.hexData;
             }));
 
-            M19FTCFileStrategy.generateUnpackedContents(tables, data);
+            M20FTCFileStrategy.generateUnpackedContents(tables, data);
             expect(strategySpy.generateUnpackedContents.calledOnce).to.be.true;
             expect(strategySpy.generateUnpackedContents.args[0][0]).to.eql(tables);
             expect(strategySpy.generateUnpackedContents.args[0][1]).to.eql(data);
@@ -46,7 +51,7 @@ describe('M20 FTC File Strategy unit tests', () => {
         const originalData = Buffer.from([0x20, 0x10, 0x00]);
         const newData = Buffer.from([0x50, 0x40, 0x30]);
 
-        M19FTCFileStrategy.postPackFile(originalData, newData);
+        M20FTCFileStrategy.postPackFile(originalData, newData);
 
         expect(strategySpy.postPackFile.calledOnce).to.be.true;
         expect(strategySpy.postPackFile.args[0][0]).to.eql(originalData);

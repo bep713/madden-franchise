@@ -1,20 +1,25 @@
-const sinon = require('sinon');
-const expect = require('chai').expect;
-const proxyquire = require('proxyquire');
+import sinon from 'sinon';
+import { expect } from 'chai';
+import quibble from 'quibble';
 
 const strategySpy = {
     'postPackFile': sinon.spy(),
     'generateUnpackedContents': sinon.spy()
 };
 
-const M19FTCFileStrategy = proxyquire('../../../../../strategies/franchise-common/m19/M19FTCFileStrategy', {
-    '../../common/file/FTCFileStrategy': strategySpy
-});
-
 describe('M19 FTC File Strategy unit tests', () => {
-    beforeEach(() => {
+    let M19FTCFileStrategy;
+
+    beforeEach(async () => {
         strategySpy.postPackFile.resetHistory();
         strategySpy.generateUnpackedContents.resetHistory();
+
+        await quibble.esm('../../../../../strategies/common/file/FTCFileStrategy.js', {}, strategySpy);
+        M19FTCFileStrategy = (await import('../../../../../strategies/franchise-common/m19/M19FTCFileStrategy.js')).default;
+    });
+
+    afterEach(() => {
+        quibble.reset();
     });
 
     describe('can save updates made to data', () => {

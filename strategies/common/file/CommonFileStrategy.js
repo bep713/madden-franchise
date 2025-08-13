@@ -1,7 +1,4 @@
-const CommonAlgorithms = require('../CommonAlgorithms');
-
+import CommonAlgorithms from '../CommonAlgorithms.js';
 let CommonFileStrategy = {};
-
 CommonFileStrategy.generateUnpackedContents = CommonAlgorithms.save;
-
-module.exports = CommonFileStrategy;
+export default CommonFileStrategy;

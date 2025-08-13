@@ -1,6 +1,10 @@
-const { BitView } = require('bit-buffer');
-const fs = require('fs');
-const path = require('path');
+import { BitView } from 'bit-buffer';
+import fs from 'fs';
+import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const slotsLookup = JSON.parse(fs.readFileSync(path.join(__dirname, 'lookupFiles/slotsLookup.json'), 'utf8'));
 const fieldLookup = JSON.parse(fs.readFileSync(path.join(__dirname, 'lookupFiles/fieldLookup.json'), 'utf8'));
@@ -156,7 +160,7 @@ function findEnumValByNum(object, enumNum)
 
 
 // Function to read a CHVI record
-function readChviRecord(dataBuf)
+export function readChviRecord(dataBuf)
 {
     parser = dataBuf;
     offset = 0;
@@ -245,10 +249,6 @@ function readChviRecord(dataBuf)
 
     return recordObject;
 }
-
-module.exports = {
-    readChviRecord
-};
 
 function getUncompressedTextFromSixBitCompression(data) 
 {

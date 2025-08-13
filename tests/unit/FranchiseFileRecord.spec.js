@@ -1,12 +1,9 @@
-const sinon = require('sinon');
-const proxyquire = require('proxyquire');
+import sinon from 'sinon';
+import { expect } from 'chai';
+import { EventEmitter } from 'events';
+import quibble from 'quibble';
 
-const chai = require('chai');
-const expect = chai.expect;
-
-const EventEmitter = require('events').EventEmitter;
-
-let utilService = {
+let utilServiceMock = {
   'replaceAt': sinon.spy(() => { return 'test'; }),
   'binaryBlockToDecimalBlock': sinon.spy(() => { return [25, 30, 60]; })
 };
@@ -32,7 +29,7 @@ let onSpy = sinon.spy((name, fn) => {
   listenerFns.push(fn);
 });
 
-class FranchiseFileField extends EventEmitter {
+class FranchiseFileFieldMock extends EventEmitter {
   constructor(name, value, offset) {
     super();
     this._key = name;
@@ -56,19 +53,20 @@ class FranchiseFileField extends EventEmitter {
   get value() {
     return this._value;
   }
-};
 
-const FranchiseFileRecord = proxyquire('../../FranchiseFileRecord', {
-  './services/utilService': utilService,
-  './FranchiseFileField': FranchiseFileField
-});
+  get offset() {
+    return this._offset;
+  }
+};
 
 let record, data, offsetTable;
 
 describe('FranchiseFileRecord unit tests', () => {
-  beforeEach(() => {
-    utilService.replaceAt.resetHistory();
-    utilService.binaryBlockToDecimalBlock.resetHistory();
+  let FranchiseFileRecord;
+
+  beforeEach(async () => {
+    utilServiceMock.replaceAt.resetHistory();
+    utilServiceMock.binaryBlockToDecimalBlock.resetHistory();
     unformattedValueSpy.resetHistory();
     valueSpy.resetHistory();
     offsetSpy.resetHistory();
@@ -87,6 +85,14 @@ describe('FranchiseFileRecord unit tests', () => {
       'length': 32,
       'name': 'PlayerPosition'
     }];
+
+    await quibble.esm('../../services/utilService.js', {}, utilServiceMock);
+    await quibble.esm('../../FranchiseFileField.js', {}, FranchiseFileFieldMock);
+    FranchiseFileRecord = (await import('../../FranchiseFileRecord.js')).default;
+  });
+
+  afterEach(() => {
+      quibble.reset();
   });
 
   describe('constructor', () => {

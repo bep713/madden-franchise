@@ -1,9 +1,7 @@
-const sinon = require('sinon');
-const proxyquire = require('proxyquire');
-
-const chai = require('chai');
-const { BitView } = require('bit-buffer');
-const expect = chai.expect;
+import sinon from 'sinon';
+import { expect } from 'chai';
+import { BitView } from 'bit-buffer';
+import quibble from 'quibble';
 
 let bin2DecResponse = 1;
 let bin2FloatResponse = 0.500;
@@ -24,19 +22,15 @@ let onSpy = sinon.spy((name, fn) => {
   listenerFns.push(fn);
 });
 
-let FranchiseFileTable2Field = sinon.stub().callsFake(() => {
+let FranchiseFileTable2FieldMock = sinon.stub().callsFake(() => {
   return {
     'value': valueSpy(),
     'on': onSpy
   }
 });
 
-const FranchiseFileField = proxyquire('../../FranchiseFileField', {
-  // './services/utilService': utilService,
-  './FranchiseFileTable2Field': FranchiseFileTable2Field
-});
-
 describe('FranchiseFileField unit tests', () => {
+  let FranchiseFileField;
   let field;
   let key = 'test';
   let unformattedValue = Buffer.from([0x6B]);
@@ -48,7 +42,7 @@ describe('FranchiseFileField unit tests', () => {
     onEvent: sinon.spy(() => {})
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
     utilService.bin2dec.resetHistory();
     utilService.bin2Float.resetHistory();
     utilService.dec2bin.resetHistory();
@@ -70,6 +64,13 @@ describe('FranchiseFileField unit tests', () => {
     parent.onEvent.resetHistory();
 
     listenerFns = [];
+
+    await quibble.esm('../../FranchiseFileTable2Field.js', {}, FranchiseFileTable2FieldMock);
+    FranchiseFileField = (await import('../../FranchiseFileField.js')).default;
+  });
+
+  afterEach(() => {
+      quibble.reset();
   });
 
   describe('construtor', () => {
@@ -759,8 +760,8 @@ describe('FranchiseFileField unit tests', () => {
 
     it('creates a second table field', () => {
       expect(field.secondTableField).to.not.be.undefined;
-      expect(FranchiseFileTable2Field.callCount).to.equal(1);
-      expect(FranchiseFileTable2Field.firstCall.args[0]).to.eql(16, offset);
+      expect(FranchiseFileTable2FieldMock.callCount).to.equal(1);
+      expect(FranchiseFileTable2FieldMock.firstCall.args[0]).to.eql(16, offset);
     });
 
     it('sets the second table field when .value is set', () => {

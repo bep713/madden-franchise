@@ -1,20 +1,25 @@
-const sinon = require('sinon');
-const expect = require('chai').expect;
-const proxyquire = require('proxyquire');
+import sinon from 'sinon';
+import { expect } from 'chai';
+import quibble from 'quibble';
 
 const strategySpy = {
     'getInitialUnformattedValue': sinon.spy(),
     'setUnformattedValueFromFormatted': sinon.spy()
 };
 
-const M19Table2FieldStrategy = proxyquire('../../../../strategies/franchise/m19/M19Table2FieldStrategy', {
-    '../../common/table2Field/FranchiseTable2FieldStrategy': strategySpy
-});
-
 describe('M19 Table2 Field Strategy', () => {
-    beforeEach(() => {
+    let M19Table2FieldStrategy;
+    
+    beforeEach(async () => {
         strategySpy.getInitialUnformattedValue.resetHistory();
         strategySpy.setUnformattedValueFromFormatted.resetHistory();
+
+        await quibble.esm('../../../../strategies/common/table2Field/FranchiseTable2FieldStrategy.js', {}, strategySpy);
+        M19Table2FieldStrategy = (await import('../../../../strategies/franchise/m19/M19Table2FieldStrategy.js')).default;
+    });
+
+    afterEach(() => {
+        quibble.reset();
     });
 
     it('get initial unformatted value', () => {

@@ -1,5 +1,5 @@
-const expect = require('chai').expect;
-const utilService = require('../../services/utilService');
+import { expect } from 'chai';
+import utilService from '../../services/utilService.js';
 
 describe('util service unit tests', () => {
   describe('dec2bin', () => {

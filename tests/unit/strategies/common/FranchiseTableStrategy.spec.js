@@ -1,6 +1,6 @@
-const expect = require('chai').expect;
-const common = require('../../common/common');
-const FranchiseTableStrategy = require('../../../../strategies/common/table/FranchiseTableStrategy');
+import { expect } from 'chai';
+import common from '../../common/common.js';
+import FranchiseTableStrategy from '../../../../strategies/common/table/FranchiseTableStrategy.js';
 
 describe('Franchise Table Strategy unit tests', () => {
     describe('get table2 binary data', () => {

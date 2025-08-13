@@ -1,6 +1,6 @@
-const sinon = require('sinon');
-const expect = require('chai').expect;
-const proxyquire = require('proxyquire');
+import sinon from 'sinon';
+import { expect } from 'chai';
+import quibble from 'quibble';
 
 const headerStrategySpy = {
     'parseHeader': sinon.spy(),
@@ -12,17 +12,21 @@ const tableStrategy = {
     'getMandatoryOffsets': sinon.spy()
 };
 
-const M20TableStrategy = proxyquire('../../../../strategies/franchise/m20/M20TableStrategy', {
-    '../../common/header/m20/M20TableHeaderStrategy': headerStrategySpy,
-    '../../common/table/FranchiseTableStrategy': tableStrategy
-});
-
 describe('M20 Table Field Strategy', () => {
-    beforeEach(() => {
+    let M20TableStrategy;
+    beforeEach(async () => {
         headerStrategySpy.parseHeader.resetHistory();
         headerStrategySpy.parseHeaderAttributesFromSchema.resetHistory();
         tableStrategy.getTable2BinaryData.resetHistory();
         tableStrategy.getMandatoryOffsets.resetHistory();
+
+        await quibble.esm('../../../../strategies/common/header/m20/M20TableHeaderStrategy.js', {}, headerStrategySpy);
+        await quibble.esm('../../../../strategies/common/table/FranchiseTableStrategy.js', {}, tableStrategy);
+        M20TableStrategy = (await import('../../../../strategies/franchise/m20/M20TableStrategy.js')).default;
+    });
+
+    afterEach(() => {
+        quibble.reset();
     });
 
     it('parse header', () => {

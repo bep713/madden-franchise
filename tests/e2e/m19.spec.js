@@ -1,9 +1,7 @@
-const fs = require('fs');
-const path = require('path');
-const expect = require('chai').expect;
-const { BitView } = require('bit-buffer');
-const FranchiseFile = require('../../FranchiseFile');
-const FranchiseFileTable = require('../../FranchiseFileTable');
+import { expect } from 'chai';
+import { BitView } from 'bit-buffer';
+import FranchiseFile from '../../FranchiseFile.js';
+import FranchiseFileTable from '../../FranchiseFileTable.js';
 
 const filePaths = {
   'compressed': {
@@ -380,6 +378,8 @@ describe('Madden 19 end to end tests', function () {
     });
 
     describe('Player table', () => {
+      let table;
+      
       before(() => {
         table = file.getTableById(4155);
       });
@@ -565,6 +565,8 @@ describe('Madden 19 end to end tests', function () {
     });
 
     describe('EndofSeasonResigningStartReaction', () => {
+      let table;
+
       beforeEach(() => {
         table = file.getTableByIndex(431);
       });
@@ -635,6 +637,8 @@ describe('Madden 19 end to end tests', function () {
     });
 
     describe('AnnualAwardsAvailablePeriodEndReaction', () => {
+      let table;
+
       before((done) => {
         table = file.getTableById(4262);
         table.readRecords().then(() => {
@@ -650,6 +654,8 @@ describe('Madden 19 end to end tests', function () {
     });
 
     describe('OverallPercentage', () => {
+      let table;
+
       before((done) => {
         table = file.getTableByName('OverallPercentage');
         table.readRecords().then(() => {
@@ -728,6 +734,8 @@ describe('Madden 19 end to end tests', function () {
     });
 
     describe('Stadium', () => {
+      let table;
+
       before((done) => {
         table = file.getTableByName('Stadium');
         table.readRecords(['STADIUM_FLAGBASEBALL']).then(() => {

@@ -1,14 +1,14 @@
-const fs = require('fs');
-const expect = require('chai').expect;
+import fs from 'fs';
+import { expect } from 'chai';
 
-const M19TableHeaderStrategy = require('../../../../strategies/common/header/m19/M19TableHeaderStrategy');
+import M19TableHeaderStrategy from '../../../../strategies/common/header/m19/M19TableHeaderStrategy.js';
 
-const popularityComponentTableSchema = require('../../../data/test-schemas/M19_PopularityComponentTable.json');
+import popularityComponentTableSchema from '../../../data/test-schemas/M19_PopularityComponentTable.json' with { type: "json" };
 const popularityComponentTable = fs.readFileSync('tests/data/strategies/m19/PopularityComponentTable.frt');
 
 const playerArrayTable = fs.readFileSync('tests/data/strategies/m19/PlayerArray.frt');
 
-const playerTableSchema = require('../../../data/test-schemas/M19_Player.json');
+import playerTableSchema from '../../../data/test-schemas/M19_Player.json' with { type: "json" };
 const playerTable = fs.readFileSync('tests/data/strategies/m19/Player.frt');
 
 describe('M19 Table Header unit tests', () => {
