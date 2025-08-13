@@ -1,4 +1,4 @@
-export = M19FTCTable2FieldStrategy;
+export default M19FTCTable2FieldStrategy;
 /**
  * @type {Table2FieldStrategy}
  */

@@ -1,4 +1,7 @@
-export = FranchiseFileTable;
+export default FranchiseFileTable;
+export type FranchiseFileTableHeader = any;
+export type OffsetTableEntry = any;
+export type EmptyRecordEntry = any;
 /**
  * @typedef {Object} FranchiseFileTableHeader
  * @param {string} name
@@ -101,7 +104,7 @@ declare class FranchiseFileTable {
     /** @type {Array<number>} */
     arraySizes: Array<number>;
     /** @type {Map<EmptyRecordEntry>} */
-    emptyRecords: Map<any>;
+    emptyRecords: Map<any, any>;
     /** @type {FranchiseFileSettings} */
     _settings: FranchiseFileSettings;
     /** @returns {Buffer} */
@@ -148,7 +151,7 @@ declare class FranchiseFileTable {
     /** @param {Array<string>?} [attribsToLoad] @returns {Promise<FranchiseFileTable>} */
     readRecords(attribsToLoad?: Array<string> | null): Promise<FranchiseFileTable>;
     /** @returns {Map<EmptyRecordEntry>} */
-    _parseEmptyRecords(): Map<any>;
+    _parseEmptyRecords(): Map<any, any>;
     /** @param {FranchiseFileRecord} */
     _onRecordEmpty(record: any): void;
     /** @param {Buffer} data @param {FranchiseFileTableHeader} header @param {Array<FranchiseFileRecord>} records */
@@ -164,14 +167,8 @@ declare class FranchiseFileTable {
     /** @param {string} name @param {*} object */
     onEvent(name: string, object: any): void;
 }
-declare namespace FranchiseFileTable {
-    export { FranchiseFileTableHeader, OffsetTableEntry, EmptyRecordEntry };
-}
-type FranchiseFileTableHeader = any;
-type OffsetTableEntry = any;
-import FranchiseFileRecord = require("./FranchiseFileRecord");
-import FranchiseFileTable2Field = require("./FranchiseFileTable2Field");
-import FranchiseFileTable3Field = require("./FranchiseFileTable3Field");
-import FranchiseFileSettings = require("./FranchiseFileSettings");
-type EmptyRecordEntry = any;
+import FranchiseFileRecord from "./FranchiseFileRecord.js";
+import FranchiseFileTable2Field from "./FranchiseFileTable2Field.js";
+import FranchiseFileTable3Field from "./FranchiseFileTable3Field.js";
+import FranchiseFileSettings from "./FranchiseFileSettings.js";
 //# sourceMappingURL=FranchiseFileTable.d.ts.map

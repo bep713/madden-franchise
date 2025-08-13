@@ -4,7 +4,7 @@
   "description": "Tools to read a madden franchise file and get data from it",
   "main": "FranchiseFile.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "make-types": "tsc --project ./tsconfig.json"
   },
   "keywords": [
     "madden",

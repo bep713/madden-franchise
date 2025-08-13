@@ -6,8 +6,12 @@ madden-franchise is a Madden franchise file parser written in NodeJS that allows
 ## Installation
     npm i madden-franchise
 
+## Important Note
+This package migrated to ESM with v4.0.0.
+If your project still uses CommonJS, you will need to use v3.8.0 or older.
+
 ## Usage
-    const Franchise = require('madden-franchise');
+    import Franchise from 'madden-franchise';
 
     let franchise = await Franchise.create([path to file], [options]);
     let table = franchise.getTableByName('Player');

@@ -1,4 +1,4 @@
-export = M19FTCTableStrategy;
+export default M19FTCTableStrategy;
 /**
  * @type {TableStrategy}
  */

@@ -1,4 +1,4 @@
-export = FranchiseEnumValue;
+export default FranchiseEnumValue;
 declare class FranchiseEnumValue {
     /** @param {string} name @param {number} index @param {string} value @param {string?} [unformattedValue] */
     constructor(name: string, index: number, value: string, unformattedValue?: string | null);

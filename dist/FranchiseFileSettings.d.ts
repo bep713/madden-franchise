@@ -1,4 +1,5 @@
-export = FranchiseFileSettings;
+export default FranchiseFileSettings;
+export type SettingsParam = any;
 /**
  * @typedef {Object} SettingsParam
  * @param {boolean?} [saveOnChange]
@@ -17,12 +18,16 @@ declare class FranchiseFileSettings {
     /** @type {string | false} */
     schemaDirectory: string | false;
     /** @type {boolean} */
+    useNewSchemaGeneration: boolean;
+    /** @type {Object} */
+    schemaFileMap: any;
+    /** @type {Object[]} */
+    extraSchemas: any[];
+    /** @type {boolean} */
     autoParse: boolean;
     /** @type {boolean} */
     autoUnempty: boolean;
+    /** @type {number} */
+    gameYearOverride: number;
 }
-declare namespace FranchiseFileSettings {
-    export { SettingsParam };
-}
-type SettingsParam = any;
 //# sourceMappingURL=FranchiseFileSettings.d.ts.map

@@ -1,4 +1,6 @@
-export = FranchiseSchema;
+export default FranchiseSchema;
+export type SchemaAttribute = any;
+export type TableSchema = any;
 /**
    * @typedef SchemaAttribute
    * @param {string} index
@@ -22,9 +24,16 @@ export = FranchiseSchema;
    * @param {Array<SchemaAttribute>} attributes
 */
 declare class FranchiseSchema {
-    constructor(filePath: any);
+    constructor(filePath: any, { useNewSchemaGeneration, extraSchemas, fileMap }?: {
+        useNewSchemaGeneration?: boolean;
+        extraSchemas?: any[];
+        fileMap?: {};
+    });
     schemas: any[];
     path: any;
+    useNewSchemaGeneration: boolean;
+    extraSchemas: any[];
+    fileMap: {};
     evaluate(): void;
     getSchema(name: any): any;
     getEnum(name: any): any;
@@ -35,9 +44,4 @@ declare class FranchiseSchema {
     enumMap: {};
     evaluateSchemaXml(): void;
 }
-declare namespace FranchiseSchema {
-    export { SchemaAttribute, TableSchema };
-}
-type SchemaAttribute = any;
-type TableSchema = any;
 //# sourceMappingURL=FranchiseSchema.d.ts.map

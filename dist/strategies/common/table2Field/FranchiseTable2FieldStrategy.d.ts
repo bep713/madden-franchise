@@ -1,3 +1,6 @@
-export function getInitialUnformattedValue(field: any, data: any): any;
-export function setUnformattedValueFromFormatted(formattedValue: any, maxLength: any): any;
+export default FranchiseTable2FieldStrategy;
+declare namespace FranchiseTable2FieldStrategy {
+    function getInitialUnformattedValue(field: any, data: any): any;
+    function setUnformattedValueFromFormatted(formattedValue: any, maxLength: any): Buffer;
+}
 //# sourceMappingURL=FranchiseTable2FieldStrategy.d.ts.map

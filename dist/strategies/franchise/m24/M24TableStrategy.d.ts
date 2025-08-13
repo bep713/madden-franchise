@@ -1,4 +1,4 @@
-export = M24TableStrategy;
+export default M24TableStrategy;
 /**
  * @type {TableStrategy}
  */

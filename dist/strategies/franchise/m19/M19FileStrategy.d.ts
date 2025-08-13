@@ -1,4 +1,4 @@
-export = M19FileStrategy;
+export default M19FileStrategy;
 /**
  * @type {FileStrategy}
  */

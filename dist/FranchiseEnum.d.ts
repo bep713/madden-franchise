@@ -1,4 +1,4 @@
-export = FranchiseEnum;
+export default FranchiseEnum;
 declare class FranchiseEnum {
     /** @param {string | FranchiseEnum} name @param {number} assetId @param {boolean} isRecordPersistent */
     constructor(name: string | FranchiseEnum, assetId: number, isRecordPersistent: boolean);
@@ -29,5 +29,5 @@ declare class FranchiseEnum {
     getMemberByName(name: string): FranchiseEnumValue | null;
     setMemberLength(): void;
 }
-import FranchiseEnumValue = require("./FranchiseEnumValue");
+import FranchiseEnumValue from "./FranchiseEnumValue.js";
 //# sourceMappingURL=FranchiseEnum.d.ts.map

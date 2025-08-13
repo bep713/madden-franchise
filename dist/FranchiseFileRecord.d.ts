@@ -1,6 +1,5 @@
-export = FranchiseFileRecord;
+export default FranchiseFileRecord;
 declare class FranchiseFileRecord {
-    [name: string]: any;
     /** @param {Buffer} data @param {number} index @param {OffsetTableEntry} offsetTable, @param {FranchiseFileTable} parent */
     constructor(data: Buffer, index: number, offsetTable: OffsetTableEntry, parent: FranchiseFileTable);
     /** @type {Buffer}  */
@@ -44,5 +43,5 @@ declare class FranchiseFileRecord {
     /** @param {string} name @param {FranchiseFileField} field */
     onEvent(name: string, field: FranchiseFileField): void;
 }
-import FranchiseFileField = require("./FranchiseFileField");
+import FranchiseFileField from "./FranchiseFileField.js";
 //# sourceMappingURL=FranchiseFileRecord.d.ts.map

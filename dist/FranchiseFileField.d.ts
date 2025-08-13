@@ -1,4 +1,4 @@
-export = FranchiseFileField;
+export default FranchiseFileField;
 declare class FranchiseFileField {
     /** @param {string} key @param {Buffer} value @param {OffsetTableEntry} offset @param {FranchiseFileRecord} parent */
     constructor(key: string, value: Buffer, offset: OffsetTableEntry, parent: FranchiseFileRecord);
@@ -50,7 +50,7 @@ declare class FranchiseFileField {
     /** @param {BitView} unformatted, @param {OffsetTableEntry} offset */
     _parseFieldValue(unformatted: BitView, offset: OffsetTableEntry): any;
 }
-import FranchiseFileTable2Field = require("./FranchiseFileTable2Field");
-import FranchiseFileTable3Field = require("./FranchiseFileTable3Field");
+import FranchiseFileTable2Field from "./FranchiseFileTable2Field.js";
+import FranchiseFileTable3Field from "./FranchiseFileTable3Field.js";
 import { BitView } from "bit-buffer";
 //# sourceMappingURL=FranchiseFileField.d.ts.map

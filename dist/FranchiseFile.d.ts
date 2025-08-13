@@ -1,4 +1,21 @@
-export = FranchiseFile;
+export default FranchiseFile;
+export type FileType = {
+    format: string;
+    year: number;
+    compressed: boolean;
+};
+export type SchemaMetadata = {
+    gameYear: string | null;
+    major: number | null;
+    minor: number | null;
+    path: string | null;
+};
+export type PartialSchemaMetadata = {
+    major: number;
+    minor: number;
+};
+export type AssetTable = any;
+export type RecordReference = any;
 /**
  * @typedef {Object} AssetTable
  * @param {number} assetId
@@ -44,7 +61,13 @@ declare class FranchiseFile {
      * @returns {Promise<void>}
      */
     parse(): Promise<void>;
-    strategy: GameStrategy;
+    strategy: {
+        name: string;
+        file: FileStrategy;
+        table: TableStrategy;
+        table2Field: Table2FieldStrategy;
+        table3Field: Table3FieldStrategy;
+    };
     schemaList: FranchiseSchema;
     /** @type {Array<FranchiseFileTable>} */
     tables: Array<FranchiseFileTable>;
@@ -151,27 +174,7 @@ declare class FranchiseFile {
      */
     getReferencesToRecord(tableId: number, recordIndex: number): any[];
 }
-declare namespace FranchiseFile {
-    export { FileType, SchemaMetadata, PartialSchemaMetadata, AssetTable, RecordReference };
-}
-import FranchiseSchema = require("./FranchiseSchema");
-import FranchiseFileTable = require("./FranchiseFileTable");
-type AssetTable = any;
-import FranchiseFileSettings = require("./FranchiseFileSettings");
-type FileType = {
-    format: string;
-    year: number;
-    compressed: boolean;
-};
-type SchemaMetadata = {
-    gameYear: string | null;
-    major: number | null;
-    minor: number | null;
-    path: string | null;
-};
-type PartialSchemaMetadata = {
-    major: number;
-    minor: number;
-};
-type RecordReference = any;
+import FranchiseSchema from "./FranchiseSchema.js";
+import FranchiseFileTable from "./FranchiseFileTable.js";
+import FranchiseFileSettings from "./FranchiseFileSettings.js";
 //# sourceMappingURL=FranchiseFile.d.ts.map

@@ -1,4 +1,4 @@
-export = FranchiseFileTable2Field;
+export default FranchiseFileTable2Field;
 declare class FranchiseFileTable2Field {
     /** @param {number} index @param {number} maxLength @param {FranchiseFileTable} parent */
     constructor(index: number, maxLength: number, parent: FranchiseFileTable);

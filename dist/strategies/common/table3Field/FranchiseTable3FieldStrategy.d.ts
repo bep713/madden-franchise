@@ -1,5 +1,8 @@
-export function getZlibDataStartIndex(unformattedValue: any): any;
-export function getInitialUnformattedValue(field: any, data: any): any;
-export function getFormattedValueFromUnformatted(unformattedValue: any): any;
-export function setUnformattedValueFromFormatted(formattedValue: any, oldUnformattedValue: any, maxLength: any): any;
+export default FranchiseTable3FieldStrategy;
+declare namespace FranchiseTable3FieldStrategy {
+    function getZlibDataStartIndex(unformattedValue: any): any;
+    function getInitialUnformattedValue(field: any, data: any): any;
+    function getFormattedValueFromUnformatted(unformattedValue: any): any;
+    function setUnformattedValueFromFormatted(formattedValue: any, oldUnformattedValue: any, maxLength: any): Buffer;
+}
 //# sourceMappingURL=FranchiseTable3FieldStrategy.d.ts.map
