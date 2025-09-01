@@ -165,7 +165,7 @@ schemaGenerator.generateFromStream = (stream, showOutput, outputFile) => {
 };
 /** @returns {Record<string, any>} */
 schemaGenerator.getExtraSchemas = () => {
-    const filePath = path.join(__dirname, '../../data/schemas/extra-schemas.json');
+    const filePath = path.join(__dirname, '../data/schemas/extra-schemas.json');
     const data = fs.readFileSync(filePath, 'utf-8');
     return JSON.parse(data);
 };

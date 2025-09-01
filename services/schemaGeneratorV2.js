@@ -23,7 +23,7 @@ export async function generateSchemaV2({ fileMap, extraSchemas }) {
     if (!extraSchemas || extraSchemas.length === 0) {
         // Load extra schemas if available
         try {
-            const extraPath = path.join(__dirname, '../../data/schemas/extra-schemas.json');
+            const extraPath = path.join(__dirname, '../data/schemas/extra-schemas.json');
             const extraRaw = await fs.readFile(extraPath, 'utf8');
             extraSchemas = JSON.parse(extraRaw);
         }

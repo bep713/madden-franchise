@@ -1,1 +1,1 @@
-{"version":3,"file":"FranchiseTable3FieldStrategy.d.ts","sourceRoot":"","sources":["../../../../src/strategies/common/table3Field/FranchiseTable3FieldStrategy.js"],"names":[],"mappings":";;IAIA,2DAEC;IACD,gEAGC;IACD,yEAWC;IACD,iHAMC"}
+{"version":3,"file":"FranchiseTable3FieldStrategy.d.ts","sourceRoot":"","sources":["../../../../strategies/common/table3Field/FranchiseTable3FieldStrategy.js"],"names":[],"mappings":";;IAIA,2DAEC;IACD,gEAGC;IACD,sEAWC;IACD,iHAMC"}

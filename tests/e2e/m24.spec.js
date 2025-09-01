@@ -3,9 +3,9 @@ import path, { dirname } from 'path';
 import zlib from 'zlib';
 import { expect } from 'chai';
 import { BitView } from 'bit-buffer';
-import FranchiseFile from '../../src/FranchiseFile.js';
-import FranchiseFileTable from '../../src/FranchiseFileTable.js';
-import { readChviRecord } from '../../src/services/TDB2Converter.js';
+import FranchiseFile from '../../FranchiseFile.js';
+import FranchiseFileTable from '../../FranchiseFileTable.js';
+import { readChviRecord } from '../../services/TDB2Converter.js';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);

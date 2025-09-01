@@ -3,7 +3,7 @@
 const fs = require('fs/promises');
 const path = require('path');
 const { gzipSync } = require('zlib');
-const { generateSchemaV2 } = require('../src/services/schemaGeneratorV2');
+const { generateSchemaV2 } = require('../services/schemaGeneratorV2');
 
 let done = false;
 

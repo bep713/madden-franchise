@@ -2,10 +2,10 @@ import fs from 'fs';
 import path, { dirname } from 'path';
 import { expect } from 'chai';
 import { BitView } from 'bit-buffer';
-import FranchiseFile from '../../src/FranchiseFile.js';
-import FranchiseFileTable from '../../src/FranchiseFileTable.js';
+import FranchiseFile from '../../FranchiseFile.js';
+import FranchiseFileTable from '../../FranchiseFileTable.js';
 import filePaths from '../util/filePathUtil.js';
-import { IsonProcessor } from '../../src/services/isonProcessor.js';
+import { IsonProcessor } from '../../services/isonProcessor.js';
 import { Decoder } from '@toondepauw/node-zstd';
 import { fileURLToPath } from 'url';
 

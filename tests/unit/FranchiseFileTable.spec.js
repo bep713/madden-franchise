@@ -47,8 +47,8 @@ describe("FranchiseFileTable unit tests", () => {
   let playerTable, tunableDataTable;
 
   beforeEach(async () => {
-    await quibble.esm('../../src/FranchiseFileRecord.js', {}, RecordStub);
-    FranchiseFileTable = (await import('../../src/FranchiseFileTable.js')).default;
+    await quibble.esm('../../FranchiseFileRecord.js', {}, RecordStub);
+    FranchiseFileTable = (await import('../../FranchiseFileTable.js')).default;
 
     playerTable = initializeTable(tableData.player, {
       name: 'Player',

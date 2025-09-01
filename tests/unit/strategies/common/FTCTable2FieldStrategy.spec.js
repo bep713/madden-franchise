@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import FTCTable2FieldStrategy from '../../../../src/strategies/common/table2Field/FTCTable2FieldStrategy.js';
+import FTCTable2FieldStrategy from '../../../../strategies/common/table2Field/FTCTable2FieldStrategy.js';
 
 describe('FTC Table2 Field Strategy', () => {
     describe('get initial unformatted value', () => {

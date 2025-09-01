@@ -20,9 +20,9 @@ describe('M20 Table Field Strategy', () => {
         tableStrategy.getTable2BinaryData.resetHistory();
         tableStrategy.getMandatoryOffsets.resetHistory();
 
-        await quibble.esm('../../../../src/strategies/common/header/m20/M20TableHeaderStrategy.js', {}, headerStrategySpy);
-        await quibble.esm('../../../../src/strategies/common/table/FranchiseTableStrategy.js', {}, tableStrategy);
-        M20TableStrategy = (await import('../../../../src/strategies/franchise/m20/M20TableStrategy.js')).default;
+        await quibble.esm('../../../../strategies/common/header/m20/M20TableHeaderStrategy.js', {}, headerStrategySpy);
+        await quibble.esm('../../../../strategies/common/table/FranchiseTableStrategy.js', {}, tableStrategy);
+        M20TableStrategy = (await import('../../../../strategies/franchise/m20/M20TableStrategy.js')).default;
     });
 
     afterEach(() => {

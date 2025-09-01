@@ -14,8 +14,8 @@ describe('M19 FTC File Strategy unit tests', () => {
         strategySpy.postPackFile.resetHistory();
         strategySpy.generateUnpackedContents.resetHistory();
 
-        await quibble.esm('../../../../../src/strategies/common/file/FTCFileStrategy.js', {}, strategySpy);
-        M19FTCFileStrategy = (await import('../../../../../src/strategies/franchise-common/m19/M19FTCFileStrategy.js')).default;
+        await quibble.esm('../../../../../strategies/common/file/FTCFileStrategy.js', {}, strategySpy);
+        M19FTCFileStrategy = (await import('../../../../../strategies/franchise-common/m19/M19FTCFileStrategy.js')).default;
     });
 
     afterEach(() => {

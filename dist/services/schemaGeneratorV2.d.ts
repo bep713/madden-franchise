@@ -7,5 +7,5 @@
 export function generateSchemaV2({ fileMap, extraSchemas }: {
     main: string;
     [id: string]: string;
-}): Promise<Object>;
+}): Promise<any>;
 //# sourceMappingURL=schemaGeneratorV2.d.ts.map

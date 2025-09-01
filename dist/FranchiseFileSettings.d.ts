@@ -1,5 +1,5 @@
 export default FranchiseFileSettings;
-export type SettingsParam = Object;
+export type SettingsParam = any;
 /**
  * @typedef {Object} SettingsParam
  * @param {boolean?} [saveOnChange]
@@ -20,9 +20,9 @@ declare class FranchiseFileSettings {
     /** @type {boolean} */
     useNewSchemaGeneration: boolean;
     /** @type {Object} */
-    schemaFileMap: Object;
+    schemaFileMap: any;
     /** @type {Object[]} */
-    extraSchemas: Object[];
+    extraSchemas: any[];
     /** @type {boolean} */
     autoParse: boolean;
     /** @type {boolean} */

@@ -9,20 +9,17 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 let FranchiseZstdTable3FieldStrategy = {};
-let dictionary = fs.readFileSync(path.join(__dirname, '../../../../data/zstd-dicts/26/dict.bin'));
+let dictionary = fs.readFileSync(path.join(__dirname, '../../../data/zstd-dicts/26/dict.bin'));
 const zstdDecoder = new Decoder(dictionary);
 // Create a single IsonProcessor instance for M26 and reuse it for better performance
 const isonProcessor = new IsonProcessor(26);
-
 FranchiseZstdTable3FieldStrategy.getZstdDataStartIndex = (unformattedValue) => {
     return unformattedValue.indexOf(Buffer.from([0x28, 0xB5, 0x2F, 0xFD]));
 };
-
 FranchiseZstdTable3FieldStrategy.getInitialUnformattedValue = (field, data) => {
     return data.slice(field.thirdTableField.index, (field.thirdTableField.index + field.offset.maxLength + 2));
     // extend maxLength + 2 because the first 2 bytes are the size of the compressed data
 };
-
 FranchiseZstdTable3FieldStrategy.getFormattedValueFromUnformatted = (unformattedValue) => {
     // First two bytes are the size of the zipped data, so skip those and get the raw ISON buffer
     const zstdDataStartIndex = FranchiseZstdTable3FieldStrategy.getZstdDataStartIndex(unformattedValue);
@@ -33,7 +30,6 @@ FranchiseZstdTable3FieldStrategy.getFormattedValueFromUnformatted = (unformatted
     const jsonObj = isonProcessor.isonVisualsToJson(isonBuf);
     return JSON.stringify(jsonObj);
 };
-
 FranchiseZstdTable3FieldStrategy.setUnformattedValueFromFormatted = (formattedValue, oldUnformattedValue, maxLength) => {
     // Parse the JSON string into a JSON object
     let jsonObj = JSON.parse(formattedValue);
@@ -46,5 +42,4 @@ FranchiseZstdTable3FieldStrategy.setUnformattedValueFromFormatted = (formattedVa
     sizeBuf.writeUInt16LE(compressedBuf.length);
     return Buffer.concat([sizeBuf, compressedBuf, padding]);
 };
-
 export default FranchiseZstdTable3FieldStrategy;

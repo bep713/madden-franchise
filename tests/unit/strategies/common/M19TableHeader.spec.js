@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { expect } from 'chai';
 
-import M19TableHeaderStrategy from '../../../../src/strategies/common/header/m19/M19TableHeaderStrategy.js';
+import M19TableHeaderStrategy from '../../../../strategies/common/header/m19/M19TableHeaderStrategy.js';
 
 import popularityComponentTableSchema from '../../../data/test-schemas/M19_PopularityComponentTable.json' with { type: "json" };
 const popularityComponentTable = fs.readFileSync('tests/data/strategies/m19/PopularityComponentTable.frt');

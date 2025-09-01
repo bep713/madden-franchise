@@ -65,8 +65,8 @@ describe('FranchiseFileField unit tests', () => {
 
     listenerFns = [];
 
-    await quibble.esm('../../src/FranchiseFileTable2Field.js', {}, FranchiseFileTable2FieldMock);
-    FranchiseFileField = (await import('../../src/FranchiseFileField.js')).default;
+    await quibble.esm('../../FranchiseFileTable2Field.js', {}, FranchiseFileTable2FieldMock);
+    FranchiseFileField = (await import('../../FranchiseFileField.js')).default;
   });
 
   afterEach(() => {

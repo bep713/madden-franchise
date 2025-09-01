@@ -46,7 +46,7 @@ export class IsonProcessor {
   loadGameYearData() {
     // Check if we already have this game year's lookup loaded into memory, and if not, load it from file
     if (!IsonProcessor.internedLookups[this.gameYear]) {
-      const lookupFilePath = path.join(__dirname, `../../data/interned-strings/${this.gameYear.toString()}/lookup.json`);
+      const lookupFilePath = path.join(__dirname, `../data/interned-strings/${this.gameYear.toString()}/lookup.json`);
       if (fs.existsSync(lookupFilePath)) {
         IsonProcessor.internedLookups[this.gameYear] = JSON.parse(fs.readFileSync(lookupFilePath, 'utf8'));
       } else {
@@ -68,7 +68,7 @@ export class IsonProcessor {
    */
   loadGameYearDataStatic(gameYear) {
     if (!IsonProcessor.internedLookups[gameYear]) {
-      const lookupFilePath = path.join(__dirname, `../../data/interned-strings/${gameYear.toString()}/lookup.json`);
+      const lookupFilePath = path.join(__dirname, `../data/interned-strings/${gameYear.toString()}/lookup.json`);
       if (fs.existsSync(lookupFilePath)) {
         IsonProcessor.internedLookups[gameYear] = JSON.parse(fs.readFileSync(lookupFilePath, 'utf8'));
       } else {

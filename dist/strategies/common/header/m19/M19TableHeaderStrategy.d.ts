@@ -16,7 +16,7 @@ declare namespace M19TableHeaderStrategy {
         data1Flag3: any;
         data1Flag4: any;
         tableStoreLength: any;
-        tableStoreName: string | null;
+        tableStoreName: string;
         data1Offset: any;
         data1TableId: any;
         data1RecordCount: any;

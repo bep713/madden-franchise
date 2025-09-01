@@ -69,4 +69,3 @@ data/schemas/*.xml
 
 .vscode
 custom-scripts/
-pack/

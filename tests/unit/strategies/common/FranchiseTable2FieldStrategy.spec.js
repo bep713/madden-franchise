@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import FranchiseTable2FieldStrategy from '../../../../src/strategies/common/table2Field/FranchiseTable2FieldStrategy.js';
+import FranchiseTable2FieldStrategy from '../../../../strategies/common/table2Field/FranchiseTable2FieldStrategy.js';
 
 describe('Franchise Table2 Field Strategy', () => {
     describe('get initial unformatted value', () => {

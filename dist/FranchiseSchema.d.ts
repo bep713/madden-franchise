@@ -1,4 +1,3 @@
-/// <reference types="node" />
 export default FranchiseSchema;
 export type SchemaAttribute = any;
 export type TableSchema = any;
@@ -24,11 +23,11 @@ export type TableSchema = any;
    * @param {string} base
    * @param {Array<SchemaAttribute>} attributes
 */
-declare class FranchiseSchema extends events {
+declare class FranchiseSchema {
     constructor(filePath: any, { useNewSchemaGeneration, extraSchemas, fileMap }?: {
-        useNewSchemaGeneration?: boolean | undefined;
-        extraSchemas?: any[] | undefined;
-        fileMap?: {} | undefined;
+        useNewSchemaGeneration?: boolean;
+        extraSchemas?: any[];
+        fileMap?: {};
     });
     schemas: any[];
     path: any;
@@ -42,8 +41,7 @@ declare class FranchiseSchema extends events {
     schema: any;
     meta: any;
     schemaMap: any;
-    enumMap: {} | undefined;
+    enumMap: {};
     evaluateSchemaXml(): void;
 }
-import events from "events";
 //# sourceMappingURL=FranchiseSchema.d.ts.map

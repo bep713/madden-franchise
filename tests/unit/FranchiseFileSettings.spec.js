@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import FranchiseFileSettings from '../../src/FranchiseFileSettings.js';
+import FranchiseFileSettings from '../../FranchiseFileSettings.js';
 
 const defaultSettings = {
     'saveOnChange': false,
