@@ -1,5 +1,5 @@
-export function isonVisualsToJson(fileBuf: any, gameYear?: number): {};
-export function jsonVisualsToIson(jsonObj: any, gameYear?: number): any;
+export function isonVisualsToJson(fileBuf: any, gameYear?: number): {} | null;
+export function jsonVisualsToIson(jsonObj: any, gameYear?: number): Buffer;
 /**
  * ISON processor class that handles game year specific interned string lookups
  */
@@ -36,15 +36,15 @@ export class IsonProcessor {
     /**
      * Convert ISON buffer to JSON object
      */
-    isonVisualsToJson(fileBuf: any): {};
+    isonVisualsToJson(fileBuf: any): {} | null;
     /**
      * Convert JSON object to ISON buffer
      */
-    jsonVisualsToIson(jsonObj: any): any;
+    jsonVisualsToIson(jsonObj: any): Buffer;
     /**
      * Function to write the ISON data to a compressed buffer
      */
-    writeTable3IsonData(isonBuffer: any): any;
+    writeTable3IsonData(isonBuffer: any): Buffer;
     writeIsonFromJson(jsonObj: any): Buffer;
     writeBytes(buffer: any, offset: any, data: any): any;
     writeByte(buffer: any, offset: any, byte: any): any;

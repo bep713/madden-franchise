@@ -1,6 +1,7 @@
+/// <reference types="node" />
 export default FranchiseFileTable;
-export type FranchiseFileTableHeader = any;
-export type OffsetTableEntry = any;
+export type FranchiseFileTableHeader = Object;
+export type OffsetTableEntry = Object;
 export type EmptyRecordEntry = any;
 /**
  * @typedef {Object} FranchiseFileTableHeader
@@ -70,7 +71,7 @@ export type EmptyRecordEntry = any;
  * @param {number} previous
  * @param {number} next
  */
-declare class FranchiseFileTable {
+declare class FranchiseFileTable extends events {
     constructor(data: any, offset: any, gameYear: any, strategy: any, settings: any);
     index: number;
     /** @type {Buffer} */
@@ -121,15 +122,15 @@ declare class FranchiseFileTable {
         indexOffset: number;
         isSigned: boolean;
         length: number;
-        maxLength: any;
-        maxValue: any;
-        minValue: any;
+        maxLength: null;
+        maxValue: null;
+        minValue: null;
         name: string;
         offset: number;
         type: string;
         valueInSecondTable: boolean;
         valueInThirdTable: boolean;
-    }[];
+    }[] | undefined;
     _generateGenericSchema(): {
         attributes: {
             name: string;
@@ -149,7 +150,7 @@ declare class FranchiseFileTable {
     /** @param {Buffer} buf @param {boolean} shouldReadRecords @returns {Promise<FranchiseFileTable>?} */
     replaceRawData(buf: Buffer, shouldReadRecords: boolean): Promise<FranchiseFileTable> | null;
     /** @param {Array<string>?} [attribsToLoad] @returns {Promise<FranchiseFileTable>} */
-    readRecords(attribsToLoad?: Array<string> | null): Promise<FranchiseFileTable>;
+    readRecords(attribsToLoad?: string[] | null | undefined): Promise<FranchiseFileTable>;
     /** @returns {Map<EmptyRecordEntry>} */
     _parseEmptyRecords(): Map<any, any>;
     /** @param {FranchiseFileRecord} */
@@ -167,6 +168,7 @@ declare class FranchiseFileTable {
     /** @param {string} name @param {*} object */
     onEvent(name: string, object: any): void;
 }
+import events from "events";
 import FranchiseFileRecord from "./FranchiseFileRecord.js";
 import FranchiseFileTable2Field from "./FranchiseFileTable2Field.js";
 import FranchiseFileTable3Field from "./FranchiseFileTable3Field.js";

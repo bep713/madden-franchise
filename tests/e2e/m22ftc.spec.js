@@ -1,6 +1,6 @@
 import path, { dirname } from 'path';
 import { expect } from 'chai';
-import FranchiseFile from '../../FranchiseFile.js';
+import FranchiseFile from '../../src/FranchiseFile.js';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);

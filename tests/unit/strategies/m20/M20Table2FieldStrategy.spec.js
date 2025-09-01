@@ -13,8 +13,8 @@ describe('M20 Table2 Field Strategy', () => {
         strategySpy.getInitialUnformattedValue.resetHistory();
         strategySpy.setUnformattedValueFromFormatted.resetHistory();
 
-        await quibble.esm('../../../../strategies/common/table2Field/FranchiseTable2FieldStrategy.js', {}, strategySpy);
-        M20Table2FieldStrategy = (await import('../../../../strategies/franchise/m20/M20Table2FieldStrategy.js')).default;
+        await quibble.esm('../../../../src/strategies/common/table2Field/FranchiseTable2FieldStrategy.js', {}, strategySpy);
+        M20Table2FieldStrategy = (await import('../../../../src/strategies/franchise/m20/M20Table2FieldStrategy.js')).default;
     });
 
     afterEach(() => {

@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import FTCTableStrategy from '../../../../strategies/common/table/FTCTableStrategy.js';
+import FTCTableStrategy from '../../../../src/strategies/common/table/FTCTableStrategy.js';
 
 describe('FTC Table Strategy unit tests', () => {
     describe('get table2 binary data', () => {

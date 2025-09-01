@@ -20,7 +20,7 @@ declare class FranchiseEnum {
     /** @returns {Array<FranchiseEnumValue>} */
     get members(): FranchiseEnumValue[];
     /** @param {string} name @param {number} index @param {string} value @param {string?} [unformattedValue] */
-    addMember(name: string, index: number, value: string, unformattedValue?: string | null): void;
+    addMember(name: string, index: number, value: string, unformattedValue?: string | null | undefined): void;
     /** @param {string} value @returns {FranchiseEnumValue?} */
     getMemberByValue(value: string): FranchiseEnumValue | null;
     /** @param {string} value @returns {FranchiseEnumValue?} */

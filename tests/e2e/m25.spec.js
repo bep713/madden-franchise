@@ -3,11 +3,11 @@ import path, { dirname } from 'path';
 import zlib from 'zlib';
 import { expect } from 'chai';
 import { BitView } from 'bit-buffer';
-import FranchiseFile from '../../FranchiseFile.js';
-import FranchiseFileTable from '../../FranchiseFileTable.js';
+import FranchiseFile from '../../src/FranchiseFile.js';
+import FranchiseFileTable from '../../src/FranchiseFileTable.js';
 import filePaths from '../util/filePathUtil.js';
 import { fileURLToPath } from 'url';
-import { IsonProcessor } from '../../services/isonProcessor.js';
+import { IsonProcessor } from '../../src/services/isonProcessor.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

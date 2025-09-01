@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import utilService from '../../services/utilService.js';
+import utilService from '../../src/services/utilService.js';
 
 describe('util service unit tests', () => {
   describe('dec2bin', () => {

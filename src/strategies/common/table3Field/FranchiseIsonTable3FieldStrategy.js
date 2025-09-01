@@ -4,13 +4,16 @@ import { IsonProcessor } from "../../../services/isonProcessor.js";
 let FranchiseTable3FieldStrategy = {};
 // Create a single IsonProcessor instance for M25 and reuse it for better performance
 const isonProcessor = new IsonProcessor(25);
+
 FranchiseTable3FieldStrategy.getZlibDataStartIndex = (unformattedValue) => {
     return unformattedValue.indexOf(Buffer.from([0x1F, 0x8B]));
 };
+
 FranchiseTable3FieldStrategy.getInitialUnformattedValue = (field, data) => {
     return data.slice(field.thirdTableField.index, (field.thirdTableField.index + field.offset.maxLength + 2));
     // extend maxLength + 2 because the first 2 bytes are the size of the zipped data
 };
+
 FranchiseTable3FieldStrategy.getFormattedValueFromUnformatted = (unformattedValue) => {
     // First two bytes are the size of the zipped data, so skip those and get the raw ISON buffer
     const zlibDataStartIndex = FranchiseTable3FieldStrategy.getZlibDataStartIndex(unformattedValue);
@@ -19,6 +22,7 @@ FranchiseTable3FieldStrategy.getFormattedValueFromUnformatted = (unformattedValu
     const jsonObj = isonProcessor.isonVisualsToJson(isonBuf);
     return JSON.stringify(jsonObj);
 };
+
 FranchiseTable3FieldStrategy.setUnformattedValueFromFormatted = (formattedValue, oldUnformattedValue, maxLength) => {
     // Parse the JSON string into a JSON object
     let jsonObj = JSON.parse(formattedValue);
@@ -29,4 +33,5 @@ FranchiseTable3FieldStrategy.setUnformattedValueFromFormatted = (formattedValue,
     sizeBuf.writeUInt16LE(isonBuf.length);
     return Buffer.concat([sizeBuf, isonBuf, padding]);
 };
+
 export default FranchiseTable3FieldStrategy;

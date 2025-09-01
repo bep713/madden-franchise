@@ -6,9 +6,9 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const slotsLookup = JSON.parse(fs.readFileSync(path.join(__dirname, 'lookupFiles/slotsLookup.json'), 'utf8'));
-const fieldLookup = JSON.parse(fs.readFileSync(path.join(__dirname, 'lookupFiles/fieldLookup.json'), 'utf8'));
-const enumLookup = JSON.parse(fs.readFileSync(path.join(__dirname, 'lookupFiles/enumLookup.json'), 'utf8'));
+const slotsLookup = JSON.parse(fs.readFileSync(path.join(__dirname, '../../data/lookup-files/slotsLookup.json'), 'utf8'));
+const fieldLookup = JSON.parse(fs.readFileSync(path.join(__dirname, '../../data/lookup-files/fieldLookup.json'), 'utf8'));
+const enumLookup = JSON.parse(fs.readFileSync(path.join(__dirname, '../../data/lookup-files/enumLookup.json'), 'utf8'));
 
 // Field type constants
 const FIELD_TYPE_INT = 0;

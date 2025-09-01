@@ -1,8 +1,8 @@
 import path, { dirname } from 'path';
 import { expect } from 'chai';
 import { BitView } from 'bit-buffer';
-import FranchiseFile from '../../FranchiseFile.js';
-import FranchiseFileTable from '../../FranchiseFileTable.js';
+import FranchiseFile from '../../src/FranchiseFile.js';
+import FranchiseFileTable from '../../src/FranchiseFileTable.js';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);

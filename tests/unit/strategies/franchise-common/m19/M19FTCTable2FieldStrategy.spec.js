@@ -13,8 +13,8 @@ describe('M19 FTC Table2 Field Strategy unit tests', () => {
         strategySpy.getInitialUnformattedValue.resetHistory();
         strategySpy.setUnformattedValueFromFormatted.resetHistory();
 
-        await quibble.esm('../../../../../strategies/common/table2Field/FTCTable2FieldStrategy.js', {}, strategySpy);
-        M19FTCTable2Strategy = (await import('../../../../../strategies/franchise-common/m19/M19FTCTable2FieldStrategy.js')).default;
+        await quibble.esm('../../../../../src/strategies/common/table2Field/FTCTable2FieldStrategy.js', {}, strategySpy);
+        M19FTCTable2Strategy = (await import('../../../../../src/strategies/franchise-common/m19/M19FTCTable2FieldStrategy.js')).default;
     });
 
     afterEach(() => {

@@ -1,0 +1,20 @@
+export default FranchiseFile;
+export const create: typeof FranchiseFile.create;
+import FranchiseEnum from "./FranchiseEnum";
+import FranchiseEnumValue from "./FranchiseEnumValue";
+import FranchiseFile from "./FranchiseFile";
+import FranchiseFileField from "./FranchiseFileField";
+import FranchiseFileRecord from "./FranchiseFileRecord";
+import FranchiseFileSettings from "./FranchiseFileSettings";
+import FranchiseFileTable from "./FranchiseFileTable";
+import FranchiseFileTable2Field from "./FranchiseFileTable2Field";
+import FranchiseFileTable3Field from "./FranchiseFileTable3Field";
+import FranchiseSchema from "./FranchiseSchema";
+import { generateSchemaV2 } from "./services/schemaGeneratorV2";
+import { IsonProcessor } from "./services/isonProcessor";
+import { readChviRecord } from "./services/TDB2Converter";
+import schemaGenerator from "./services/schemaGenerator";
+import schemaPicker from "./services/schemaPicker";
+import utilService from "./services/utilService";
+export { FranchiseEnum, FranchiseEnumValue, FranchiseFile, FranchiseFileField, FranchiseFileRecord, FranchiseFileSettings, FranchiseFileTable, FranchiseFileTable2Field, FranchiseFileTable3Field, FranchiseSchema, generateSchemaV2, IsonProcessor, readChviRecord, schemaGenerator, schemaPicker, utilService };
+//# sourceMappingURL=index.d.ts.map

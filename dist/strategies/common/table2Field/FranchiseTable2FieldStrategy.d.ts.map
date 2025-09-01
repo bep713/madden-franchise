@@ -1,1 +1,1 @@
-{"version":3,"file":"FranchiseTable2FieldStrategy.d.ts","sourceRoot":"","sources":["../../../../strategies/common/table2Field/FranchiseTable2FieldStrategy.js"],"names":[],"mappings":";;IACA,gEAEC;IACD,uFAUC"}
+{"version":3,"file":"FranchiseTable2FieldStrategy.d.ts","sourceRoot":"","sources":["../../../../src/strategies/common/table2Field/FranchiseTable2FieldStrategy.js"],"names":[],"mappings":";;IACA,gEAEC;IACD,uFAUC"}

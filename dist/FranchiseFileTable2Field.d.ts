@@ -26,7 +26,7 @@ declare class FranchiseFileTable2Field {
     set strategy(strategy: Table2FieldStrategy);
     /** @type {Table2FieldStrategy} */
     get strategy(): Table2FieldStrategy;
-    _strategy: Table2FieldStrategy;
+    _strategy: any;
     /** @param {number} offset */
     set offset(offset: number);
     /** @returns {number} */

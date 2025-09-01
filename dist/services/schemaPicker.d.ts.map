@@ -1,1 +1,1 @@
-{"version":3,"file":"schemaPicker.d.ts","sourceRoot":"","sources":["../../services/schemaPicker.js"],"names":[],"mappings":";;IASA,iJAAiJ;IACjJ,gHAOC;IACD,uEAAuE;IACvE,oEAMC"}
+{"version":3,"file":"schemaPicker.d.ts","sourceRoot":"","sources":["../../src/services/schemaPicker.js"],"names":[],"mappings":";;IASA,iJAAiJ;IACjJ,mFAOC;IACD,uEAAuE;IACvE,oEAMC"}

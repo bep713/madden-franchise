@@ -12,8 +12,8 @@ describe('Franchise File Strategy unit tests', () => {
     beforeEach(async () => {
         strategySpy.generateUnpackedContents.resetHistory();
 
-        await quibble.esm('../../../../strategies/common/file/CommonFileStrategy.js', {}, strategySpy);
-        FranchiseFileStrategy = (await import('../../../../strategies/common/file/FranchiseFileStrategy.js')).default;
+        await quibble.esm('../../../../src/strategies/common/file/CommonFileStrategy.js', {}, strategySpy);
+        FranchiseFileStrategy = (await import('../../../../src/strategies/common/file/FranchiseFileStrategy.js')).default;
     });
 
     afterEach(() => {

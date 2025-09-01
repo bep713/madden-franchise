@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { expect } from 'chai';
-import M20TableHeaderStrategy from '../../../../strategies/common/header/m20/M20TableHeaderStrategy.js';
+import M20TableHeaderStrategy from '../../../../src/strategies/common/header/m20/M20TableHeaderStrategy.js';
 
 import popularityComponentTableSchema from '../../../data/test-schemas/M20_PopularityComponentTable.json' with { type: "json" };
 const popularityComponentTable = fs.readFileSync('tests/data/strategies/m20/PopularityComponentTable.frt');

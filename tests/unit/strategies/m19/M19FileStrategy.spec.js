@@ -14,8 +14,8 @@ describe('M19 File Strategy unit tests', () => {
         strategySpy.postPackFile.resetHistory();
         strategySpy.generateUnpackedContents.resetHistory();
 
-        await quibble.esm('../../../../strategies/common/file/FranchiseFileStrategy.js', {}, strategySpy);
-        M19FileStrategy = (await import('../../../../strategies/franchise/m19/M19FileStrategy.js')).default;
+        await quibble.esm('../../../../src/strategies/common/file/FranchiseFileStrategy.js', {}, strategySpy);
+        M19FileStrategy = (await import('../../../../src/strategies/franchise/m19/M19FileStrategy.js')).default;
     });
 
     afterEach(() => {

@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const SCHEMA_DIRECTORY = path.join(__dirname, '../data/schemas');
+const SCHEMA_DIRECTORY = path.join(__dirname, '../../data/schemas');
 let schemaPicker = {};
 /** @param {number} gameYear @param {number} major @param {number} minor @param {FranchiseFileSettings?} [settings] @returns {SchemaMetadata?} */
 schemaPicker.pick = (gameYear, major, minor, settings) => {

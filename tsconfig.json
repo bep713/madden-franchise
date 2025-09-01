@@ -1,11 +1,14 @@
 {
   // Change this to match your project
-  "include": ["./**/*.js"],
-  "exclude": ["node_modules", "tests", "dist", "custom-scripts"],
+  "include": ["./src/**/*.js"],
+  "exclude": ["node_modules", "tests", "dist", "custom-scripts", "rollup.config.js"],
   "compilerOptions": {
     // Tells TypeScript to read JS files, as
     // normally they are ignored as source files
     "allowJs": true,
+    "paths": {
+      "#data/*": ["./data/*"]
+    },
     // Generate d.ts files
     "declaration": true,
     // This compiler run should
@@ -18,6 +21,11 @@
     // go to js file when using IDE functions like
     // "Go to Definition" in VSCode
     "declarationMap": true,
-    "lib": ["ESNext"]
+    "lib": ["esnext"],
+    "module": "esnext",
+    "target": "esnext",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
   }
 }
