@@ -1,3 +1,4 @@
+/// <reference types="node" />
 export default FranchiseFile;
 export type FileType = {
     format: string;
@@ -14,8 +15,8 @@ export type PartialSchemaMetadata = {
     major: number;
     minor: number;
 };
-export type AssetTable = any;
-export type RecordReference = any;
+export type AssetTable = Object;
+export type RecordReference = Object;
 /**
  * @typedef {Object} AssetTable
  * @param {number} assetId
@@ -26,14 +27,14 @@ export type RecordReference = any;
    * @param {number} tableId
    * @param {number} rowNumber
    */
-declare class FranchiseFile {
+declare class FranchiseFile extends events {
     /**
      *
      * @param {string} filePath
      * @param {FranchiseFileSettings?} [settings]
      * @returns {Promise<FranchiseFile>}
      */
-    static create(filePath: string, settings?: FranchiseFileSettings | null): Promise<FranchiseFile>;
+    static create(filePath: string, settings?: FranchiseFileSettings | null | undefined): Promise<FranchiseFile>;
     /**
      *
      * @param {string} filePath
@@ -67,12 +68,12 @@ declare class FranchiseFile {
         table: TableStrategy;
         table2Field: Table2FieldStrategy;
         table3Field: Table3FieldStrategy;
-    };
-    schemaList: FranchiseSchema;
+    } | undefined;
+    schemaList: FranchiseSchema | undefined;
     /** @type {Array<FranchiseFileTable>} */
-    tables: Array<FranchiseFileTable>;
+    tables: FranchiseFileTable[] | undefined;
     /** @type {Array<AssetTable>} */
-    assetTable: Array<AssetTable>;
+    assetTable: Object[] | undefined;
     /**
      *
      * @param {string} outputFilePath
@@ -172,8 +173,9 @@ declare class FranchiseFile {
      * @param {number} recordIndex
      * @returns {Array<TableRecordReference>}
      */
-    getReferencesToRecord(tableId: number, recordIndex: number): any[];
+    getReferencesToRecord(tableId: number, recordIndex: number): Object[];
 }
+import events from "events";
 import FranchiseSchema from "./FranchiseSchema.js";
 import FranchiseFileTable from "./FranchiseFileTable.js";
 import FranchiseFileSettings from "./FranchiseFileSettings.js";

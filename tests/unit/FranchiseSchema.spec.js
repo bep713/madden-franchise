@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path, { dirname } from 'path';
 import { expect } from 'chai';
-import FranchiseSchema from '../../FranchiseSchema.js';
+import FranchiseSchema from '../../src/FranchiseSchema.js';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);

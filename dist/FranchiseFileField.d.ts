@@ -29,7 +29,7 @@ declare class FranchiseFileField {
     /** @returns {boolean} */
     get isReference(): boolean;
     /** @returns {RecordReference?} */
-    get referenceData(): RecordReference;
+    get referenceData(): any;
     /** @param {boolean} changed */
     set isChanged(changed: boolean);
     /** @returns {boolean} */
@@ -46,11 +46,10 @@ declare class FranchiseFileField {
     /** @param {BitView} unformattedValue @param {boolean} suppressErrors */
     setUnformattedValueWithoutChangeEvent(unformattedValue: BitView, suppressErrors: boolean): void;
     /** @returns {FranchiseEnumValue?} */
-    _getEnumFromValue(value: any): FranchiseEnumValue;
+    _getEnumFromValue(value: any): FranchiseEnumValue | null;
     /** @param {BitView} unformatted, @param {OffsetTableEntry} offset */
     _parseFieldValue(unformatted: BitView, offset: OffsetTableEntry): any;
 }
 import FranchiseFileTable2Field from "./FranchiseFileTable2Field.js";
 import FranchiseFileTable3Field from "./FranchiseFileTable3Field.js";
-import { BitView } from "bit-buffer";
 //# sourceMappingURL=FranchiseFileField.d.ts.map

@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import schemaPicker from '../../services/schemaPicker.js';
+import schemaPicker from '../../src/services/schemaPicker.js';
 
 const schemaPickerSettings = {
   'schemaDirectory': 'C:\\Projects\\madden-franchise\\tests\\data\\test-schemas'

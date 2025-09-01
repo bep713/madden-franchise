@@ -86,9 +86,9 @@ describe('FranchiseFileRecord unit tests', () => {
       'name': 'PlayerPosition'
     }];
 
-    await quibble.esm('../../services/utilService.js', {}, utilServiceMock);
-    await quibble.esm('../../FranchiseFileField.js', {}, FranchiseFileFieldMock);
-    FranchiseFileRecord = (await import('../../FranchiseFileRecord.js')).default;
+    await quibble.esm('../../src/services/utilService.js', {}, utilServiceMock);
+    await quibble.esm('../../src/FranchiseFileField.js', {}, FranchiseFileFieldMock);
+    FranchiseFileRecord = (await import('../../src/FranchiseFileRecord.js')).default;
   });
 
   afterEach(() => {

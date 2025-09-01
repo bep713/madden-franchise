@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { BitView } from 'bit-buffer';
-import FranchiseFile from '../../FranchiseFile.js';
-import FranchiseFileTable from '../../FranchiseFileTable.js';
+import FranchiseFile from '../../src/FranchiseFile.js';
+import FranchiseFileTable from '../../src/FranchiseFileTable.js';
 
 const filePaths = {
   'compressed': {

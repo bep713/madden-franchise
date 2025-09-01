@@ -13,8 +13,8 @@ describe('M20 File Strategy unit tests', () => {
         strategySpy.postPackFile.resetHistory();
         strategySpy.generateUnpackedContents.resetHistory();
 
-        await quibble.esm('../../../../strategies/common/file/FranchiseFileStrategy.js', {}, strategySpy);
-        M20FileStrategy = (await import('../../../../strategies/franchise/m20/M20FileStrategy.js')).default;
+        await quibble.esm('../../../../src/strategies/common/file/FranchiseFileStrategy.js', {}, strategySpy);
+        M20FileStrategy = (await import('../../../../src/strategies/franchise/m20/M20FileStrategy.js')).default;
     });
 
     afterEach(() => {

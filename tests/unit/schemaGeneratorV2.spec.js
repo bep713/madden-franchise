@@ -2,7 +2,7 @@ import fs from 'fs';
 import path, { dirname } from 'path';
 import zlib from 'zlib';
 import { expect } from 'chai';
-import { generateSchemaV2 } from '../../services/schemaGeneratorV2.js';
+import { generateSchemaV2 } from '../../src/services/schemaGeneratorV2.js';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);

@@ -1,7 +1,7 @@
 export default FranchiseEnumValue;
 declare class FranchiseEnumValue {
     /** @param {string} name @param {number} index @param {string} value @param {string?} [unformattedValue] */
-    constructor(name: string, index: number, value: string, unformattedValue?: string | null);
+    constructor(name: string, index: number, value: string, unformattedValue?: string | null | undefined);
     /** @private */
     private _name;
     /** @private */
@@ -14,7 +14,7 @@ declare class FranchiseEnumValue {
     get index(): number;
     get value(): number;
     /** @returns {string?} */
-    get unformattedValue(): string;
+    get unformattedValue(): string | null;
     /** @param {number} length */
     setMemberLength(length: number): void;
 }

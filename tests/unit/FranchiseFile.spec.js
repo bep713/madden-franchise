@@ -2,7 +2,7 @@ import fs from 'fs';
 import sinon from 'sinon';
 import { expect } from 'chai';
 import common from './common/common.js';
-import Constants from '../../Constants.js';
+import Constants from '../../src/Constants.js';
 import zlib from 'zlib';
 import quibble from 'quibble';
 
@@ -58,7 +58,7 @@ describe('Franchise File unit tests', () => {
     beforeEach(async () => {
         zlibSpy.inflateSync.resetHistory();
         await quibble.esm('zlib', zlibSpy, zlibSpy);
-        FranchiseFile = (await import('../../FranchiseFile.js')).default;
+        FranchiseFile = (await import('../../src/FranchiseFile.js')).default;
     });
 
     afterEach(() => {

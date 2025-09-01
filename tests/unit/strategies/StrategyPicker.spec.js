@@ -1,6 +1,6 @@
 import { expect } from 'chai';
-import Constants from '../../../Constants.js';
-import StrategyPicker from '../../../strategies/StrategyPicker.js';
+import Constants from '../../../src/Constants.js';
+import StrategyPicker from '../../../src/strategies/StrategyPicker.js';
 
 describe('Strategy Picker unit tests', () => {
     it('M19', () => {

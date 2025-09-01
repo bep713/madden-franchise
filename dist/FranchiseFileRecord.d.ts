@@ -36,7 +36,7 @@ declare class FranchiseFileRecord {
     /** @param {string} key @returns {*?} */
     getValueByKey(key: string): any | null;
     /** @param {string} key @returns {RecordReference?} */
-    getReferenceDataByKey(key: string): RecordReference;
+    getReferenceDataByKey(key: string): RecordReference | null;
     /** @returns {Record<string, FranchiseFileField>} */
     parseRecordFields(): Record<string, FranchiseFileField>;
     empty(): void;
