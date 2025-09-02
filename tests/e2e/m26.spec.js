@@ -2267,6 +2267,24 @@ describe('Madden 26 end to end tests', function () {
         });
       });
 
+      it('handles setting larger formatted values', (done) => {
+        const newData = JSON.parse(fs.readFileSync(path.join(__dirname, '../data/26LargeVisualsData.json'), 'utf8'));
+
+        table.records[0]['RawData'] = newData;
+
+        file.save(filePathToSave).then(() => {
+          let file2 = new FranchiseFile(filePathToSave);
+          file2.on('ready', async () => {
+            let table2 = file2.getTableByUniqueId(characterVisualsUniqueId);
+            await table2.readRecords();
+            
+            expect(table2.records[0]['RawData']).to.eql(JSON.stringify(newData));
+
+            done();
+          });
+        });
+      });
+
       /* Not relevant for M26 as this scenario does not exist
       describe('handles scenario where data exists between the table3 size & data', () => {
         let table, file3;

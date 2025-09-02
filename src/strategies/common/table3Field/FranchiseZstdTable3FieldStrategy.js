@@ -1,7 +1,6 @@
 import zlib from "zlib";
 import fs from "fs";
 import path, { dirname } from "path";
-import { Decoder } from "@toondepauw/node-zstd";
 import { IsonProcessor } from "../../../services/isonProcessor.js";
 import { fileURLToPath } from "url";
 
@@ -10,7 +9,6 @@ const __dirname = dirname(__filename);
 
 let FranchiseZstdTable3FieldStrategy = {};
 let dictionary = fs.readFileSync(path.join(__dirname, '../../../../data/zstd-dicts/26/dict.bin'));
-const zstdDecoder = new Decoder(dictionary);
 // Create a single IsonProcessor instance for M26 and reuse it for better performance
 const isonProcessor = new IsonProcessor(26);
 
@@ -28,7 +26,9 @@ FranchiseZstdTable3FieldStrategy.getFormattedValueFromUnformatted = (unformatted
     const zstdDataStartIndex = FranchiseZstdTable3FieldStrategy.getZstdDataStartIndex(unformattedValue);
     // Zstd decoder cannot handle extra padding bytes, so we need to get the exact number of bytes
     const length = unformattedValue.readUInt16LE(0);
-    const isonBuf = zstdDecoder.decodeSync(unformattedValue.subarray(zstdDataStartIndex, zstdDataStartIndex + length));
+
+    const isonBuf = zlib.zstdDecompressSync(unformattedValue.subarray(zstdDataStartIndex, zstdDataStartIndex + length), {dictionary: dictionary});
+
     // Convert the ISON buffer to a JSON object using the class instance
     const jsonObj = isonProcessor.isonVisualsToJson(isonBuf);
     return JSON.stringify(jsonObj);
@@ -39,8 +39,23 @@ FranchiseZstdTable3FieldStrategy.setUnformattedValueFromFormatted = (formattedVa
     let jsonObj = JSON.parse(formattedValue);
     // Convert the object into an ISON buffer using the class instance
     let isonBuf = isonProcessor.jsonVisualsToIson(jsonObj);
-    // Create the zstd-compressed buffer (not using dictionary due to node limitations, game still reads it fine)
-    const compressedBuf = zlib.zstdCompressSync(isonBuf);
+
+    // Create the zstd-compressed buffer
+    let compressedBuf = zlib.zstdCompressSync(isonBuf, {dictionary: dictionary});
+
+    // Some larger formatted values may require a higher compression level to fit within the field
+    // We use this check instead of always using the higher compression level for performance reasons
+    if(compressedBuf.length > maxLength)
+    {
+        compressedBuf = zlib.zstdCompressSync(isonBuf, {dictionary: dictionary, params: {[zlib.constants.ZSTD_c_compressionLevel]: 19}});
+
+        // If it still doesn't fit, throw an error as there's nothing more we can do
+        if(compressedBuf.length > maxLength)
+        {
+            throw new Error("Compressed table3 buffer exceeds maximum length");
+        }
+    }
+
     let padding = Buffer.alloc(maxLength - compressedBuf.length); // table3s all have the same length and are zero padded to the end.
     let sizeBuf = Buffer.alloc(2);
     sizeBuf.writeUInt16LE(compressedBuf.length);

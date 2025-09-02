@@ -1,0 +1,126 @@
+{
+  "loadouts": [
+    {
+      "loadoutCategory": "Base"
+    },
+    {
+      "loadoutType": "PlayerOnField",
+      "loadoutElements": [
+        {
+          "itemAssetName": "Undershirt_None",
+          "slotType": "InnerShirt"
+        },
+        {
+          "itemAssetName": "ArmSleeve_None",
+          "slotType": "LeftArmWear"
+        },
+        {
+          "itemAssetName": "ArmSleeve_None",
+          "slotType": "RightArmWear"
+        },
+        {
+          "itemAssetName": "ElbowGear_None",
+          "slotType": "LeftElbowWear"
+        },
+        {
+          "itemAssetName": "ElbowGear_None",
+          "slotType": "RightElbowWear"
+        },
+        {
+          "itemAssetName": "GearHand_glove_NikeSuperbad6_Black",
+          "slotType": "LeftHandWear"
+        },
+        {
+          "itemAssetName": "GearHand_glove_NikeSuperbad6_Black",
+          "slotType": "RightHandWear"
+        },
+        {
+          "itemAssetName": "GearFaceMask_Speedflex3BarRB"
+        },
+        {
+          "itemAssetName": "GearHelmet_Speed_Flex",
+          "slotType": "HeadWear"
+        },
+        {
+          "itemAssetName": "FaceMarks_None",
+          "slotType": "FacePaint"
+        },
+        {
+          "itemAssetName": "GearVisor_None",
+          "slotType": "Visor"
+        },
+        {
+          "itemAssetName": "Gear_JerseyStyle_SleeveTight",
+          "slotType": "OuterShirt"
+        },
+        {
+          "itemAssetName": "GearMouthpiece_None",
+          "slotType": "MouthWear"
+        },
+        {
+          "itemAssetName": "GearNeckpad_None",
+          "slotType": "Neckpad"
+        },
+        {
+          "itemAssetName": "GearFootwear_shoe_low_NikeEquinox",
+          "slotType": "LeftShoe"
+        },
+        {
+          "itemAssetName": "GearFootwear_shoe_low_NikeEquinox",
+          "slotType": "RightShoe"
+        },
+        {
+          "itemAssetName": "Gear_Socks_Mid",
+          "slotType": "InnerSocks"
+        },
+        {
+          "itemAssetName": "GearSpats_none",
+          "slotType": "LeftSpat"
+        },
+        {
+          "itemAssetName": "GearSpats_none",
+          "slotType": "RightSpat"
+        },
+        {
+          "itemAssetName": "Towel_South",
+          "slotType": "Towel"
+        },
+        {
+          "itemAssetName": "GearWrist_wristTapedNormal_Black",
+          "slotType": "LeftWristWear"
+        },
+        {
+          "itemAssetName": "GearWrist_wristTapedNormal_Black",
+          "slotType": "RightWristWear"
+        },
+        {
+          "itemAssetName": "ThighPad_Regular",
+          "slotType": "LeftThighWear"
+        },
+        {
+          "itemAssetName": "KneePad_Regular",
+          "slotType": "KneeWear"
+        },
+        {
+          "blends": [
+            {
+              "barycentricBlend": 0.5,
+              "baseBlend": 0.5
+            }
+          ],
+          "itemAssetName": "Backplate_Standard",
+          "slotType": "BackPlate"
+        },
+        {
+          "itemAssetName": "Small_Pads",
+          "slotType": "Shoulderpads"
+        },
+        {
+          "itemAssetName": "ThighPad_Regular",
+          "slotType": "RightThighWear"
+        }
+      ]
+    }
+  ],
+  "skinTone": 2
+}
