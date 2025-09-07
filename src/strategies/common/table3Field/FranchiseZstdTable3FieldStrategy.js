@@ -16,9 +16,20 @@ FranchiseZstdTable3FieldStrategy.getZstdDataStartIndex = (unformattedValue) => {
     return unformattedValue.indexOf(Buffer.from([0x28, 0xB5, 0x2F, 0xFD]));
 };
 
-FranchiseZstdTable3FieldStrategy.getInitialUnformattedValue = (field, data) => {
-    return data.slice(field.thirdTableField.index, (field.thirdTableField.index + field.offset.maxLength + 2));
+FranchiseZstdTable3FieldStrategy.getInitialUnformattedValue = (field, data, overflowField) => {
     // extend maxLength + 2 because the first 2 bytes are the size of the compressed data
+    const table3InitialData = data.slice(field.thirdTableField.index, (field.thirdTableField.index + field.offset.maxLength + 2));
+    
+    // If an overflow field exists, concatenate its data to get the full unformatted value
+    if(overflowField)
+    {
+        const overflowData = data.slice(overflowField.thirdTableField.index, (overflowField.thirdTableField.index + overflowField.offset.maxLength + 2));
+        return Buffer.concat([table3InitialData, overflowData]);
+    }
+
+    // Otherwise, just return the initial data
+    return table3InitialData;
+    
 };
 
 FranchiseZstdTable3FieldStrategy.getFormattedValueFromUnformatted = (unformattedValue) => {
@@ -49,10 +60,12 @@ FranchiseZstdTable3FieldStrategy.setUnformattedValueFromFormatted = (formattedVa
     {
         compressedBuf = zlib.zstdCompressSync(isonBuf, {dictionary: dictionary, params: {[zlib.constants.ZSTD_c_compressionLevel]: 19}});
 
-        // If it still doesn't fit, throw an error as there's nothing more we can do
+        // If it still doesn't fit, return just the size + buffer so it can be handled via overflow record
         if(compressedBuf.length > maxLength)
         {
-            throw new Error("Compressed table3 buffer exceeds maximum length");
+            const sizeBuf = Buffer.alloc(2);
+            sizeBuf.writeUInt16LE(compressedBuf.length);
+            return Buffer.concat([sizeBuf, compressedBuf]);
         }
     }
 

@@ -484,8 +484,20 @@ class FranchiseFileTable extends EventEmitter {
             const fieldsReferencingThirdTable = record.fieldsArray.filter((field) => {
                 return field.thirdTableField;
             });
+
+            // Check if this record has an overflow record reference
+            const overflowRef = record['Overflow'];
+            const overflowTableId = utilService.bin2dec(overflowRef.substring(0, 15));
+            const overflowTableRow = utilService.bin2dec(overflowRef.substring(15));
+            let overflowRecord = null;
+            // If the overflow reference exists and is in this table, use it when reading the unformatted value
+            if(overflowTableId !== 0 && overflowTableId === header.tableId)
+            {
+                overflowRecord = records[overflowTableRow];
+            }
+
             fieldsReferencingThirdTable.forEach((field) => {
-                field.thirdTableField.unformattedValue = that.strategyBase.table3Field.getInitialUnformattedValue(field, thirdTableData);
+                field.thirdTableField.unformattedValue = that.strategyBase.table3Field.getInitialUnformattedValue(field, thirdTableData, overflowRecord ? overflowRecord.fields[field.key] : null);
                 field.thirdTableField.strategy = that.strategyBase.table3Field;
                 that.table3Records.push(field.thirdTableField);
                 field.thirdTableField.parent = that;

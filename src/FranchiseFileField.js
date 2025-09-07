@@ -185,6 +185,12 @@ class FranchiseFileField {
         this._isChanged = changed;
     }
     ;
+
+    /** @returns {FranchiseFIleRecord} */
+    get parent() {
+        return this._parent;
+    }
+
     /** @param {OffsetTableEntry} offset */
     getValueAs(offset) {
         if (this._unformattedValue === null) {
