@@ -113,17 +113,16 @@ class FranchiseFileTable3Field {
 
         // Get the parent field and parent table for the current table3 field
         const field = this.fieldReference;
-        const table = field.parent.parent;
+        const record = field.parent;
+        const table = record.parent;
 
         // Get existing value of Overflow field to see if we already have an overflow record assigned
-        const fieldOverflowRef = field.parent.getFieldByKey('Overflow').value;
-        const overflowTableId = utilService.bin2dec(fieldOverflowRef.substring(0, 15));
-        const overflowTableRow = utilService.bin2dec(fieldOverflowRef.substring(15));
+        const overflowRecord = utilService.getTable3OverflowRecord(record);
 
         // If the overflow record is assigned and is in this table, use it
-        if(overflowTableId !== 0 && overflowTableId === table.header.tableId)
+        if(overflowRecord)
         {
-            table.records[overflowTableRow].getFieldByKey(field.key).thirdTableField.unformattedValue = overflowData;
+            overflowRecord.getFieldByKey(field.key).thirdTableField.unformattedValue = overflowData;
         }
         else // Otherwise, get the next available record in the table, if there is one, and assign it as the overflow record
         {
@@ -133,7 +132,7 @@ class FranchiseFileTable3Field {
             if(nextRecordIndex != table.header.recordCapacity)
             {
                 // Update the Overflow reference of the current record to point to the new overflow record
-                const reference = utilService.dec2bin(table.header.tableId, 15) + utilService.dec2bin(nextRecordIndex, 17);
+                const reference = utilService.getBinaryReferenceData(table.header.tableId, nextRecordIndex);
                 field.parent.getFieldByKey('Overflow').value = reference;
 
                 // Unempty the overflow record and set the data
@@ -156,20 +155,21 @@ class FranchiseFileTable3Field {
             return;
         }
 
-        // If the referenced record is in the current table, clear it out and empty it
-        const overflowTableId = utilService.bin2dec(overflowRef.substring(0, 15));
-        const overflowTableRow = utilService.bin2dec(overflowRef.substring(15));
-
         const field = this.fieldReference;
-        const table = field.parent.parent;
-        if(overflowTableId === table.header.tableId)
+        const record = field.parent;
+        const table = record.parent;
+
+        // If the referenced record is in the current table, clear it out and empty it
+        const overflowRecord = utilService.getTable3OverflowRecord(record);
+
+        if(overflowRecord)
         {
-            table.records[overflowTableRow].getFieldByKey(field.key).value = {};
-            table.records[overflowTableRow].empty();
+            overflowRecord.getFieldByKey(field.key).value = {};
+            overflowRecord.empty();
         }
 
         // Clear the overflow reference
-        this.fieldReference.parent.getFieldByKey('Overflow').value = emptyRef;
+        record.getFieldByKey('Overflow').value = emptyRef;
         
     }
 }

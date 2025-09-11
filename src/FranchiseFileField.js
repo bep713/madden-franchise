@@ -186,7 +186,7 @@ class FranchiseFileField {
     }
     ;
 
-    /** @returns {FranchiseFIleRecord} */
+    /** @returns {FranchiseFileRecord} */
     get parent() {
         return this._parent;
     }
