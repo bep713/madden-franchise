@@ -2267,6 +2267,61 @@ describe('Madden 26 end to end tests', function () {
         });
       });
 
+      it('handles setting larger formatted values', (done) => {
+        const newData = JSON.parse(fs.readFileSync(path.join(__dirname, '../data/26LargeVisualsData.json'), 'utf8'));
+
+        table.records[0]['RawData'] = newData;
+
+        file.save(filePathToSave).then(() => {
+          let file2 = new FranchiseFile(filePathToSave);
+          file2.on('ready', async () => {
+            let table2 = file2.getTableByUniqueId(characterVisualsUniqueId);
+            await table2.readRecords();
+            
+            expect(table2.records[0]['RawData']).to.eql(JSON.stringify(newData));
+
+            done();
+          });
+        });
+      });
+
+      it('handles reading overflow data', (done) => {
+        let file2 = new FranchiseFile(path.join(__dirname, '../data/CAREER-26VISUALSOVERFLOW'));
+        file2.on('ready', async () => {
+          let table2 = file2.getTableByUniqueId(characterVisualsUniqueId);
+          await table2.readRecords();
+
+          const visualsData = JSON.parse(table2.records[488]['RawData'])
+
+          expect(visualsData.loadouts.length).to.not.equal(0);
+          done();
+        });
+      });
+
+      it('handles saving with overflow data', (done) => {
+        let file2 = new FranchiseFile(path.join(__dirname, '../data/CAREER-26VISUALSOVERFLOW'));
+        file2.on('ready', async () => {
+          let table2 = file2.getTableByUniqueId(characterVisualsUniqueId);
+          await table2.readRecords();
+          const visualsData = JSON.parse(table2.records[488]['RawData']);
+
+          visualsData.skintone = 3;
+
+          table2.records[488]['RawData'] = visualsData;
+
+          file2.save(filePathToSave).then(() => {
+            let file3 = new FranchiseFile(filePathToSave);
+            file3.on('ready', async () => {
+              let table3 = file3.getTableByUniqueId(characterVisualsUniqueId);
+              await table3.readRecords();
+              const visualsData2 = JSON.parse(table3.records[488]['RawData']);
+              expect(visualsData2.skinTone).to.equal(3);
+              done();
+            });
+          });
+        });
+      });
+      
       /* Not relevant for M26 as this scenario does not exist
       describe('handles scenario where data exists between the table3 size & data', () => {
         let table, file3;

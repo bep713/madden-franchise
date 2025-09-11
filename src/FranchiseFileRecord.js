@@ -77,6 +77,12 @@ class FranchiseFileRecord {
             });
         }
     }
+
+    /** @returns {FranchiseFileTable} */
+    get parent() {
+        return this._parent;
+    }
+
     /** @param {string} key @returns {FranchiseFileField?} */
     getFieldByKey(key) {
         return this._fields[key];

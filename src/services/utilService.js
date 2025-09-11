@@ -203,4 +203,17 @@ utilService.getBinaryReferenceData = function (tableId, rowNumber) {
     const recordIndexBinary = utilService.dec2bin(rowNumber, 17);
     return referenceBinary + recordIndexBinary;
 };
+
+utilService.getTable3OverflowRecord = function (record) {
+    const overflowRef = record.getFieldByKey('Overflow').value;
+    //console.log(overflowRef);
+    const { tableId: overflowTableId, rowNumber: overflowTableRow } = utilService.getReferenceData(overflowRef);
+    // If the overflow reference exists and is in this table, use it when reading the unformatted value
+    if(overflowTableId !== 0 && overflowTableId === record.parent.header.tableId)
+    {
+        return record.parent.records[overflowTableRow];
+    }
+
+    return null;
+};
 export default utilService;
