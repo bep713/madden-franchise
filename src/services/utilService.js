@@ -3,49 +3,51 @@ let utilService = {};
 utilService.intersection = function (arrayOfArrays) {
     return arrayOfArrays
         .reduce((acc, array, index) => {
-        if (index === 0)
-            return array;
-        return array.filter((value) => acc.includes(value));
-    }, [])
-        .filter((value, index, self) => self.indexOf(value) === index) // Make values unique
-    ;
+            if (index === 0) return array;
+            return array.filter((value) => acc.includes(value));
+        }, [])
+        .filter((value, index, self) => self.indexOf(value) === index); // Make values unique
 };
 utilService.dec2bin = function (dec, len) {
     const bin = (dec >>> 0).toString(2);
-    if (len)
-        return bin.padStart(len, '0');
+    if (len) return bin.padStart(len, '0');
     return bin;
 };
 utilService.bin2dec = function (binary) {
     if (!utilService.isString(binary)) {
-        throw new Error(`Argument invalid - must be of type string. You passed in a ${typeof binary}.`);
-    }
-    else if (!utilService.stringOnlyContainsBinaryDigits(binary)) {
-        throw new Error(`Argument invalid - string must only contain binary digits.`);
+        throw new Error(
+            `Argument invalid - must be of type string. You passed in a ${typeof binary}.`
+        );
+    } else if (!utilService.stringOnlyContainsBinaryDigits(binary)) {
+        throw new Error(
+            `Argument invalid - string must only contain binary digits.`
+        );
     }
     return parseInt(binary, 2);
 };
 utilService.bin2Float = function (binary) {
     if (!utilService.isString(binary)) {
-        throw new Error(`Argument invalid - must be of type string. You passed in a ${typeof binary}.`);
-    }
-    else if (!utilService.stringOnlyContainsBinaryDigits(binary)) {
-        throw new Error(`Argument invalid - string must only contain binary digits.`);
+        throw new Error(
+            `Argument invalid - must be of type string. You passed in a ${typeof binary}.`
+        );
+    } else if (!utilService.stringOnlyContainsBinaryDigits(binary)) {
+        throw new Error(
+            `Argument invalid - string must only contain binary digits.`
+        );
     }
     const buffer = Buffer.from(utilService.bin2hex(binary), 'hex');
     if (buffer.length >= 4) {
         return buffer.readFloatBE(0);
-    }
-    else {
+    } else {
         return 0;
     }
 };
 utilService.float2Bin = function (float) {
-    const getHex = i => ('00' + i.toString(16)).slice(-2);
-    var view = new DataView(new ArrayBuffer(4)), result;
+    const getHex = (i) => ('00' + i.toString(16)).slice(-2);
+    var view = new DataView(new ArrayBuffer(4)),
+        result;
     view.setFloat32(0, float);
-    result = Array
-        .apply(null, { length: 4 })
+    result = Array.apply(null, { length: 4 })
         .map((_, i) => getHex(view.getUint8(i)))
         .join('');
     return utilService.hex2bin(result).padStart(32, '0');
@@ -59,7 +61,7 @@ utilService.uintToInt = function (uint, nbit) {
     return uint;
 };
 utilService.hex2bin = function (hex) {
-    return (parseInt(hex, 16).toString(2)).padStart(8, '0');
+    return parseInt(hex, 16).toString(2).padStart(8, '0');
 };
 utilService.bin2hex = function (bin) {
     return parseInt(bin, 2).toString(16).padStart(2, '0').toUpperCase();
@@ -98,14 +100,15 @@ utilService.binaryBlockToDecimalBlock = function (binary) {
 utilService.getBitArray = function (data) {
     let arr = [...data];
     try {
-        const bits = arr.map((decimal) => {
-            return (decimal).toString(2).padStart(8, '0');
-        }).reduce((prev, curr) => {
-            return prev + curr;
-        });
+        const bits = arr
+            .map((decimal) => {
+                return decimal.toString(2).padStart(8, '0');
+            })
+            .reduce((prev, curr) => {
+                return prev + curr;
+            });
         return bits;
-    }
-    catch {
+    } catch {
         return null;
     }
 };
@@ -113,14 +116,17 @@ utilService.replaceAt = function (oldValue, index, value) {
     if (index < 0) {
         throw new Error('Index must be a positive number.');
     }
-    return oldValue.substr(0, index) + value + oldValue.substr(index + value.length);
+    return (
+        oldValue.substr(0, index) +
+        value +
+        oldValue.substr(index + value.length)
+    );
 };
 utilService.byteArrayToLong = function (byteArray, reverse) {
     let newByteArray;
     if (Buffer.isBuffer(byteArray)) {
         newByteArray = Buffer.from(byteArray);
-    }
-    else {
+    } else {
         newByteArray = byteArray.slice();
     }
     if (reverse) {
@@ -128,7 +134,7 @@ utilService.byteArrayToLong = function (byteArray, reverse) {
     }
     var value = 0;
     for (var i = newByteArray.length - 1; i >= 0; i--) {
-        value = (value * 256) + newByteArray[i];
+        value = value * 256 + newByteArray[i];
     }
     return value;
 };
@@ -154,7 +160,7 @@ utilService.removeChildNodes = function (node) {
     }
 };
 utilService.isString = function (str) {
-    return (typeof str === 'string' || str instanceof String);
+    return typeof str === 'string' || str instanceof String;
 };
 utilService.stringOnlyContainsBinaryDigits = function (str) {
     return /[a-zA-Z2-9]/.test(str) === false;
@@ -162,14 +168,25 @@ utilService.stringOnlyContainsBinaryDigits = function (str) {
 utilService.readDWordAt = function (index, data, le) {
     if (index < 3) {
         throw new Error('Error: index must be equal to or greater than 3.');
-    }
-    else if (index >= data.length) {
-        throw new Error('Error: index must not be greater than the passed in data array length.');
+    } else if (index >= data.length) {
+        throw new Error(
+            'Error: index must not be greater than the passed in data array length.'
+        );
     }
     if (le) {
-        return utilService.toUint32(data[index - 3] | data[index - 2] << 8 | data[index - 1] << 16 | data[index] << 24);
+        return utilService.toUint32(
+            data[index - 3] |
+                (data[index - 2] << 8) |
+                (data[index - 1] << 16) |
+                (data[index] << 24)
+        );
     }
-    return utilService.toUint32(data[index] | data[index - 1] << 8 | data[index - 2] << 16 | data[index - 3] << 24);
+    return utilService.toUint32(
+        data[index] |
+            (data[index - 1] << 8) |
+            (data[index - 2] << 16) |
+            (data[index - 3] << 24)
+    );
 };
 utilService.toUint32 = function (x) {
     return utilService.modulo(utilService.toInteger(x), Math.pow(2, 32));
@@ -183,8 +200,8 @@ utilService.toInteger = function (x) {
 };
 utilService.getReferenceData = function (value) {
     return {
-        'tableId': utilService.bin2dec(value.substring(0, 15)),
-        'rowNumber': utilService.bin2dec(value.substring(15))
+        tableId: utilService.bin2dec(value.substring(0, 15)),
+        rowNumber: utilService.bin2dec(value.substring(15))
     };
 };
 utilService.getReferenceDataFromBuffer = (buf) => {
@@ -207,10 +224,13 @@ utilService.getBinaryReferenceData = function (tableId, rowNumber) {
 utilService.getTable3OverflowRecord = function (record) {
     const overflowRef = record.getFieldByKey('Overflow').value;
     //console.log(overflowRef);
-    const { tableId: overflowTableId, rowNumber: overflowTableRow } = utilService.getReferenceData(overflowRef);
+    const { tableId: overflowTableId, rowNumber: overflowTableRow } =
+        utilService.getReferenceData(overflowRef);
     // If the overflow reference exists and is in this table, use it when reading the unformatted value
-    if(overflowTableId !== 0 && overflowTableId === record.parent.header.tableId)
-    {
+    if (
+        overflowTableId !== 0 &&
+        overflowTableId === record.parent.header.tableId
+    ) {
         return record.parent.records[overflowTableRow];
     }
 

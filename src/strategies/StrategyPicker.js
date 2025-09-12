@@ -1,11 +1,11 @@
-import Constants from "../Constants.js";
-import M19Strategy from "./franchise/m19/M19Strategy.js";
-import M20Strategy from "./franchise/m20/M20Strategy.js";
-import M24Strategy from "./franchise/m24/M24Strategy.js";
-import M25Strategy from "./franchise/m25/M25Strategy.js";
-import M26Strategy from "./franchise/m26/M26Strategy.js";
-import M19FTCStrategy from "./franchise-common/m19/M19FTCStrategy.js";
-import M20FTCStrategy from "./franchise-common/m20/M20FTCStrategy.js";
+import Constants from '../Constants.js';
+import M19Strategy from './franchise/m19/M19Strategy.js';
+import M20Strategy from './franchise/m20/M20Strategy.js';
+import M24Strategy from './franchise/m24/M24Strategy.js';
+import M25Strategy from './franchise/m25/M25Strategy.js';
+import M26Strategy from './franchise/m26/M26Strategy.js';
+import M19FTCStrategy from './franchise-common/m19/M19FTCStrategy.js';
+import M20FTCStrategy from './franchise-common/m20/M20FTCStrategy.js';
 let StrategyPicker = {};
 /**
  * @returns GameStrategy
@@ -28,8 +28,7 @@ StrategyPicker.pick = (type) => {
             case 26:
                 return M26Strategy;
         }
-    }
-    else {
+    } else {
         switch (type.year) {
             case 19:
                 return M19FTCStrategy;

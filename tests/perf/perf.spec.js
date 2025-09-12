@@ -8,14 +8,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const filePaths = {
-    'compressed': {
-      'm21': 'tests/data/CAREER-21COMPRESS'
+    compressed: {
+        m21: 'tests/data/CAREER-21COMPRESS'
     },
-    'uncompressed': {
-      'm21': 'tests/data/21UNCOMPRESS.frt'
+    uncompressed: {
+        m21: 'tests/data/21UNCOMPRESS.frt'
     },
-    'saveTest': {
-      'm21': 'tests/data/CAREER-TESTSAVE-21'
+    saveTest: {
+        m21: 'tests/data/CAREER-TESTSAVE-21'
     }
 };
 
@@ -23,10 +23,10 @@ let file = createNewFranchiseFile(filePaths.compressed.m21);
 
 function createNewFranchiseFile(thePath) {
     return new FranchiseFile(thePath, {
-        'autoParse': false,
-        'schemaDirectory': path.join(__dirname, '../data/test-schemas')
+        autoParse: false,
+        schemaDirectory: path.join(__dirname, '../data/test-schemas')
     });
-};
+}
 
 describe('madden franchise performance tests', function () {
     this.timeout(7000);
@@ -37,7 +37,7 @@ describe('madden franchise performance tests', function () {
     before(async () => {
         memoryBefore = getHeapInMB();
         console.time('parse');
-        
+
         await file.parse();
 
         if (!file.isLoaded) {
@@ -49,7 +49,7 @@ describe('madden franchise performance tests', function () {
         }
 
         console.timeEnd('parse');
-        
+
         const memoryAfter = getHeapInMB();
         const memoryUsedInTest = (memoryAfter - memoryBefore).toFixed(2);
         console.log(`Parse used approximately ${memoryUsedInTest} MB\n`);
@@ -79,15 +79,14 @@ describe('madden franchise performance tests', function () {
                 constructor(buffer) {
                     this._buffer = buffer;
                 }
-            };
+            }
 
             class Field {
                 constructor(buf) {
                     this._buf = buf;
                     this._test = 'test';
                 }
-            };
-
+            }
 
             for (let i = 0; i < 4000; i++) {
                 let record = new Record(buffer);
@@ -127,7 +126,7 @@ describe('madden franchise performance tests', function () {
             const overallPercentage = file.getTableById(4097);
             await overallPercentage.readRecords();
         });
-    
+
         it('large table', async () => {
             const player = file.getTableById(4226);
             await player.readRecords();
@@ -145,7 +144,7 @@ describe('madden franchise performance tests', function () {
             it('get from record', () => {
                 table.records[0].PercentageSpline;
             });
-    
+
             it('get from field explicitly', () => {
                 table.records[0].fields.PercentageSpline.value;
             });
@@ -159,7 +158,7 @@ describe('madden franchise performance tests', function () {
             it('get from record', () => {
                 table.records[0].CareerStats;
             });
-    
+
             it('get from field explicitly', () => {
                 table.records[0].CareerStats.value;
             });
@@ -167,7 +166,6 @@ describe('madden franchise performance tests', function () {
     });
 
     describe('quick validation', () => {
-        
         describe('overall percentage', () => {
             let table;
             before(() => {
@@ -178,7 +176,7 @@ describe('madden franchise performance tests', function () {
                 console.time('read');
                 table.records[0].PlayerPosition;
                 console.timeEnd('read');
-    
+
                 expect(table.records[0].PlayerPosition).to.equal('CB');
             });
 
@@ -203,14 +201,14 @@ describe('madden franchise performance tests', function () {
                 console.timeEnd('write');
 
                 expect(table.records[20].FirstName).to.equal('Test');
-            }); 
+            });
         });
     });
 
     async function createFranchiseFileAndEnsureReady(path) {
         let file = createNewFranchiseFile(path);
         await file.parse();
-        
+
         await new Promise((resolve) => {
             file.on('ready', () => {
                 resolve();
@@ -218,10 +216,12 @@ describe('madden franchise performance tests', function () {
         });
 
         return file;
-    };
+    }
 
     it('use case #1 - "export"', async () => {
-        file = await createFranchiseFileAndEnsureReady(filePaths.compressed.m21);
+        file = await createFranchiseFileAndEnsureReady(
+            filePaths.compressed.m21
+        );
 
         const player = file.getTableById(4226);
 
@@ -239,7 +239,9 @@ describe('madden franchise performance tests', function () {
     });
 
     it('use case #2 - "editor"', async () => {
-        file = await createFranchiseFileAndEnsureReady(filePaths.compressed.m21);
+        file = await createFranchiseFileAndEnsureReady(
+            filePaths.compressed.m21
+        );
 
         const player = file.getTableById(4226);
 
@@ -265,7 +267,9 @@ describe('madden franchise performance tests', function () {
     });
 
     it('use case #3 - "script"', async () => {
-        file = await createFranchiseFileAndEnsureReady(filePaths.compressed.m21);
+        file = await createFranchiseFileAndEnsureReady(
+            filePaths.compressed.m21
+        );
 
         const player = file.getTableById(4226);
 
@@ -288,10 +292,10 @@ describe('madden franchise performance tests', function () {
                 9: record._fields.ContractSalary4
             };
         });
-        console.timeEnd('read 5 records, 10 fields each')
+        console.timeEnd('read 5 records, 10 fields each');
 
         const team = file.getTableById(7708);
-        
+
         console.time('read second table');
         await team.readRecords();
         console.timeEnd('read second table');
@@ -315,4 +319,4 @@ describe('madden franchise performance tests', function () {
 
 function getHeapInMB() {
     return process.memoryUsage().heapUsed / 1024 / 1024;
-};
+}

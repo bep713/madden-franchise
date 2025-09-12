@@ -5,28 +5,39 @@ import FranchiseTableStrategy from '../../../../src/strategies/common/table/Fran
 describe('Franchise Table Strategy unit tests', () => {
     describe('get table2 binary data', () => {
         it('gives expected result if all fields are parsed', () => {
-            const table2Records = [{
-                'isChanged': false,
-                'index': 0,
-                'hexData': Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00])
-            }, {
-                'isChanged': true,
-                'index': 6,
-                'hexData': Buffer.from([0x68, 0x65, 0x6C, 0x6C, 0x6F, 0x00])
-            }, {
-                'isChanged': false,
-                'index': 12,
-                'hexData': Buffer.from([0x74, 0x65, 0x73, 0x74, 0x31, 0x32])
-            }, {
-                'isChanged': false,
-                'index': 0,
-                'hexData': Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00])
-            }];
+            const table2Records = [
+                {
+                    isChanged: false,
+                    index: 0,
+                    hexData: Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00])
+                },
+                {
+                    isChanged: true,
+                    index: 6,
+                    hexData: Buffer.from([0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x00])
+                },
+                {
+                    isChanged: false,
+                    index: 12,
+                    hexData: Buffer.from([0x74, 0x65, 0x73, 0x74, 0x31, 0x32])
+                },
+                {
+                    isChanged: false,
+                    index: 0,
+                    hexData: Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00])
+                }
+            ];
 
-            const oldData = Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4F, 0x6C, 0x64, 0x44, 0x61, 0x74, 
-                0x74, 0x65, 0x73, 0x74, 0x31, 0x32, 0x67, 0x00, 0x00, 0x00, 0x00, 0x00]);
+            const oldData = Buffer.from([
+                0x67, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4f, 0x6c, 0x64, 0x44,
+                0x61, 0x74, 0x74, 0x65, 0x73, 0x74, 0x31, 0x32, 0x67, 0x00,
+                0x00, 0x00, 0x00, 0x00
+            ]);
 
-            const result = FranchiseTableStrategy.getTable2BinaryData(table2Records, oldData);
+            const result = FranchiseTableStrategy.getTable2BinaryData(
+                table2Records,
+                oldData
+            );
 
             const expectedResult = table2Records.reduce((prev, cur) => {
                 return Buffer.concat([prev, cur.hexData]);
@@ -36,32 +47,46 @@ describe('Franchise Table Strategy unit tests', () => {
         });
 
         it('gives expected results if certain fields are omitted', () => {
-            const table2Records = [{
-                'isChanged': false,
-                'index': 0,
-                'hexData': Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00])
-            }, {
-                'isChanged': true,
-                'index': 6,
-                'hexData': Buffer.from([0x68, 0x65, 0x6C, 0x6C, 0x6F, 0x00])
-            }, {
-                'isChanged': false,
-                'index': 18,
-                'hexData': Buffer.from([0x74, 0x65, 0x73, 0x74, 0x31, 0x32])
-            }, {
-                'isChanged': false,
-                'index': 0,
-                'hexData': Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00])
-            }];
+            const table2Records = [
+                {
+                    isChanged: false,
+                    index: 0,
+                    hexData: Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00])
+                },
+                {
+                    isChanged: true,
+                    index: 6,
+                    hexData: Buffer.from([0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x00])
+                },
+                {
+                    isChanged: false,
+                    index: 18,
+                    hexData: Buffer.from([0x74, 0x65, 0x73, 0x74, 0x31, 0x32])
+                },
+                {
+                    isChanged: false,
+                    index: 0,
+                    hexData: Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00])
+                }
+            ];
 
-            const oldData = Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4F, 0x6C, 0x64, 0x44, 0x61, 0x74, 0x68, 0x65, 
-                0x6C, 0x6C, 0x6F, 0x00, 0x74, 0x65, 0x73, 0x74, 0x31, 0x32, 0x67, 0x00, 0x00, 0x00, 0x00, 0x00]);
+            const oldData = Buffer.from([
+                0x67, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4f, 0x6c, 0x64, 0x44,
+                0x61, 0x74, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x00, 0x74, 0x65,
+                0x73, 0x74, 0x31, 0x32, 0x67, 0x00, 0x00, 0x00, 0x00, 0x00
+            ]);
 
-            const expectedResult = Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00, 0x68, 0x65, 0x6C, 0x6C, 0x6F, 0x00, 0x68, 0x65, 
-                0x6C, 0x6C, 0x6F, 0x00, 0x74, 0x65, 0x73, 0x74, 0x31, 0x32, 0x67, 0x00, 0x00, 0x00, 0x00, 0x00]);
+            const expectedResult = Buffer.from([
+                0x67, 0x00, 0x00, 0x00, 0x00, 0x00, 0x68, 0x65, 0x6c, 0x6c,
+                0x6f, 0x00, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x00, 0x74, 0x65,
+                0x73, 0x74, 0x31, 0x32, 0x67, 0x00, 0x00, 0x00, 0x00, 0x00
+            ]);
 
-            const result = FranchiseTableStrategy.getTable2BinaryData(table2Records, oldData);
-            
+            const result = FranchiseTableStrategy.getTable2BinaryData(
+                table2Records,
+                oldData
+            );
+
             common.hashCompare(Buffer.concat(result), expectedResult);
         });
 
@@ -150,14 +175,14 @@ describe('Franchise Table Strategy unit tests', () => {
                     }
                 },
                 {
-                    offset: table.offsetTable[3],   // not a string field
+                    offset: table.offsetTable[3] // not a string field
                 },
                 {
                     offset: table.offsetTable[4],
                     secondTableField: {
                         offset: 0
                     }
-                },
+                }
             ]
         };
 
@@ -166,7 +191,7 @@ describe('Franchise Table Strategy unit tests', () => {
         // each record table2 holds 48 bytes
         // This record index is 7, so 7*48 + (field offset)
         expect(record.fieldsArray[0].secondTableField.offset).to.equal(336);
-        expect(record.fieldsArray[1].secondTableField.offset).to.equal(367);    // offsets are out of order above
+        expect(record.fieldsArray[1].secondTableField.offset).to.equal(367); // offsets are out of order above
         expect(record.fieldsArray[2].secondTableField.offset).to.equal(345);
         expect(record.fieldsArray[4].secondTableField.offset).to.equal(378);
     });

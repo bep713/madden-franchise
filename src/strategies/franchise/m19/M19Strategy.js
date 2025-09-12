@@ -1,7 +1,7 @@
-import M19FileStrategy from "./M19FileStrategy.js";
-import M19TableStrategy from "./M19TableStrategy.js";
-import M19Table2FieldStrategy from "./M19Table2FieldStrategy.js";
-import M24Table3Strategy from "../m24/M24Table3FieldStrategy.js";
+import M19FileStrategy from './M19FileStrategy.js';
+import M19TableStrategy from './M19TableStrategy.js';
+import M19Table2FieldStrategy from './M19Table2FieldStrategy.js';
+import M24Table3Strategy from '../m24/M24Table3FieldStrategy.js';
 export const name = 'M19Strategy';
 export { M19FileStrategy as file };
 export { M19TableStrategy as table };

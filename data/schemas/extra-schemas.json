@@ -1,27 +1,31 @@
-[{
+[
+    {
         "numMembers": "1",
         "assetId": "28862",
         "name": "UserEntity",
         "base": null,
-        "attributes": [{
-            "index": "0",
-            "name": "IsUserControlled",
-            "type": "bool",
-            "minValue": null,
-            "maxValue": null,
-            "maxLength": null,
-            "default": "False",
-            "final": null,
-            "enum": null,
-            "const": null
-        }]
+        "attributes": [
+            {
+                "index": "0",
+                "name": "IsUserControlled",
+                "type": "bool",
+                "minValue": null,
+                "maxValue": null,
+                "maxLength": null,
+                "default": "False",
+                "final": null,
+                "enum": null,
+                "const": null
+            }
+        ]
     },
     {
         "numMembers": "2",
         "assetId": null,
         "name": "Reaction",
         "base": "none()",
-        "attributes": [{
+        "attributes": [
+            {
                 "index": "1",
                 "name": "EventRecord",
                 "type": "record",
@@ -52,178 +56,216 @@
         "assetId": null,
         "name": "Request",
         "base": "none()",
-        "attributes": [{
-            "name": "IsResponseRequired",
-            "type": "bool",
-            "default": "False"
-          }, {
-            "name": "IsConnectionRequired",
-            "type": "bool",
-            "default": "False"
-          }, {
-            "name": "IsBlocking",
-            "type": "bool",
-            "default": "False"
-          }, {
-            "name": "IsPersistent",
-            "type": "bool",
-            "default": "False"
-          }, {
-            "name": "CanUpdateResponse",
-            "type": "bool",
-            "default": "False"
-          }, {
-            "name": "ExpirationDuration",
-            "type": "int",
-            "minValue": "0",
-            "maxValue": "16777215",
-            "default": "0"
-          }, {
-            "index": "7",
-            "name": "CpuResponseMinDuration",
-            "type": "int",
-            "minValue": "0",
-            "maxValue": "16777215",
-            "default": "0"
-          }, {
-            "name": "CpuResponseMaxDuration",
-            "type": "int",
-            "minValue": "0",
-            "maxValue": "16777215",
-            "default": "0"
-          }, {
-            "name": "RequestData",
-            "type": "record"
-          }, {
-            "name": "RequestForm",
-            "type": "ResponseForm"
-          }, {
-            "name": "ResponseForms",
-            "type": "ResponseForm[]"
-          }, {
-            "name": "DefaultResponse",
-            "type": "ResponseForm"
-          }, {
-            "name": "RequestId",
-            "type": "int",
-            "minValue": "-100",
-            "maxValue": "100",
-            "default": "-1"
-          }, {
-            "name": "TargetUser",
-            "type": "User"
-          }, {
-            "name": "IssueTime",
-            "type": "int",
-            "minValue": "0",
-            "maxValue": "100",
-            "default": "0"
-          }, {
-            "name": "Priority",
-            "type": "int",
-            "minValue": "0",
-            "maxValue": "255",
-            "default": "0"
-          }, {
-            "name": "ResolveTime",
-            "type": "int",
-            "minValue": "0",
-            "maxValue": "100",
-            "default": "0"
-          }, {
-            "name": "CpuResponseDuration",
-            "type": "int",
-            "minValue": "0",
-            "maxValue": "16777215",
-            "default": "0"
-          }, {
-            "name": "Resolution",
-            "type": "int",
-            "minValue": "0",
-            "maxValue": "100",
-            "default": "0"
-          }, {
-            "name": "Response",
-            "type": "ResponseForm"
-          }, {
-            "name": "Issue",
-            "type": "Request_Issue"
-          }, {
-            "name": "Dismiss",
-            "type": "none()"
-          }, {
-            "name": "ClearResponse",
-            "type": "none()",
-            "final": "true"
-          }, {
-            "name": "Refresh",
-            "type": "none()",
-            "final": "true"
-          }, {
-            "name": "IsResolutionPending",
-            "type": "bool()"
-          }, {
-            "name": "HasResolution",
-            "type": "bool()"
-          }, {
-            "name": "HandleResponse",
-            "type": "none()",
-            "default": "FranchiseUser user = TargetUser;\r\nif(user != null)\r\n{\r\n    user.ReadyToAdvance = true;\r\n}",
-            "final": "true"
-          }, {
-            "name": "CanSubmitResponse",
-            "type": "bool",
-            "default": "True"
-          }, {
-            "name": "Commands",
-            "type": "Command[]"
-          }, {
-            "name": "IsSubmittable",
-            "type": "bool",
-            "default": "True"
-          }, {
-            "name": "RequestStyle",
-            "type": "RequestStyle",
-            "default": "RequestStyle:Default",
-            "enum": {
-              "_name": "RequestStyle",
-              "_assetId": "6210747",
-              "_isRecordPersistent": "true",
-              "_members": [{
-                "_name": "Default",
-                "_index": 0,
-                "_value": 0,
-                "_unformattedValue": "00"
-              }, {
-                "_name": "Primary",
-                "_index": 1,
-                "_value": 1,
-                "_unformattedValue": "01"
-              }, {
-                "_name": "Notification",
-                "_index": 2,
-                "_value": 2,
-                "_unformattedValue": "10"
-              }, {
-                "_name": "Blocker",
-                "_index": 3,
-                "_value": 3,
-                "_unformattedValue": "11"
-              }],
-              "_maxLength": 2
+        "attributes": [
+            {
+                "name": "IsResponseRequired",
+                "type": "bool",
+                "default": "False"
+            },
+            {
+                "name": "IsConnectionRequired",
+                "type": "bool",
+                "default": "False"
+            },
+            {
+                "name": "IsBlocking",
+                "type": "bool",
+                "default": "False"
+            },
+            {
+                "name": "IsPersistent",
+                "type": "bool",
+                "default": "False"
+            },
+            {
+                "name": "CanUpdateResponse",
+                "type": "bool",
+                "default": "False"
+            },
+            {
+                "name": "ExpirationDuration",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "16777215",
+                "default": "0"
+            },
+            {
+                "index": "7",
+                "name": "CpuResponseMinDuration",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "16777215",
+                "default": "0"
+            },
+            {
+                "name": "CpuResponseMaxDuration",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "16777215",
+                "default": "0"
+            },
+            {
+                "name": "RequestData",
+                "type": "record"
+            },
+            {
+                "name": "RequestForm",
+                "type": "ResponseForm"
+            },
+            {
+                "name": "ResponseForms",
+                "type": "ResponseForm[]"
+            },
+            {
+                "name": "DefaultResponse",
+                "type": "ResponseForm"
+            },
+            {
+                "name": "RequestId",
+                "type": "int",
+                "minValue": "-100",
+                "maxValue": "100",
+                "default": "-1"
+            },
+            {
+                "name": "TargetUser",
+                "type": "User"
+            },
+            {
+                "name": "IssueTime",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "100",
+                "default": "0"
+            },
+            {
+                "name": "Priority",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "255",
+                "default": "0"
+            },
+            {
+                "name": "ResolveTime",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "100",
+                "default": "0"
+            },
+            {
+                "name": "CpuResponseDuration",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "16777215",
+                "default": "0"
+            },
+            {
+                "name": "Resolution",
+                "type": "int",
+                "minValue": "0",
+                "maxValue": "100",
+                "default": "0"
+            },
+            {
+                "name": "Response",
+                "type": "ResponseForm"
+            },
+            {
+                "name": "Issue",
+                "type": "Request_Issue"
+            },
+            {
+                "name": "Dismiss",
+                "type": "none()"
+            },
+            {
+                "name": "ClearResponse",
+                "type": "none()",
+                "final": "true"
+            },
+            {
+                "name": "Refresh",
+                "type": "none()",
+                "final": "true"
+            },
+            {
+                "name": "IsResolutionPending",
+                "type": "bool()"
+            },
+            {
+                "name": "HasResolution",
+                "type": "bool()"
+            },
+            {
+                "name": "HandleResponse",
+                "type": "none()",
+                "default": "FranchiseUser user = TargetUser;\r\nif(user != null)\r\n{\r\n    user.ReadyToAdvance = true;\r\n}",
+                "final": "true"
+            },
+            {
+                "name": "CanSubmitResponse",
+                "type": "bool",
+                "default": "True"
+            },
+            {
+                "name": "Commands",
+                "type": "Command[]"
+            },
+            {
+                "name": "IsSubmittable",
+                "type": "bool",
+                "default": "True"
+            },
+            {
+                "name": "RequestStyle",
+                "type": "RequestStyle",
+                "default": "RequestStyle:Default",
+                "enum": {
+                    "_name": "RequestStyle",
+                    "_assetId": "6210747",
+                    "_isRecordPersistent": "true",
+                    "_members": [
+                        {
+                            "_name": "Default",
+                            "_index": 0,
+                            "_value": 0,
+                            "_unformattedValue": "00"
+                        },
+                        {
+                            "_name": "Primary",
+                            "_index": 1,
+                            "_value": 1,
+                            "_unformattedValue": "01"
+                        },
+                        {
+                            "_name": "Notification",
+                            "_index": 2,
+                            "_value": 2,
+                            "_unformattedValue": "10"
+                        },
+                        {
+                            "_name": "Blocker",
+                            "_index": 3,
+                            "_value": 3,
+                            "_unformattedValue": "11"
+                        }
+                    ],
+                    "_maxLength": 2
+                }
+            },
+            {
+                "name": "SeenByUser",
+                "type": "bool",
+                "default": "True"
             }
-          }, {
-            "name": "SeenByUser",
-            "type": "bool",
-            "default": "True"
-          }
         ]
     },
     {
         "name": "Event",
         "numMembers": "2",
         "base": "none()",
-        "attributes": [{
+        "attributes": [
+            {
                 "name": "Enqueue",
                 "idx": "0",
                 "type": "none()",
@@ -243,7 +285,8 @@
         "name": "SeasonScheduleManager.SeasonScheduleWeeklyGameInfo",
         "numMembers": "4",
         "base": "none()",
-        "attributes": [{
+        "attributes": [
+            {
                 "name": "MondayTimes",
                 "idx": "0",
                 "type": "int[]"
@@ -269,7 +312,8 @@
         "name": "SeasonScheduleManager",
         "numMembers": "6",
         "base": "none()",
-        "attributes": [{
+        "attributes": [
+            {
                 "name": "TunableRuleSets",
                 "idx": "0",
                 "type": "SeasonScheduleTunableData[]"
@@ -305,7 +349,8 @@
         "name": "SeasonScheduleManager.SeasonScheduleTunableData",
         "numMembers": "25",
         "base": "none()",
-        "attributes": [{
+        "attributes": [
+            {
                 "name": "BaseYear",
                 "idx": "0",
                 "type": "int",
@@ -443,7 +488,8 @@
         "name": "Scheduler",
         "numMembers": "3",
         "base": "none()",
-        "attributes": [{
+        "attributes": [
+            {
                 "name": "Epoch",
                 "type": "Scheduler.DateTime"
             },
@@ -461,7 +507,8 @@
         "name": "Scheduler.DateTime",
         "numMembers": "6",
         "base": "none()",
-        "attributes": [{
+        "attributes": [
+            {
                 "name": "Month",
                 "type": "Month",
                 "enum": "Month"
@@ -502,7 +549,8 @@
         "name": "Scheduler.Appointment",
         "numMembers": "10",
         "base": "none()",
-        "attributes": [{
+        "attributes": [
+            {
                 "name": "Name",
                 "type": "string",
                 "maxLength": "32"
@@ -551,7 +599,8 @@
         "name": "Scheduler.RelativeAppt",
         "numMembers": "4",
         "base": "none()",
-        "attributes": [{
+        "attributes": [
+            {
                 "name": "Appointment",
                 "type": "Scheduler.Appointment"
             },
@@ -574,7 +623,8 @@
         "name": "Scheduler.RelativeApptDateTime",
         "numMembers": "7",
         "base": "none()",
-        "attributes": [{
+        "attributes": [
+            {
                 "name": "Appointment",
                 "type": "Scheduler.Appointment"
             },
@@ -617,7 +667,8 @@
         "name": "Transaction",
         "numMembers": "11",
         "base": "none()",
-        "attributes": [{
+        "attributes": [
+            {
                 "name": "StartStage",
                 "type": "Stage"
             },
@@ -633,7 +684,7 @@
                 "name": "IsDynamic",
                 "type": "bool",
                 "default": "False"
-            },            
+            },
             {
                 "name": "IsDone",
                 "type": "bool()"
@@ -670,7 +721,8 @@
         "name": "Stage",
         "numMembers": "6",
         "base": "none()",
-        "attributes": [{
+        "attributes": [
+            {
                 "name": "Start",
                 "type": "Expression"
             },
@@ -700,7 +752,8 @@
         "name": "UserRegistry",
         "numMembers": "7",
         "base": "none()",
-        "attributes": [{
+        "attributes": [
+            {
                 "name": "RegisterUserEvent",
                 "type": "RegisterUserEvent"
             },
@@ -734,7 +787,8 @@
         "name": "User",
         "numMembers": "6",
         "base": "none()",
-        "attributes": [{
+        "attributes": [
+            {
                 "name": "UserIdLower",
                 "type": "int",
                 "minValue": "0",

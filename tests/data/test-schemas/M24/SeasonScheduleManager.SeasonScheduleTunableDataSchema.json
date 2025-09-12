@@ -1,1 +1,152 @@
-{"numMembers":"29","name":"SeasonScheduleManager.SeasonScheduleTunableData","attributes":[{"index":"0","name":"OriginYear","type":"int","minValue":"0","maxValue":"2047"},{"index":"1","name":"BaseYear","type":"int","minValue":"0","maxValue":"2047"},{"index":"2","name":"RegSeasMaxGamesPerWeek","type":"int","minValue":"0","maxValue":"16"},{"index":"3","name":"ThanksgivingWeek","type":"int","minValue":"0","maxValue":"11"},{"index":"4","name":"ThanksgivingHomeTeams","type":"Team[]"},{"index":"5","name":"RegSeasWeeklyInfo","type":"SeasonScheduleManager.SeasonScheduleWeeklyGameInfo[]"},{"index":"6","name":"PreSeasEmptyGamesWeek","type":"int","minValue":"0","maxValue":"4"},{"index":"7","name":"RegSeasGamesPerWeek","type":"int[]"},{"index":"8","name":"RegSeasNumAFCTeams","type":"int","minValue":"0","maxValue":"16"},{"index":"9","name":"RegSeasNumNFCTeams","type":"int","minValue":"0","maxValue":"16"},{"index":"10","name":"NumberTeams","type":"int","minValue":"0","maxValue":"32"},{"index":"11","name":"PreSeasNumGamesPerTeam","type":"int","minValue":"0","maxValue":"4"},{"index":"12","name":"IntraConfOppSeeds","type":"int[][][]"},{"index":"13","name":"InterConfMaxGames","type":"int","minValue":"0","maxValue":"4"},{"index":"14","name":"InterConfOppSeeds","type":"int[][]"},{"index":"15","name":"InterConfOverflowLookaheadYear","type":"int","minValue":"0","maxValue":"4"},{"index":"16","name":"ConfPlayOffWeek","type":"SeasonScheduleManager.SeasonScheduleWeeklyGameInfo"},{"index":"17","name":"DivPlayOffWeek","type":"SeasonScheduleManager.SeasonScheduleWeeklyGameInfo"},{"index":"18","name":"ProBowlWeek","type":"SeasonScheduleManager.SeasonScheduleWeeklyGameInfo"},{"index":"19","name":"SuperBowlWeek","type":"SeasonScheduleManager.SeasonScheduleWeeklyGameInfo"},{"index":"20","name":"WildCardWeek","type":"SeasonScheduleManager.SeasonScheduleWeeklyGameInfo"},{"index":"21","name":"SuperBowlBeforeProBowl","type":"bool"},{"index":"22","name":"Unknown_1","type":"int","minValue":"0","maxValue":"3"},{"index":"23","name":"PreSeasInterConfTeamRoleAdjustWeek","type":"int","minValue":"0","maxValue":"4"},{"index":"24","name":"PreSeasNumGamesPerWeek","type":"int[]"},{"index":"25","name":"IntraConfMinGames","type":"int","minValue":"0","maxValue":"4"},{"index":"26","name":"PreSeasNumByeWeeks","type":"int","minValue":"0","maxValue":"0"},{"index":"27","name":"PreSeasonMaximizeOuterConfGames","type":"bool"}]}
+{
+    "numMembers": "29",
+    "name": "SeasonScheduleManager.SeasonScheduleTunableData",
+    "attributes": [
+        {
+            "index": "0",
+            "name": "OriginYear",
+            "type": "int",
+            "minValue": "0",
+            "maxValue": "2047"
+        },
+        {
+            "index": "1",
+            "name": "BaseYear",
+            "type": "int",
+            "minValue": "0",
+            "maxValue": "2047"
+        },
+        {
+            "index": "2",
+            "name": "RegSeasMaxGamesPerWeek",
+            "type": "int",
+            "minValue": "0",
+            "maxValue": "16"
+        },
+        {
+            "index": "3",
+            "name": "ThanksgivingWeek",
+            "type": "int",
+            "minValue": "0",
+            "maxValue": "11"
+        },
+        { "index": "4", "name": "ThanksgivingHomeTeams", "type": "Team[]" },
+        {
+            "index": "5",
+            "name": "RegSeasWeeklyInfo",
+            "type": "SeasonScheduleManager.SeasonScheduleWeeklyGameInfo[]"
+        },
+        {
+            "index": "6",
+            "name": "PreSeasEmptyGamesWeek",
+            "type": "int",
+            "minValue": "0",
+            "maxValue": "4"
+        },
+        { "index": "7", "name": "RegSeasGamesPerWeek", "type": "int[]" },
+        {
+            "index": "8",
+            "name": "RegSeasNumAFCTeams",
+            "type": "int",
+            "minValue": "0",
+            "maxValue": "16"
+        },
+        {
+            "index": "9",
+            "name": "RegSeasNumNFCTeams",
+            "type": "int",
+            "minValue": "0",
+            "maxValue": "16"
+        },
+        {
+            "index": "10",
+            "name": "NumberTeams",
+            "type": "int",
+            "minValue": "0",
+            "maxValue": "32"
+        },
+        {
+            "index": "11",
+            "name": "PreSeasNumGamesPerTeam",
+            "type": "int",
+            "minValue": "0",
+            "maxValue": "4"
+        },
+        { "index": "12", "name": "IntraConfOppSeeds", "type": "int[][][]" },
+        {
+            "index": "13",
+            "name": "InterConfMaxGames",
+            "type": "int",
+            "minValue": "0",
+            "maxValue": "4"
+        },
+        { "index": "14", "name": "InterConfOppSeeds", "type": "int[][]" },
+        {
+            "index": "15",
+            "name": "InterConfOverflowLookaheadYear",
+            "type": "int",
+            "minValue": "0",
+            "maxValue": "4"
+        },
+        {
+            "index": "16",
+            "name": "ConfPlayOffWeek",
+            "type": "SeasonScheduleManager.SeasonScheduleWeeklyGameInfo"
+        },
+        {
+            "index": "17",
+            "name": "DivPlayOffWeek",
+            "type": "SeasonScheduleManager.SeasonScheduleWeeklyGameInfo"
+        },
+        {
+            "index": "18",
+            "name": "ProBowlWeek",
+            "type": "SeasonScheduleManager.SeasonScheduleWeeklyGameInfo"
+        },
+        {
+            "index": "19",
+            "name": "SuperBowlWeek",
+            "type": "SeasonScheduleManager.SeasonScheduleWeeklyGameInfo"
+        },
+        {
+            "index": "20",
+            "name": "WildCardWeek",
+            "type": "SeasonScheduleManager.SeasonScheduleWeeklyGameInfo"
+        },
+        { "index": "21", "name": "SuperBowlBeforeProBowl", "type": "bool" },
+        {
+            "index": "22",
+            "name": "Unknown_1",
+            "type": "int",
+            "minValue": "0",
+            "maxValue": "3"
+        },
+        {
+            "index": "23",
+            "name": "PreSeasInterConfTeamRoleAdjustWeek",
+            "type": "int",
+            "minValue": "0",
+            "maxValue": "4"
+        },
+        { "index": "24", "name": "PreSeasNumGamesPerWeek", "type": "int[]" },
+        {
+            "index": "25",
+            "name": "IntraConfMinGames",
+            "type": "int",
+            "minValue": "0",
+            "maxValue": "4"
+        },
+        {
+            "index": "26",
+            "name": "PreSeasNumByeWeeks",
+            "type": "int",
+            "minValue": "0",
+            "maxValue": "0"
+        },
+        {
+            "index": "27",
+            "name": "PreSeasonMaximizeOuterConfGames",
+            "type": "bool"
+        }
+    ]
+}

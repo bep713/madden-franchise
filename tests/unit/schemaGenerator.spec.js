@@ -20,7 +20,7 @@ const SCHEMA_PATHS = {
     },
     m25: {
         xml: path.join(TEST_SCHEMA_FOLDER, 'M25_222_6_test.ftx'),
-        gz: path.join(TEST_SCHEMA_FOLDER, 'M25_222_6.gz'),
+        gz: path.join(TEST_SCHEMA_FOLDER, 'M25_222_6.gz')
     }
 };
 
@@ -29,7 +29,7 @@ describe('schema generator unit tests', () => {
 
     before(async () => {
         schemaGenerator.generate(SCHEMA_PATHS.m22.xml);
-        
+
         schemaRoot = await new Promise((resolve) => {
             schemaGenerator.eventEmitter.on('schemas:done', (schema) => {
                 resolve(schema);
@@ -39,7 +39,7 @@ describe('schema generator unit tests', () => {
 
     it('contains the correct amount of schemas', async () => {
         expect(schemaRoot.schemas.length).to.equal(2999);
-        expect(Object.keys(schemaRoot.schemaMap).length).to.equal(2982);    // extra schemas not added to schema map
+        expect(Object.keys(schemaRoot.schemaMap).length).to.equal(2982); // extra schemas not added to schema map
     });
 
     describe('schemaRoot format', () => {
@@ -55,7 +55,7 @@ describe('schema generator unit tests', () => {
             // first few schemas are custom added in the data/schemas/extra-schemas.json file
             // so start with 12th index which would be the first schema in the actual file.
             const schema = schemaRoot.schemas[NUM_CUSTOM_SCHEMAS + 1];
-            
+
             expect(schema.assetId).to.be.undefined;
             expect(schema.ownerAssetId).to.equal('46647');
             expect(schema.numMembers).to.equal('3');
@@ -90,19 +90,21 @@ describe('schema generator unit tests', () => {
 
         it('correctly parses a max length attribute', () => {
             const schema = schemaRoot.schemaMap.AdvanceStageRequest;
-            const attr = schema.attributes.find(attr => attr.maxLength);
+            const attr = schema.attributes.find((attr) => attr.maxLength);
             expect(attr.maxLength).to.equal('13');
         });
 
         it('correctly parses a const attribute', () => {
             const schema = schemaRoot.schemaMap.AdvanceStageRequest;
-            const constAttr = schema.attributes.find(attr => attr.const);
+            const constAttr = schema.attributes.find((attr) => attr.const);
             expect(constAttr.const).to.equal('true');
         });
 
         it('correctly parses an enum attribute', () => {
             const schema = schemaRoot.schemaMap.AdvanceStageRequest;
-            const reqStyle = schema.attributes.find(attr => attr.name === 'RequestStyle');
+            const reqStyle = schema.attributes.find(
+                (attr) => attr.name === 'RequestStyle'
+            );
             expect(reqStyle.enum).to.eql({
                 _name: 'RequestStyle',
                 _assetId: '116422',
@@ -132,7 +134,7 @@ describe('schema generator unit tests', () => {
                         _index: 3,
                         _value: 3,
                         _unformattedValue: '11'
-                    },
+                    }
                 ]
             });
         });
@@ -140,7 +142,7 @@ describe('schema generator unit tests', () => {
 
     it('correct output', async () => {
         schemaGenerator.generate(SCHEMA_PATHS.m25.xml);
-        
+
         let schemaRoot = await new Promise((resolve) => {
             schemaGenerator.eventEmitter.on('schemas:done', (schema) => {
                 resolve(schema);
@@ -148,14 +150,16 @@ describe('schema generator unit tests', () => {
         });
 
         const newData = {
-            'meta': schemaRoot.meta,
-            'schemas': schemaRoot.schemas
+            meta: schemaRoot.meta,
+            schemas: schemaRoot.schemas
         };
 
         const compareData = JSON.parse(JSON.stringify(newData));
 
         const expectedGzip = fs.readFileSync(SCHEMA_PATHS.m25.gz);
-        const expectedData = JSON.parse(zlib.gunzipSync(expectedGzip).toString());
+        const expectedData = JSON.parse(
+            zlib.gunzipSync(expectedGzip).toString()
+        );
 
         expect(compareData.meta).to.eql(expectedData.meta);
 

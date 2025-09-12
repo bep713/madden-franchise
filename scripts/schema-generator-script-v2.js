@@ -9,12 +9,15 @@ let done = false;
 
 (async () => {
     const files = await fs.readdir(process.argv[2], { withFileTypes: true });
-    const schemas = files.filter(f => f.isFile() && f.name.endsWith('.FTX') && f.name !== 'football.FTX');
+    const schemas = files.filter(
+        (f) =>
+            f.isFile() && f.name.endsWith('.FTX') && f.name !== 'football.FTX'
+    );
     const mainSchemaName = process.argv[4] || 'franchise-schemas.FTX';
 
-    const main = schemas.find(f => f.name === mainSchemaName);
+    const main = schemas.find((f) => f.name === mainSchemaName);
     const otherSchemas = schemas
-        .filter(f => f.name !== mainSchemaName)
+        .filter((f) => f.name !== mainSchemaName)
         .reduce((acc, file) => {
             const name = file.name.replace(/\.FTX$/i, '');
             acc[name] = path.join(process.argv[2], file.name);
@@ -26,19 +29,27 @@ let done = false;
             main: path.join(process.argv[2], main.name),
             ...otherSchemas
         },
-        extraSchemas: process.argv[5] ? JSON.parse(await fs.readFile(process.argv[5], 'utf8')) : undefined
+        extraSchemas: process.argv[5]
+            ? JSON.parse(await fs.readFile(process.argv[5], 'utf8'))
+            : undefined
     });
 
     const outputPath = process.argv[3] || __dirname;
     const compressed = gzipSync(JSON.stringify(schema));
-    await fs.writeFile(path.join(outputPath, `M${schema.meta.gameYear}_${schema.meta.major}_${schema.meta.minor}.gz`), compressed);
+    await fs.writeFile(
+        path.join(
+            outputPath,
+            `M${schema.meta.gameYear}_${schema.meta.major}_${schema.meta.minor}.gz`
+        ),
+        compressed
+    );
     done = true;
 })();
 
-function wait () {
+function wait() {
     if (!done) {
         setTimeout(wait, 500);
     }
-};
+}
 
 wait();

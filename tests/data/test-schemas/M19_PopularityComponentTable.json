@@ -1,1 +1,31 @@
-{"assetId":"29060","numMembers":"3","name":"PopularityComponentTable","attributes":[{"index":"0","name":"LocalPopularity","type":"int","minValue":"0","maxValue":"100","default":"0"},{"index":"1","name":"NationalPopularity","type":"int","minValue":"0","maxValue":"100","default":"0"},{"index":"2","name":"RegionalPopularity","type":"int","minValue":"0","maxValue":"100","default":"0"}]}
+{
+    "assetId": "29060",
+    "numMembers": "3",
+    "name": "PopularityComponentTable",
+    "attributes": [
+        {
+            "index": "0",
+            "name": "LocalPopularity",
+            "type": "int",
+            "minValue": "0",
+            "maxValue": "100",
+            "default": "0"
+        },
+        {
+            "index": "1",
+            "name": "NationalPopularity",
+            "type": "int",
+            "minValue": "0",
+            "maxValue": "100",
+            "default": "0"
+        },
+        {
+            "index": "2",
+            "name": "RegionalPopularity",
+            "type": "int",
+            "minValue": "0",
+            "maxValue": "100",
+            "default": "0"
+        }
+    ]
+}

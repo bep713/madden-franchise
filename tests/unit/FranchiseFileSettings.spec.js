@@ -2,10 +2,10 @@ import { expect } from 'chai';
 import FranchiseFileSettings from '../../src/FranchiseFileSettings.js';
 
 const defaultSettings = {
-    'saveOnChange': false,
-    'schemaOverride': false,
-    'schemaDirectory': false,
-    'autoParse': true
+    saveOnChange: false,
+    schemaOverride: false,
+    schemaDirectory: false,
+    autoParse: true
 };
 
 function checkSettings(settings, args) {
@@ -15,12 +15,11 @@ function checkSettings(settings, args) {
     for (const setting in defaultSettings) {
         if (args[setting] === null || args[setting] === undefined) {
             expect(settings[setting]).to.eql(defaultSettings[setting]);
-        }
-        else {
+        } else {
             expect(settings[setting]).to.eql(args[setting]);
         }
     }
-};
+}
 
 describe('FranchiseFileSettings unit tests', () => {
     it('default', () => {
@@ -30,7 +29,7 @@ describe('FranchiseFileSettings unit tests', () => {
 
     it('save on change', () => {
         let args = {
-            'saveOnChange': true
+            saveOnChange: true
         };
 
         const settings = new FranchiseFileSettings(args);
@@ -39,10 +38,10 @@ describe('FranchiseFileSettings unit tests', () => {
 
     it('schemaOverride', () => {
         let args = {
-            'schemaOverride': {
-                'major': 370,
-                'minor': 1,
-                'gameYear': 20
+            schemaOverride: {
+                major: 370,
+                minor: 1,
+                gameYear: 20
             }
         };
 
@@ -52,7 +51,7 @@ describe('FranchiseFileSettings unit tests', () => {
 
     it('schemaDirectory', () => {
         let args = {
-            'schemaDirectory': 'C:\\Users\\Test\\Schemas'
+            schemaDirectory: 'C:\\Users\\Test\\Schemas'
         };
 
         const settings = new FranchiseFileSettings(args);
@@ -61,7 +60,7 @@ describe('FranchiseFileSettings unit tests', () => {
 
     it('autoParse', () => {
         let args = {
-            'autoParse': true
+            autoParse: true
         };
 
         const settings = new FranchiseFileSettings(args);
@@ -70,17 +69,17 @@ describe('FranchiseFileSettings unit tests', () => {
 
     it('all settings', () => {
         let args = {
-            'saveOnChange': true,
-            'schemaOverride': {
-                'major': 370,
-                'minor': 1,
-                'gameYear': 20
+            saveOnChange: true,
+            schemaOverride: {
+                major: 370,
+                minor: 1,
+                gameYear: 20
             },
-            'schemaDirectory': 'C:\\Users\\Test\\Schemas',
-            'autoParse': false
+            schemaDirectory: 'C:\\Users\\Test\\Schemas',
+            autoParse: false
         };
 
         const settings = new FranchiseFileSettings(args);
         checkSettings(settings, args);
-    })
+    });
 });

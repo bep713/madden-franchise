@@ -3,17 +3,17 @@
 const schemaGenerator = require('../src/services/schemaGenerator');
 
 schemaGenerator.eventEmitter.on('schemas:done', () => {
-  done = true;
+    done = true;
 });
 
 schemaGenerator.generate(process.argv[2], true, process.argv[3]);
 
 let done = false;
 
-function wait () {
-  if (!done) {
-    setTimeout(wait, 500);
-  }
-};
+function wait() {
+    if (!done) {
+        setTimeout(wait, 500);
+    }
+}
 
 wait();

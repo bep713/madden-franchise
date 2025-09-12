@@ -23,23 +23,28 @@ export async function generateSchemaV2({ fileMap, extraSchemas }) {
     if (!extraSchemas || extraSchemas.length === 0) {
         // Load extra schemas if available
         try {
-            const extraPath = path.join(__dirname, '../../data/schemas/extra-schemas.json');
+            const extraPath = path.join(
+                __dirname,
+                '../../data/schemas/extra-schemas.json'
+            );
             const extraRaw = await fs.readFile(extraPath, 'utf8');
             extraSchemas = JSON.parse(extraRaw);
-        }
-        catch {
+        } catch {
             // ignore if not present
         }
     }
     // Recursively parse a file and its includes (async)
     async function parseFile(fileKey) {
-        if (parsedFiles[fileKey])
-            return;
+        if (parsedFiles[fileKey]) return;
         const filePath = fileMap[fileKey];
-        if (!filePath)
-            throw new Error(`Missing file mapping for: ${fileKey}`);
+        if (!filePath) throw new Error(`Missing file mapping for: ${fileKey}`);
         const xml = await fs.readFile(filePath, 'utf8');
-        const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '', allowBooleanAttributes: true, trimValues: false });
+        const parser = new XMLParser({
+            ignoreAttributes: false,
+            attributeNamePrefix: '',
+            allowBooleanAttributes: true,
+            trimValues: false
+        });
         const doc = parser.parse(xml);
         const root = doc.FranTkData;
         if (!schemaMeta.databaseName && root.databaseName) {
@@ -60,7 +65,9 @@ export async function generateSchemaV2({ fileMap, extraSchemas }) {
                     // Try all lowercase
                     incKey = incKey.toLowerCase();
                     if (!fileMap[incKey]) {
-                        console.warn(`schemaGeneratorV2: Missing file mapping for include: ${incKey} in ${fileKey}`);
+                        console.warn(
+                            `schemaGeneratorV2: Missing file mapping for include: ${incKey} in ${fileKey}`
+                        );
                         continue; // Suppress missing include mapping
                     }
                 }
@@ -69,21 +76,34 @@ export async function generateSchemaV2({ fileMap, extraSchemas }) {
         }
         // Parse enums and schemas
         if (root.schemas) {
-            const items = Object.entries(root.schemas)
-                .flatMap(([tag, val]) => Array.isArray(val) ? val.map(v => ({ tag, ...v })) : [{ tag, ...val }]);
+            const items = Object.entries(root.schemas).flatMap(([tag, val]) =>
+                Array.isArray(val)
+                    ? val.map((v) => ({ tag, ...v }))
+                    : [{ tag, ...val }]
+            );
             for (const item of items) {
                 if (item.tag === 'enum') {
-                    const theEnum = new FranchiseEnum(item.name, item.assetId, item.isRecordPersistent);
+                    const theEnum = new FranchiseEnum(
+                        item.name,
+                        item.assetId,
+                        item.isRecordPersistent
+                    );
                     theEnum._members = [];
                     if (item.attribute) {
-                        const members = Array.isArray(item.attribute) ? item.attribute : [item.attribute];
+                        const members = Array.isArray(item.attribute)
+                            ? item.attribute
+                            : [item.attribute];
                         for (const attr of members) {
-                            theEnum.addMember && theEnum.addMember(attr.name, attr.idx, attr.value);
+                            theEnum.addMember &&
+                                theEnum.addMember(
+                                    attr.name,
+                                    attr.idx,
+                                    attr.value
+                                );
                         }
                     }
                     enums.push(theEnum);
-                }
-                else if (item.tag === 'schema') {
+                } else if (item.tag === 'schema') {
                     const schema = {
                         assetId: item.assetId,
                         ownerAssetId: item.ownerAssetId,
@@ -93,7 +113,9 @@ export async function generateSchemaV2({ fileMap, extraSchemas }) {
                         attributes: []
                     };
                     if (item.attribute) {
-                        const attrs = Array.isArray(item.attribute) ? item.attribute : [item.attribute];
+                        const attrs = Array.isArray(item.attribute)
+                            ? item.attribute
+                            : [item.attribute];
                         for (const attr of attrs) {
                             schema.attributes.push(parseAttribute(attr));
                         }
@@ -134,32 +156,47 @@ export async function generateSchemaV2({ fileMap, extraSchemas }) {
         }
     }
     function getEnum(name) {
-        return enums.find(theEnum => theEnum.name === name);
+        return enums.find((theEnum) => theEnum.name === name);
     }
     function addExtraSchemas() {
-        if (!Array.isArray(extraSchemas))
-            return;
+        if (!Array.isArray(extraSchemas)) return;
         extraSchemas.forEach((schema) => {
             if (!schemaMap[schema.name]) {
-                schema.attributes.filter((attrib) => {
-                    return attrib.enum && !(attrib.enum instanceof FranchiseEnum);
-                }).forEach((attrib) => {
-                    attrib.enum = getEnum(attrib.enum);
-                });
+                schema.attributes
+                    .filter((attrib) => {
+                        return (
+                            attrib.enum &&
+                            !(attrib.enum instanceof FranchiseEnum)
+                        );
+                    })
+                    .forEach((attrib) => {
+                        attrib.enum = getEnum(attrib.enum);
+                    });
                 schemas.unshift(schema);
             }
         });
     }
     function calculateInheritedSchemas(schemaList) {
-        const schemasWithBase = schemaList.filter((schema) => schema.base && schema.base.indexOf('()') === -1);
+        const schemasWithBase = schemaList.filter(
+            (schema) => schema.base && schema.base.indexOf('()') === -1
+        );
         schemasWithBase.forEach((schema) => {
             if (schema.base && schema.base.indexOf('()') === -1) {
                 schema.originalAttributesOrder = schema.attributes;
-                const baseSchema = schemaList.find((schemaToSearch) => schemaToSearch.name === schema.base);
+                const baseSchema = schemaList.find(
+                    (schemaToSearch) => schemaToSearch.name === schema.base
+                );
                 if (baseSchema) {
                     baseSchema.attributes.forEach((baseAttribute, index) => {
-                        let oldIndex = schema.attributes.findIndex((schemaAttribute) => schemaAttribute?.name === baseAttribute?.name);
-                        utilService.arrayMove(schema.attributes, oldIndex, index);
+                        let oldIndex = schema.attributes.findIndex(
+                            (schemaAttribute) =>
+                                schemaAttribute?.name === baseAttribute?.name
+                        );
+                        utilService.arrayMove(
+                            schema.attributes,
+                            oldIndex,
+                            index
+                        );
                     });
                 }
             }
@@ -169,7 +206,7 @@ export async function generateSchemaV2({ fileMap, extraSchemas }) {
     addExtraSchemas();
     calculateInheritedSchemas(schemas);
     // Set enum member lengths if needed
-    enums.forEach(e => e.setMemberLength && e.setMemberLength());
+    enums.forEach((e) => e.setMemberLength && e.setMemberLength());
     // Extract gameYear from databaseName
     const majorVersion = schemaMeta.dataMajorVersion;
     const minorVersion = schemaMeta.dataMinorVersion;

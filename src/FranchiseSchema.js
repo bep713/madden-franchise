@@ -1,35 +1,38 @@
-import fs from "fs";
-import path from "path";
-import zlib from "zlib";
-import FranchiseEnum from "./FranchiseEnum.js";
-import events from "events";
-import schemaGenerator from "./services/schemaGenerator.js";
-import { generateSchemaV2 } from "./services/schemaGeneratorV2.js";
+import fs from 'fs';
+import path from 'path';
+import zlib from 'zlib';
+import FranchiseEnum from './FranchiseEnum.js';
+import events from 'events';
+import schemaGenerator from './services/schemaGenerator.js';
+import { generateSchemaV2 } from './services/schemaGeneratorV2.js';
 const EventEmitter = events.EventEmitter;
 /**
-   * @typedef SchemaAttribute
-   * @param {string} index
-   * @param {string} name
-   * @param {string} type
-   * @param {string} minValue
-   * @param {string} maxValue
-   * @param {string} maxLength
-   * @param {string} default
-   * @param {string} final
-   * @param {FranchiseEnum?} [enum]
-   * @param {string}
-*/
+ * @typedef SchemaAttribute
+ * @param {string} index
+ * @param {string} name
+ * @param {string} type
+ * @param {string} minValue
+ * @param {string} maxValue
+ * @param {string} maxLength
+ * @param {string} default
+ * @param {string} final
+ * @param {FranchiseEnum?} [enum]
+ * @param {string}
+ */
 /**
-   * @typedef TableSchema
-   * @param {number} assetId
-   * @param {number} ownerAssetId
-   * @param {number} numMembers
-   * @param {string} name
-   * @param {string} base
-   * @param {Array<SchemaAttribute>} attributes
-*/
+ * @typedef TableSchema
+ * @param {number} assetId
+ * @param {number} ownerAssetId
+ * @param {number} numMembers
+ * @param {string} name
+ * @param {string} base
+ * @param {Array<SchemaAttribute>} attributes
+ */
 class FranchiseSchema extends EventEmitter {
-    constructor(filePath, { useNewSchemaGeneration = false, extraSchemas = [], fileMap = {} } = {}) {
+    constructor(
+        filePath,
+        { useNewSchemaGeneration = false, extraSchemas = [], fileMap = {} } = {}
+    ) {
         super();
         this.schemas = [];
         this.path = filePath;
@@ -37,7 +40,6 @@ class FranchiseSchema extends EventEmitter {
         this.extraSchemas = extraSchemas;
         this.fileMap = fileMap;
     }
-    ;
     evaluate() {
         const fileExtension = path.extname(this.path).toLowerCase();
         switch (fileExtension) {
@@ -50,19 +52,20 @@ class FranchiseSchema extends EventEmitter {
                 this.evaluateSchemaXml();
                 break;
             default:
-                throw new Error('Invalid schema. Please make sure your schema file is of correct format (.gz, .xml, or .ftx).');
+                throw new Error(
+                    'Invalid schema. Please make sure your schema file is of correct format (.gz, .xml, or .ftx).'
+                );
         }
     }
-    ;
     getSchema(name) {
         // return this.schemas.find((schema) => { return schema.name === name; });
         return this.schemaMap[name];
     }
-    ;
     getEnum(name) {
-        return this.enums.find((theEnum) => { return theEnum.name === name; });
+        return this.enums.find((theEnum) => {
+            return theEnum.name === name;
+        });
     }
-    ;
     evaluateSchemaGzip() {
         const schemaFile = fs.readFileSync(this.path);
         const uncompressed = zlib.gunzipSync(schemaFile);
@@ -88,7 +91,9 @@ class FranchiseSchema extends EventEmitter {
             if (!this.schemaMap[schema.name]) {
                 schema.attributes.forEach((attrib) => {
                     if (attrib.enum) {
-                        attrib.enum = new FranchiseEnum(this.enumMap[attrib.enum]);
+                        attrib.enum = new FranchiseEnum(
+                            this.enumMap[attrib.enum]
+                        );
                     }
                 });
                 this.schemas.unshift(schema);
@@ -101,7 +106,6 @@ class FranchiseSchema extends EventEmitter {
         }
         this.emit('schemas:done');
     }
-    ;
     evaluateSchemaXml() {
         if (this.useNewSchemaGeneration) {
             generateSchemaV2({
@@ -114,8 +118,7 @@ class FranchiseSchema extends EventEmitter {
                 this.schemaMap = schema.schemaMap;
                 this.emit('schemas:done');
             });
-        }
-        else {
+        } else {
             schemaGenerator.eventEmitter.on('schemas:done', (schema) => {
                 this.schema = schema;
                 this.meta = schema.meta;
@@ -126,7 +129,5 @@ class FranchiseSchema extends EventEmitter {
             schemaGenerator.generate(this.path);
         }
     }
-    ;
 }
-;
 export default FranchiseSchema;

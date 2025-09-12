@@ -3,8 +3,8 @@ import { expect } from 'chai';
 import quibble from 'quibble';
 
 const strategySpy = {
-    'getInitialUnformattedValue': sinon.spy(),
-    'setUnformattedValueFromFormatted': sinon.spy()
+    getInitialUnformattedValue: sinon.spy(),
+    setUnformattedValueFromFormatted: sinon.spy()
 };
 
 describe('M20 FTC Table2 Field Strategy unit tests', () => {
@@ -13,8 +13,16 @@ describe('M20 FTC Table2 Field Strategy unit tests', () => {
         strategySpy.getInitialUnformattedValue.resetHistory();
         strategySpy.setUnformattedValueFromFormatted.resetHistory();
 
-        await quibble.esm('../../../../../src/strategies/common/table2Field/FTCTable2FieldStrategy.js', {}, strategySpy);
-        M20FTCTable2FieldStrategy = (await import('../../../../../src/strategies/franchise-common/m20/M20FTCTable2FieldStrategy.js')).default;
+        await quibble.esm(
+            '../../../../../src/strategies/common/table2Field/FTCTable2FieldStrategy.js',
+            {},
+            strategySpy
+        );
+        M20FTCTable2FieldStrategy = (
+            await import(
+                '../../../../../src/strategies/franchise-common/m20/M20FTCTable2FieldStrategy.js'
+            )
+        ).default;
     });
 
     afterEach(() => {
@@ -23,7 +31,7 @@ describe('M20 FTC Table2 Field Strategy unit tests', () => {
 
     it('get initial unformatted value', () => {
         const field = {
-            'field': true
+            field: true
         };
 
         const binary = Buffer.from([0x00]);
@@ -31,15 +39,25 @@ describe('M20 FTC Table2 Field Strategy unit tests', () => {
         M20FTCTable2FieldStrategy.getInitialUnformattedValue(field, binary);
         expect(strategySpy.getInitialUnformattedValue.calledOnce).to.be.true;
         expect(strategySpy.getInitialUnformattedValue.args[0][0]).to.eql(field);
-        expect(strategySpy.getInitialUnformattedValue.args[0][1]).to.eql(binary);
+        expect(strategySpy.getInitialUnformattedValue.args[0][1]).to.eql(
+            binary
+        );
     });
 
     describe('can save updates made to data', () => {
         it('calls the common file algorithm', () => {
-            M20FTCTable2FieldStrategy.setUnformattedValueFromFormatted('hello', 10);
-            expect(strategySpy.setUnformattedValueFromFormatted.calledOnce).to.be.true;
-            expect(strategySpy.setUnformattedValueFromFormatted.args[0][0]).to.eql('hello');
-            expect(strategySpy.setUnformattedValueFromFormatted.args[0][1]).to.eql(10);
+            M20FTCTable2FieldStrategy.setUnformattedValueFromFormatted(
+                'hello',
+                10
+            );
+            expect(strategySpy.setUnformattedValueFromFormatted.calledOnce).to
+                .be.true;
+            expect(
+                strategySpy.setUnformattedValueFromFormatted.args[0][0]
+            ).to.eql('hello');
+            expect(
+                strategySpy.setUnformattedValueFromFormatted.args[0][1]
+            ).to.eql(10);
         });
     });
 });

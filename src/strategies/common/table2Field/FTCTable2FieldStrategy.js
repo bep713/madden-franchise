@@ -1,6 +1,9 @@
 let FTCTable2FieldStrategy = {};
 FTCTable2FieldStrategy.getInitialUnformattedValue = (field, data) => {
-    let fieldData = data.slice(field.secondTableField.index, (field.secondTableField.index + field.offset.maxLength));
+    let fieldData = data.slice(
+        field.secondTableField.index,
+        field.secondTableField.index + field.offset.maxLength
+    );
     const endOfFieldIndex = fieldData.indexOf(0x00);
     if (endOfFieldIndex >= 0) {
         // if there's a match, break the string early, making sure to include the 0s from the '00'.
@@ -9,7 +12,10 @@ FTCTable2FieldStrategy.getInitialUnformattedValue = (field, data) => {
     }
     return fieldData;
 };
-FTCTable2FieldStrategy.setUnformattedValueFromFormatted = (formattedValue, maxLength) => {
+FTCTable2FieldStrategy.setUnformattedValueFromFormatted = (
+    formattedValue,
+    maxLength
+) => {
     if (formattedValue.length >= maxLength) {
         // FTC strings cannot equal max length because the last character must be the null character.
         formattedValue = formattedValue.substring(0, maxLength - 1);

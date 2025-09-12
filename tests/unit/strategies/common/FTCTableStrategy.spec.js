@@ -4,70 +4,96 @@ import FTCTableStrategy from '../../../../src/strategies/common/table/FTCTableSt
 describe('FTC Table Strategy unit tests', () => {
     describe('get table2 binary data', () => {
         it('gives expected result if all fields are parsed', () => {
-            const table2Records = [{
-                'isChanged': false,
-                'offset': 0,
-                'lengthAtLastSave': 6,
-                'hexData': Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00])
-            }, {
-                'isChanged': true,
-                'offset': 6,
-                'lengthAtLastSave': 6,
-                'hexData': Buffer.from([0x68, 0x65, 0x6C, 0x6C, 0x6F, 0x00])
-            }, {
-                'isChanged': false,
-                'offset': 12,
-                'lengthAtLastSave': 6,
-                'hexData': Buffer.from([0x74, 0x65, 0x73, 0x74, 0x31, 0x32])
-            }, {
-                'isChanged': false,
-                'offset': 0,
-                'lengthAtLastSave': 6,
-                'hexData': Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00])
-            }];
+            const table2Records = [
+                {
+                    isChanged: false,
+                    offset: 0,
+                    lengthAtLastSave: 6,
+                    hexData: Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00])
+                },
+                {
+                    isChanged: true,
+                    offset: 6,
+                    lengthAtLastSave: 6,
+                    hexData: Buffer.from([0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x00])
+                },
+                {
+                    isChanged: false,
+                    offset: 12,
+                    lengthAtLastSave: 6,
+                    hexData: Buffer.from([0x74, 0x65, 0x73, 0x74, 0x31, 0x32])
+                },
+                {
+                    isChanged: false,
+                    offset: 0,
+                    lengthAtLastSave: 6,
+                    hexData: Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00])
+                }
+            ];
 
-            const oldData = Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4F, 0x6C, 0x64, 0x44, 0x61, 0x74, 
-                0x74, 0x65, 0x73, 0x74, 0x31, 0x32]);
+            const oldData = Buffer.from([
+                0x67, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4f, 0x6c, 0x64, 0x44,
+                0x61, 0x74, 0x74, 0x65, 0x73, 0x74, 0x31, 0x32
+            ]);
 
-            const result = FTCTableStrategy.getTable2BinaryData(table2Records, oldData);
+            const result = FTCTableStrategy.getTable2BinaryData(
+                table2Records,
+                oldData
+            );
 
-            const expectedResult = [Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00, 0x68, 0x65, 0x6C, 0x6C, 0x6F, 
-                0x00, 0x74, 0x65, 0x73, 0x74, 0x31, 0x32])]
+            const expectedResult = [
+                Buffer.from([
+                    0x67, 0x00, 0x00, 0x00, 0x00, 0x00, 0x68, 0x65, 0x6c, 0x6c,
+                    0x6f, 0x00, 0x74, 0x65, 0x73, 0x74, 0x31, 0x32
+                ])
+            ];
 
             expect(result).to.eql(expectedResult);
         });
 
         it('gives expected results if a field is smaller than it originally was', () => {
-            const table2Records = [{
-                'isChanged': false,
-                'offset': 0,
-                'lengthAtLastSave': 6,
-                'hexData': Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00])
-            }, {
-                'isChanged': true,
-                'offset': 6,
-                'lengthAtLastSave': 6,
-                'hexData': Buffer.from([0x68, 0x65, 0x6C, 0x6C])
-            }, {
-                'isChanged': false,
-                'offset': 12,
-                'lengthAtLastSave': 6,
-                'hexData': Buffer.from([0x74, 0x65, 0x73, 0x74, 0x31, 0x32])
-            }, {
-                'isChanged': false,
-                'offset': 0,
-                'lengthAtLastSave': 6,
-                'hexData': Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00])
-            }];
+            const table2Records = [
+                {
+                    isChanged: false,
+                    offset: 0,
+                    lengthAtLastSave: 6,
+                    hexData: Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00])
+                },
+                {
+                    isChanged: true,
+                    offset: 6,
+                    lengthAtLastSave: 6,
+                    hexData: Buffer.from([0x68, 0x65, 0x6c, 0x6c])
+                },
+                {
+                    isChanged: false,
+                    offset: 12,
+                    lengthAtLastSave: 6,
+                    hexData: Buffer.from([0x74, 0x65, 0x73, 0x74, 0x31, 0x32])
+                },
+                {
+                    isChanged: false,
+                    offset: 0,
+                    lengthAtLastSave: 6,
+                    hexData: Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00])
+                }
+            ];
 
-            const oldData = Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4F, 0x6C, 0x64, 0x44, 0x61, 0x74, 
-                0x74, 0x65, 0x73, 0x74, 0x31, 0x32]);
+            const oldData = Buffer.from([
+                0x67, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4f, 0x6c, 0x64, 0x44,
+                0x61, 0x74, 0x74, 0x65, 0x73, 0x74, 0x31, 0x32
+            ]);
 
-            const expectedResult = Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00, 0x68, 0x65, 0x6C, 0x6C, 
-                0x74, 0x65, 0x73, 0x74, 0x31, 0x32]);
+            const expectedResult = Buffer.from([
+                0x67, 0x00, 0x00, 0x00, 0x00, 0x00, 0x68, 0x65, 0x6c, 0x6c,
+                0x74, 0x65, 0x73, 0x74, 0x31, 0x32
+            ]);
 
-            const result = FTCTableStrategy.getTable2BinaryData(table2Records, oldData);
-            
+            const result = FTCTableStrategy.getTable2BinaryData(
+                table2Records,
+                oldData
+            );
+
             expect(result).to.eql([expectedResult]);
             expect(table2Records[0].offset).to.equal(0);
             expect(table2Records[1].offset).to.equal(6);
@@ -76,36 +102,52 @@ describe('FTC Table Strategy unit tests', () => {
         });
 
         it('gives expected results if a field is larger than it originally was', () => {
-            const table2Records = [{
-                'isChanged': false,
-                'offset': 0,
-                'lengthAtLastSave': 6,
-                'hexData': Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00])
-            }, {
-                'isChanged': true,
-                'offset': 6,
-                'lengthAtLastSave': 6,
-                'hexData': Buffer.from([0x68, 0x65, 0x6C, 0x6C, 0x50, 0x40, 0x30, 0x20, 0x10, 0x00])
-            }, {
-                'isChanged': false,
-                'offset': 12,
-                'lengthAtLastSave': 6,
-                'hexData': Buffer.from([0x74, 0x65, 0x73, 0x74, 0x31, 0x32])
-            }, {
-                'isChanged': false,
-                'offset': 0,
-                'lengthAtLastSave': 6,
-                'hexData': Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00])
-            }];
+            const table2Records = [
+                {
+                    isChanged: false,
+                    offset: 0,
+                    lengthAtLastSave: 6,
+                    hexData: Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00])
+                },
+                {
+                    isChanged: true,
+                    offset: 6,
+                    lengthAtLastSave: 6,
+                    hexData: Buffer.from([
+                        0x68, 0x65, 0x6c, 0x6c, 0x50, 0x40, 0x30, 0x20, 0x10,
+                        0x00
+                    ])
+                },
+                {
+                    isChanged: false,
+                    offset: 12,
+                    lengthAtLastSave: 6,
+                    hexData: Buffer.from([0x74, 0x65, 0x73, 0x74, 0x31, 0x32])
+                },
+                {
+                    isChanged: false,
+                    offset: 0,
+                    lengthAtLastSave: 6,
+                    hexData: Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00])
+                }
+            ];
 
-            const oldData = Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4F, 0x6C, 0x64, 0x44, 0x61, 0x74, 
-                0x74, 0x65, 0x73, 0x74, 0x31, 0x32]);
+            const oldData = Buffer.from([
+                0x67, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4f, 0x6c, 0x64, 0x44,
+                0x61, 0x74, 0x74, 0x65, 0x73, 0x74, 0x31, 0x32
+            ]);
 
-            const expectedResult = Buffer.from([0x67, 0x00, 0x00, 0x00, 0x00, 0x00, 0x68, 0x65, 0x6C, 0x6C, 0x50, 
-                0x40, 0x30, 0x20, 0x10, 0x00, 0x74, 0x65, 0x73, 0x74, 0x31, 0x32]);
+            const expectedResult = Buffer.from([
+                0x67, 0x00, 0x00, 0x00, 0x00, 0x00, 0x68, 0x65, 0x6c, 0x6c,
+                0x50, 0x40, 0x30, 0x20, 0x10, 0x00, 0x74, 0x65, 0x73, 0x74,
+                0x31, 0x32
+            ]);
 
-            const result = FTCTableStrategy.getTable2BinaryData(table2Records, oldData);
-            
+            const result = FTCTableStrategy.getTable2BinaryData(
+                table2Records,
+                oldData
+            );
+
             expect(result).to.eql([expectedResult]);
             expect(table2Records[0].offset).to.equal(0);
             expect(table2Records[1].offset).to.equal(6);
@@ -124,7 +166,7 @@ describe('FTC Table Strategy unit tests', () => {
         //     let index = 0;
 
         //     for (let i = 0; i < 20000; i++) {
-        //         const data = [0x74, 0x65, 0x73, 0x74, 0x31, 0x32, 0x74, 0x65, 0x73, 0x74, 0x31, 0x32, 
+        //         const data = [0x74, 0x65, 0x73, 0x74, 0x31, 0x32, 0x74, 0x65, 0x73, 0x74, 0x31, 0x32,
         //             0x74, 0x65, 0x73, 0x74, 0x31, 0x32, 0x74, 0x65, 0x73, 0x74, 0x31, 0x32, 0x00];
 
         //         table2RecordsPerformanceTest.push({
@@ -142,7 +184,7 @@ describe('FTC Table Strategy unit tests', () => {
         //             'isChanged': false,
         //             'offset': 0,
         //             'lengthAtLastSave': 25,
-        //             'hexData': Buffer.from([0x74, 0x65, 0x73, 0x74, 0x31, 0x32, 0x74, 0x65, 0x73, 0x74, 0x31, 0x32, 
+        //             'hexData': Buffer.from([0x74, 0x65, 0x73, 0x74, 0x31, 0x32, 0x74, 0x65, 0x73, 0x74, 0x31, 0x32,
         //                 0x74, 0x65, 0x73, 0x74, 0x31, 0x32, 0x74, 0x65, 0x73, 0x74, 0x31, 0x32, 0x00])
         //         });
         //     }
@@ -177,18 +219,20 @@ describe('FTC Table Strategy unit tests', () => {
         it('returns a list of offset names that have a second table value', () => {
             let offsetTable = [
                 {
-                    'name': 'Test',
-                    'type': 'string',
-                    'valueInSecondTable': true
+                    name: 'Test',
+                    type: 'string',
+                    valueInSecondTable: true
                 },
                 {
-                    'name': 'Test2',
-                    'type': 's_int',
-                    'valueInSecondTable': false
+                    name: 'Test2',
+                    type: 's_int',
+                    valueInSecondTable: false
                 }
             ];
 
-            expect(FTCTableStrategy.getMandatoryOffsets(offsetTable)).to.eql(['Test']);
+            expect(FTCTableStrategy.getMandatoryOffsets(offsetTable)).to.eql([
+                'Test'
+            ]);
         });
     });
 });

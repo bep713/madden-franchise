@@ -1,4 +1,4 @@
-import M20TableHeaderStrategy from "../m20/M20TableHeaderStrategy.js";
+import M20TableHeaderStrategy from '../m20/M20TableHeaderStrategy.js';
 let M24TableHeaderStrategy = {};
 M24TableHeaderStrategy.parseHeader = (data) => {
     let header = M20TableHeaderStrategy.parseHeader(data);

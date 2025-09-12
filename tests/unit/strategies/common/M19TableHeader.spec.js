@@ -3,12 +3,16 @@ import { expect } from 'chai';
 
 import M19TableHeaderStrategy from '../../../../src/strategies/common/header/m19/M19TableHeaderStrategy.js';
 
-import popularityComponentTableSchema from '../../../data/test-schemas/M19_PopularityComponentTable.json' with { type: "json" };
-const popularityComponentTable = fs.readFileSync('tests/data/strategies/m19/PopularityComponentTable.frt');
+import popularityComponentTableSchema from '../../../data/test-schemas/M19_PopularityComponentTable.json' with { type: 'json' };
+const popularityComponentTable = fs.readFileSync(
+    'tests/data/strategies/m19/PopularityComponentTable.frt'
+);
 
-const playerArrayTable = fs.readFileSync('tests/data/strategies/m19/PlayerArray.frt');
+const playerArrayTable = fs.readFileSync(
+    'tests/data/strategies/m19/PlayerArray.frt'
+);
 
-import playerTableSchema from '../../../data/test-schemas/M19_Player.json' with { type: "json" };
+import playerTableSchema from '../../../data/test-schemas/M19_Player.json' with { type: 'json' };
 const playerTable = fs.readFileSync('tests/data/strategies/m19/Player.frt');
 
 describe('M19 Table Header unit tests', () => {
@@ -21,7 +25,9 @@ describe('M19 Table Header unit tests', () => {
 
         describe('PopularityComponentTable', () => {
             before(() => {
-                result = M19TableHeaderStrategy.parseHeader(popularityComponentTable);
+                result = M19TableHeaderStrategy.parseHeader(
+                    popularityComponentTable
+                );
             });
 
             it('parses the table name', () => {
@@ -199,7 +205,7 @@ describe('M19 Table Header unit tests', () => {
             it('table 2 length', () => {
                 expect(result.table2Length).to.equal(392040);
             });
-        })
+        });
     });
 
     describe('parse header attributes from schema', () => {
@@ -207,8 +213,14 @@ describe('M19 Table Header unit tests', () => {
 
         describe('PopularityComponentTable', () => {
             before(() => {
-                const header = M19TableHeaderStrategy.parseHeader(popularityComponentTable);
-                result = M19TableHeaderStrategy.parseHeaderAttributesFromSchema(popularityComponentTableSchema, popularityComponentTable, header);
+                const header = M19TableHeaderStrategy.parseHeader(
+                    popularityComponentTable
+                );
+                result = M19TableHeaderStrategy.parseHeaderAttributesFromSchema(
+                    popularityComponentTableSchema,
+                    popularityComponentTable,
+                    header
+                );
             });
 
             it('header size', () => {
@@ -231,7 +243,11 @@ describe('M19 Table Header unit tests', () => {
         describe('Player', () => {
             before(() => {
                 const header = M19TableHeaderStrategy.parseHeader(playerTable);
-                result = M19TableHeaderStrategy.parseHeaderAttributesFromSchema(playerTableSchema, playerTable, header);
+                result = M19TableHeaderStrategy.parseHeaderAttributesFromSchema(
+                    playerTableSchema,
+                    playerTable,
+                    header
+                );
             });
 
             it('header size', () => {

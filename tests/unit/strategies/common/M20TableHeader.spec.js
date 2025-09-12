@@ -2,12 +2,16 @@ import fs from 'fs';
 import { expect } from 'chai';
 import M20TableHeaderStrategy from '../../../../src/strategies/common/header/m20/M20TableHeaderStrategy.js';
 
-import popularityComponentTableSchema from '../../../data/test-schemas/M20_PopularityComponentTable.json' with { type: "json" };
-const popularityComponentTable = fs.readFileSync('tests/data/strategies/m20/PopularityComponentTable.frt');
+import popularityComponentTableSchema from '../../../data/test-schemas/M20_PopularityComponentTable.json' with { type: 'json' };
+const popularityComponentTable = fs.readFileSync(
+    'tests/data/strategies/m20/PopularityComponentTable.frt'
+);
 
-const playerArrayTable = fs.readFileSync('tests/data/strategies/m20/PlayerArray.frt');
+const playerArrayTable = fs.readFileSync(
+    'tests/data/strategies/m20/PlayerArray.frt'
+);
 
-import playerTableSchema from '../../../data/test-schemas/M20_Player.json' with { type: "json" };
+import playerTableSchema from '../../../data/test-schemas/M20_Player.json' with { type: 'json' };
 const playerTable = fs.readFileSync('tests/data/strategies/m20/Player.frt');
 
 describe('M20 Table Header unit tests', () => {
@@ -20,7 +24,9 @@ describe('M20 Table Header unit tests', () => {
 
         describe('PopularityComponentTable', () => {
             before(() => {
-                result = M20TableHeaderStrategy.parseHeader(popularityComponentTable);
+                result = M20TableHeaderStrategy.parseHeader(
+                    popularityComponentTable
+                );
             });
 
             it('parses the table name', () => {
@@ -196,7 +202,7 @@ describe('M20 Table Header unit tests', () => {
 
             it('unique id', () => {
                 expect(result.uniqueId).to.equal(1612938518);
-            })
+            });
 
             // This table has a second table unlike the ones above.
             it('has second table', () => {
@@ -206,7 +212,7 @@ describe('M20 Table Header unit tests', () => {
             it('table 2 length', () => {
                 expect(result.table2Length).to.equal(415800);
             });
-        })
+        });
     });
 
     describe('parse header attributes from schema', () => {
@@ -214,8 +220,14 @@ describe('M20 Table Header unit tests', () => {
 
         describe('PopularityComponentTable', () => {
             before(() => {
-                const header = M20TableHeaderStrategy.parseHeader(popularityComponentTable);
-                result = M20TableHeaderStrategy.parseHeaderAttributesFromSchema(popularityComponentTableSchema, popularityComponentTable, header);
+                const header = M20TableHeaderStrategy.parseHeader(
+                    popularityComponentTable
+                );
+                result = M20TableHeaderStrategy.parseHeaderAttributesFromSchema(
+                    popularityComponentTableSchema,
+                    popularityComponentTable,
+                    header
+                );
             });
 
             it('header size', () => {
@@ -238,7 +250,11 @@ describe('M20 Table Header unit tests', () => {
         describe('Player', () => {
             before(() => {
                 const header = M20TableHeaderStrategy.parseHeader(playerTable);
-                result = M20TableHeaderStrategy.parseHeaderAttributesFromSchema(playerTableSchema, playerTable, header);
+                result = M20TableHeaderStrategy.parseHeaderAttributesFromSchema(
+                    playerTableSchema,
+                    playerTable,
+                    header
+                );
             });
 
             it('header size', () => {

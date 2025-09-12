@@ -1,13 +1,13 @@
-import fs from "fs";
-import zlib from "zlib";
-import Constants from "./Constants.js";
-import events from "events";
-import FranchiseSchema from "./FranchiseSchema.js";
-import utilService from "./services/utilService.js";
-import FranchiseFileTable from "./FranchiseFileTable.js";
-import StrategyPicker from "./strategies/StrategyPicker.js";
-import FranchiseFileSettings from "./FranchiseFileSettings.js";
-import schemaPickerService from "./services/schemaPicker.js";
+import fs from 'fs';
+import zlib from 'zlib';
+import Constants from './Constants.js';
+import events from 'events';
+import FranchiseSchema from './FranchiseSchema.js';
+import utilService from './services/utilService.js';
+import FranchiseFileTable from './FranchiseFileTable.js';
+import StrategyPicker from './strategies/StrategyPicker.js';
+import FranchiseFileSettings from './FranchiseFileSettings.js';
+import schemaPickerService from './services/schemaPicker.js';
 
 const EventEmitter = events.EventEmitter;
 const COMPRESSED_DATA_OFFSET = 0x52;
@@ -17,10 +17,10 @@ const COMPRESSED_DATA_OFFSET = 0x52;
  * @param {number} reference
  */
 /**
-   * @typedef {Object} RecordReference
-   * @param {number} tableId
-   * @param {number} rowNumber
-   */
+ * @typedef {Object} RecordReference
+ * @param {number} tableId
+ * @param {number} rowNumber
+ */
 class FranchiseFile extends EventEmitter {
     /**
      *
@@ -34,8 +34,7 @@ class FranchiseFile extends EventEmitter {
             if (file.settings.autoParse) {
                 file.on('ready', () => resolve(file));
                 file.on('error', (err) => reject(err));
-            }
-            else {
+            } else {
                 resolve(file);
             }
         });
@@ -53,8 +52,7 @@ class FranchiseFile extends EventEmitter {
         if (Array.isArray(filePath)) {
             /** @private @type {string} */
             this._filePath = filePath[0];
-        }
-        else {
+        } else {
             this._filePath = filePath;
         }
         /** @private @type {Buffer} */
@@ -64,20 +62,31 @@ class FranchiseFile extends EventEmitter {
         /** @private @type {number} */
         this._gameYear = this._type.year;
         /** @private @type {SchemaMetadata} */
-        this._expectedSchemaVersion = getSchemaMetadata(this.rawContents, this._type);
+        this._expectedSchemaVersion = getSchemaMetadata(
+            this.rawContents,
+            this._type
+        );
         if (this._type.compressed) {
             /** @type {Buffer} */
             this.packedFileContents = this._rawContents;
             /** @type {Buffer} */
-            this.unpackedFileContents = unpackFile(this._rawContents, this._type);
+            this.unpackedFileContents = unpackFile(
+                this._rawContents,
+                this._type
+            );
             if (this._type.format === Constants.FORMAT.FRANCHISE_COMMON) {
-                const newType = getFileType(this.unpackedFileContents, this._settings);
+                const newType = getFileType(
+                    this.unpackedFileContents,
+                    this._settings
+                );
                 this._type.year = newType.year;
                 this._gameYear = this._type.year;
-                this._expectedSchemaVersion = getSchemaMetadata(this.unpackedFileContents, newType);
+                this._expectedSchemaVersion = getSchemaMetadata(
+                    this.unpackedFileContents,
+                    newType
+                );
             }
-        }
-        else {
+        } else {
             this.unpackedFileContents = this._rawContents;
         }
         if (this._settings.autoParse) {
@@ -94,21 +103,27 @@ class FranchiseFile extends EventEmitter {
             const schemaMeta = this.settings.schemaOverride
                 ? this.settings.schemaOverride
                 : this.expectedSchemaVersion;
-            const schemaPath = this.settings.schemaOverride && this.settings.schemaOverride.path
-                ? this.settings.schemaOverride.path
-                : schemaPickerService.pick(this._gameYear, schemaMeta.major, schemaMeta.minor, this.settings).path;
+            const schemaPath =
+                this.settings.schemaOverride &&
+                this.settings.schemaOverride.path
+                    ? this.settings.schemaOverride.path
+                    : schemaPickerService.pick(
+                          this._gameYear,
+                          schemaMeta.major,
+                          schemaMeta.minor,
+                          this.settings
+                      ).path;
             try {
                 this.schemaList = new FranchiseSchema(schemaPath, {
                     extraSchemas: this.settings.extraSchemas,
                     fileMap: this.settings.schemaFileMap,
                     useNewSchemaGeneration: this.settings.useNewSchemaGeneration
                 });
-                this.schemaList.on("schemas:done", () => {
+                this.schemaList.on('schemas:done', () => {
                     resolve();
                 });
                 this.schemaList.evaluate();
-            }
-            catch (err) {
+            } catch (err) {
                 reject(err);
             }
         });
@@ -127,10 +142,11 @@ class FranchiseFile extends EventEmitter {
             const alt2FourthCheck = 0x58;
             const tableIndicies = [];
             for (let i = 0; i <= this.unpackedFileContents.length - 4; i += 1) {
-                if ((this.unpackedFileContents[i] === firstCheck &&
-                    this.unpackedFileContents[i + 1] === secondCheck &&
-                    this.unpackedFileContents[i + 2] === thirdCheck &&
-                    this.unpackedFileContents[i + 3] === fourthCheck) ||
+                if (
+                    (this.unpackedFileContents[i] === firstCheck &&
+                        this.unpackedFileContents[i + 1] === secondCheck &&
+                        this.unpackedFileContents[i + 2] === thirdCheck &&
+                        this.unpackedFileContents[i + 3] === fourthCheck) ||
                     (this.unpackedFileContents[i] === altFirstCheck &&
                         this.unpackedFileContents[i + 1] === altSecondCheck &&
                         this.unpackedFileContents[i + 2] === altThirdCheck &&
@@ -138,8 +154,10 @@ class FranchiseFile extends EventEmitter {
                     (this.unpackedFileContents[i] === alt2FirstCheck &&
                         this.unpackedFileContents[i + 1] === alt2SecondCheck &&
                         this.unpackedFileContents[i + 2] === alt2ThirdCheck &&
-                        this.unpackedFileContents[i + 3] === alt2FourthCheck)) {
-                    const tableStart = i - getTableStartOffsetByGameYear(this._gameYear);
+                        this.unpackedFileContents[i + 3] === alt2FourthCheck)
+                ) {
+                    const tableStart =
+                        i - getTableStartOffsetByGameYear(this._gameYear);
                     tableIndicies.push(tableStart);
                 }
             }
@@ -147,19 +165,29 @@ class FranchiseFile extends EventEmitter {
             this.tables = [];
             for (let i = 0; i < tableIndicies.length; i++) {
                 const currentTable = tableIndicies[i];
-                const nextTable = tableIndicies.length > i + 1
-                    ? tableIndicies[i + 1]
-                    : this.unpackedFileContents.length - 8; // Ignore trailing 8 bytes on last table
-                const tableData = this.unpackedFileContents.slice(currentTable, nextTable);
-                const newFranchiseTable = new FranchiseFileTable(tableData, currentTable, this._gameYear, this.strategy, this.settings);
+                const nextTable =
+                    tableIndicies.length > i + 1
+                        ? tableIndicies[i + 1]
+                        : this.unpackedFileContents.length - 8; // Ignore trailing 8 bytes on last table
+                const tableData = this.unpackedFileContents.slice(
+                    currentTable,
+                    nextTable
+                );
+                const newFranchiseTable = new FranchiseFileTable(
+                    tableData,
+                    currentTable,
+                    this._gameYear,
+                    this.strategy,
+                    this.settings
+                );
                 newFranchiseTable.index = i;
                 this.tables.push(newFranchiseTable);
-                newFranchiseTable.on("change", function () {
+                newFranchiseTable.on('change', function () {
                     this.isChanged = true;
                     if (that.settings.saveOnChange) {
                         that.packFile();
                     }
-                    that.emit("change", newFranchiseTable);
+                    that.emit('change', newFranchiseTable);
                 });
             }
             resolve();
@@ -168,14 +196,18 @@ class FranchiseFile extends EventEmitter {
             /** @type {Array<AssetTable>} */
             this.assetTable = [];
             const assetTableOffset = this.unpackedFileContents.readUInt32BE(4);
-            const assetTableEntries = this.unpackedFileContents.readUInt32BE(36);
+            const assetTableEntries =
+                this.unpackedFileContents.readUInt32BE(36);
             let currentOffset = assetTableOffset;
             for (let i = 0; i < assetTableEntries; i++) {
-                const assetId = this.unpackedFileContents.readUInt32BE(currentOffset);
-                const reference = this.unpackedFileContents.readUInt32BE(currentOffset + 4);
+                const assetId =
+                    this.unpackedFileContents.readUInt32BE(currentOffset);
+                const reference = this.unpackedFileContents.readUInt32BE(
+                    currentOffset + 4
+                );
                 this.assetTable.push({
                     assetId: assetId,
-                    reference: reference,
+                    reference: reference
                 });
                 currentOffset += 8;
             }
@@ -183,19 +215,19 @@ class FranchiseFile extends EventEmitter {
         });
         Promise.all([schemaPromise, tablePromise, assetTablePromise])
             .then(() => {
-            that.tables.forEach((table) => {
-                const schema = that.schemaList.getSchema(table.name);
-                if (schema) {
-                    table.schema = schema;
-                }
-            });
-            that.isLoaded = true;
-            that.emit("ready");
-        })
+                that.tables.forEach((table) => {
+                    const schema = that.schemaList.getSchema(table.name);
+                    if (schema) {
+                        table.schema = schema;
+                    }
+                });
+                that.isLoaded = true;
+                that.emit('ready');
+            })
             .catch((err) => {
-            console.log(err);
-            that.emit("error", err);
-        });
+                console.log(err);
+                that.emit('error', err);
+            });
     }
     /**
      *
@@ -214,17 +246,23 @@ class FranchiseFile extends EventEmitter {
      */
     packFile(outputFilePath, options) {
         const that = this;
-        this.emit("saving");
+        this.emit('saving');
         return new Promise((resolve, reject) => {
-            this.unpackedFileContents = this.strategy.file.generateUnpackedContents(this.tables, this.unpackedFileContents);
+            this.unpackedFileContents =
+                this.strategy.file.generateUnpackedContents(
+                    this.tables,
+                    this.unpackedFileContents
+                );
             let destination = outputFilePath ? outputFilePath : this.filePath;
             _packFile(this.unpackedFileContents, options).then((data) => {
-                const dataToSave = this.strategy.file.postPackFile(this.packedFileContents, data);
+                const dataToSave = this.strategy.file.postPackFile(
+                    this.packedFileContents,
+                    data
+                );
                 if (options && options.sync) {
                     _saveSync(destination, dataToSave);
                     postSaveActions();
-                }
-                else {
+                } else {
                     _save(destination, dataToSave, (err) => {
                         postSaveActions(err);
                     });
@@ -232,10 +270,10 @@ class FranchiseFile extends EventEmitter {
                 function postSaveActions(err) {
                     if (err) {
                         reject(err);
-                        that.emit("save-error");
+                        that.emit('save-error');
                     }
-                    resolve("saved");
-                    that.emit("saved");
+                    resolve('saved');
+                    that.emit('saved');
                 }
             });
         });
@@ -346,7 +384,9 @@ class FranchiseFile extends EventEmitter {
      */
     getReferencedRecord(referenceValue) {
         const reference = utilService.getReferenceData(referenceValue);
-        return this.getTableById(reference.tableId)?.records[reference.rowNumber];
+        return this.getTableById(reference.tableId)?.records[
+            reference.rowNumber
+        ];
     }
     /**
      *
@@ -362,8 +402,7 @@ class FranchiseFile extends EventEmitter {
                 .toString(2)
                 .padStart(32);
             return utilService.getReferenceData(referenceBinaryString);
-        }
-        else {
+        } else {
             return null;
         }
     }
@@ -382,41 +421,50 @@ class FranchiseFile extends EventEmitter {
     getReferencesToRecord(tableId, recordIndex) {
         const referencedTable = this.getTableById(tableId);
         if (referencedTable) {
-            const fullBinary = utilService.getBinaryReferenceData(tableId, recordIndex);
-            const hex = utilService.bin2hex(fullBinary).padStart(8, "0");
+            const fullBinary = utilService.getBinaryReferenceData(
+                tableId,
+                recordIndex
+            );
+            const hex = utilService.bin2hex(fullBinary).padStart(8, '0');
             return this.tables
                 .filter((table) => {
-                if (table.schema) {
-                    return (table.schema &&
-                        table.schema.attributes.find((attribute) => {
-                            // Generic record types can contain any table type
-                            return attribute.type === referencedTable.name
-                                || attribute.type === 'record';
-                        }));
-                }
-                else if (table.isArray && referencedTable.schema) {
-                    // If the referenced table has a schema, we can check its base name.
-                    // Some array table names are by the base name like EnumTable[] can contain AwardTypeEnumTableEntry
-                    return (table.name.slice(0, table.name.length - 2) ===
-                        referencedTable.name ||
-                        table.name.slice(0, table.name.length - 2) ===
-                            referencedTable.schema.base);
-                }
-                else if (table.isArray) {
-                    return (table.name.slice(0, table.name.length - 2) ===
-                        referencedTable.name);
-                }
-            })
+                    if (table.schema) {
+                        return (
+                            table.schema &&
+                            table.schema.attributes.find((attribute) => {
+                                // Generic record types can contain any table type
+                                return (
+                                    attribute.type === referencedTable.name ||
+                                    attribute.type === 'record'
+                                );
+                            })
+                        );
+                    } else if (table.isArray && referencedTable.schema) {
+                        // If the referenced table has a schema, we can check its base name.
+                        // Some array table names are by the base name like EnumTable[] can contain AwardTypeEnumTableEntry
+                        return (
+                            table.name.slice(0, table.name.length - 2) ===
+                                referencedTable.name ||
+                            table.name.slice(0, table.name.length - 2) ===
+                                referencedTable.schema.base
+                        );
+                    } else if (table.isArray) {
+                        return (
+                            table.name.slice(0, table.name.length - 2) ===
+                            referencedTable.name
+                        );
+                    }
+                })
                 .filter((table) => {
-                return table.data.indexOf(hex, 0, "hex") !== -1;
-            })
+                    return table.data.indexOf(hex, 0, 'hex') !== -1;
+                })
                 .map((table) => {
-                return {
-                    tableId: table.header.tableId,
-                    name: table.name,
-                    table: table,
-                };
-            });
+                    return {
+                        tableId: table.header.tableId,
+                        name: table.name,
+                        table: table
+                    };
+                });
         }
     }
 }
@@ -441,18 +489,20 @@ function _packFile(data, options) {
     return new Promise((resolve, reject) => {
         if (options && options.sync) {
             const newData = zlib.deflateSync(data, {
-                windowBits: 15,
+                windowBits: 15
             });
             resolve(newData);
-        }
-        else {
-            zlib.deflate(data, {
-                windowBits: 15,
-            }, function (err, newData) {
-                if (err)
-                    reject(err);
-                resolve(newData);
-            });
+        } else {
+            zlib.deflate(
+                data,
+                {
+                    windowBits: 15
+                },
+                function (err, newData) {
+                    if (err) reject(err);
+                    resolve(newData);
+                }
+            );
         }
     });
 }
@@ -477,11 +527,13 @@ function _saveSync(destination, packedContents) {
 function getFileType(data, settings) {
     const isDataCompressed = isCompressed(data);
     const format = getFormat(data, isDataCompressed);
-    const year = settings?.gameYearOverride ?? getGameYear(data, isDataCompressed, format);
+    const year =
+        settings?.gameYearOverride ??
+        getGameYear(data, isDataCompressed, format);
     return {
         format: format,
         compressed: isDataCompressed,
-        year: year,
+        year: year
     };
 }
 /**
@@ -506,20 +558,17 @@ function getFormat(data, isCompressed) {
     if (isCompressed) {
         const ZLIB_HEADER = Buffer.from([0x78, 0x9c]);
         if (Buffer.compare(data.slice(0, 2), ZLIB_HEADER) === 0) {
-            return "franchise-common";
+            return 'franchise-common';
+        } else {
+            return 'franchise';
         }
-        else {
-            return "franchise";
-        }
-    }
-    else {
+    } else {
         // very simple check based on file length.
         // This assumes the common files are smaller than 9,000 KB.
         if (data.length > 0x895440) {
-            return "franchise";
-        }
-        else {
-            return "franchise-common";
+            return 'franchise';
+        } else {
+            return 'franchise-common';
         }
     }
 }
@@ -534,12 +583,12 @@ function getGameYear(data, isCompressed, format) {
     const schemaMax = [
         {
             year: 19,
-            max: 95,
+            max: 95
         },
         {
             year: 26,
-            max: 999,
-        },
+            max: 999
+        }
     ];
     if (isCompressed) {
         // look at the max schemas per year. M19 schemas will be less than or equal to 95,
@@ -554,49 +603,42 @@ function getGameYear(data, isCompressed, format) {
         const yearIdentifier = data.slice(0x22, 0x25);
         if (yearIdentifier[0] === 0x52) {
             return 19;
-        }
-        else if (yearIdentifier[2] === 0x30) {
+        } else if (yearIdentifier[2] === 0x30) {
             return 20;
-        }
-        else if (yearIdentifier[2] === 0x31) {
+        } else if (yearIdentifier[2] === 0x31) {
             return 21;
-        }
-        else if (yearIdentifier[2] === 0x32) {
+        } else if (yearIdentifier[2] === 0x32) {
             return 22;
-        }
-        else if (yearIdentifier[2] === 0x33) {
+        } else if (yearIdentifier[2] === 0x33) {
             return 23;
-        }
-        else if (yearIdentifier[2] === 0x34 || yearIdentifier[2] === "d" || data[0x2A] === 0x34) {
+        } else if (
+            yearIdentifier[2] === 0x34 ||
+            yearIdentifier[2] === 'd' ||
+            data[0x2a] === 0x34
+        ) {
             return 24;
-        }
-        else if (data[0x2A] === 0x35) {
+        } else if (data[0x2a] === 0x35) {
             // M25 has year indicator in a different location
             return 25;
-        }
-        else if (data[0x2A] === 0x36) {
+        } else if (data[0x2a] === 0x36) {
             return 26;
-        }
-        else {
+        } else {
             const schemaMajor = getCompressedSchema(data).major;
             const year = schemaMax.find((schema) => {
                 return schema.max >= schemaMajor;
             }).year;
             return year;
         }
-    }
-    else {
+    } else {
         const schemaMajor = getDecompressedM20Schema(data).major;
         if (schemaMajor === 0) {
             // M19 did not include schema info in uncompressed files.
             return 19;
-        }
-        else {
+        } else {
             // M21 and M20 have very similar formats. We can tell M21 because it has a table with 'M21' in the name.
-            if (data.indexOf("M21") > -1) {
+            if (data.indexOf('M21') > -1) {
                 return 21;
-            }
-            else {
+            } else {
                 return null;
             }
         }
@@ -617,7 +659,7 @@ function getGameYear(data, isCompressed, format) {
  */
 function getSchemaMetadata(data, type) {
     let schemaMeta = {
-        gameYear: type.year,
+        gameYear: type.year
     };
     if (type.compressed) {
         if (type.format === Constants.FORMAT.FRANCHISE_COMMON) {
@@ -628,14 +670,12 @@ function getSchemaMetadata(data, type) {
         const schemaData = getCompressedSchema(data);
         schemaMeta.major = schemaData.major;
         schemaMeta.minor = schemaData.minor;
-    }
-    else {
+    } else {
         if (type.year === 19) {
             // M19 did not include schema info in uncompressed files.
             schemaMeta.major = 0;
             schemaMeta.minor = 0;
-        }
-        else {
+        } else {
             const schemaData = getDecompressedM20Schema(data);
             schemaMeta.major = schemaData.major;
             schemaMeta.minor = schemaData.minor;
@@ -656,13 +696,13 @@ function getSchemaMetadata(data, type) {
 function getCompressedSchema(data) {
     return {
         major: data.readUInt32LE(0x3e),
-        minor: data.readUInt32LE(0x42),
+        minor: data.readUInt32LE(0x42)
     };
 }
 function getDecompressedM20Schema(data) {
     return {
         major: data.readUInt32BE(0x2c),
-        minor: data.readUInt32BE(0x28),
+        minor: data.readUInt32BE(0x28)
     };
 }
 export default FranchiseFile;
