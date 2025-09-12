@@ -37,5 +37,6 @@ declare namespace utilService {
         rowNumber: any;
     };
     function getBinaryReferenceData(tableId: any, rowNumber: any): string;
+    function getTable3OverflowRecord(record: any): any;
 }
 //# sourceMappingURL=utilService.d.ts.map

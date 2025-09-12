@@ -223,11 +223,11 @@ utilService.getBinaryReferenceData = function (tableId, rowNumber) {
 
 utilService.getTable3OverflowRecord = function (record) {
     const overflowRef = record.getFieldByKey('Overflow');
-    
+
     if (overflowRef) {
         //console.log(overflowRef);
         const value = overflowRef.value;
-        const { tableId: overflowTableId, rowNumber: overflowTableRow } = 
+        const { tableId: overflowTableId, rowNumber: overflowTableRow } =
             utilService.getReferenceData(value);
         // If the overflow reference exists and is in this table, use it when reading the unformatted value
         if (

@@ -23,10 +23,10 @@ export type RecordReference = Object;
  * @param {number} reference
  */
 /**
-   * @typedef {Object} RecordReference
-   * @param {number} tableId
-   * @param {number} rowNumber
-   */
+ * @typedef {Object} RecordReference
+ * @param {number} tableId
+ * @param {number} rowNumber
+ */
 declare class FranchiseFile extends events {
     /**
      *
@@ -175,8 +175,8 @@ declare class FranchiseFile extends events {
      */
     getReferencesToRecord(tableId: number, recordIndex: number): Object[];
 }
-import events from "events";
-import FranchiseSchema from "./FranchiseSchema.js";
-import FranchiseFileTable from "./FranchiseFileTable.js";
-import FranchiseFileSettings from "./FranchiseFileSettings.js";
+import events from 'events';
+import FranchiseSchema from './FranchiseSchema.js';
+import FranchiseFileTable from './FranchiseFileTable.js';
+import FranchiseFileSettings from './FranchiseFileSettings.js';
 //# sourceMappingURL=FranchiseFile.d.ts.map

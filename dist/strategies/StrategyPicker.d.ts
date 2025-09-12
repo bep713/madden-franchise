@@ -6,9 +6,6 @@ declare namespace StrategyPicker {
     function pick(type: any): {
         name: string;
         file: FileStrategy;
-        /**
-         * @returns GameStrategy
-         */
         table: TableStrategy;
         table2Field: Table2FieldStrategy;
         table3Field: Table3FieldStrategy;

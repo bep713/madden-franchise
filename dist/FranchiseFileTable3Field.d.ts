@@ -34,5 +34,7 @@ declare class FranchiseFileTable3Field {
     /** @param {FranchiseFileTable} parent */
     set parent(parent: FranchiseFileTable);
     get parent(): FranchiseFileTable;
+    populateOverflowRecord(newUnformattedValue: any): any;
+    clearOverflowRecord(): void;
 }
 //# sourceMappingURL=FranchiseFileTable3Field.d.ts.map

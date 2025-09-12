@@ -7,7 +7,7 @@ export type SettingsParam = Object;
  * @param {string?} [schemaDirectory]
  * @param {boolean?} [autoParse]
  * @param {boolean?} [autoUnempty]
-*/
+ */
 declare class FranchiseFileSettings {
     /** @param {SettingsParam} settings */
     constructor(settings: SettingsParam);

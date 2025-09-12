@@ -29,5 +29,5 @@ declare class FranchiseEnum {
     getMemberByName(name: string): FranchiseEnumValue | null;
     setMemberLength(): void;
 }
-import FranchiseEnumValue from "./FranchiseEnumValue.js";
+import FranchiseEnumValue from './FranchiseEnumValue.js';
 //# sourceMappingURL=FranchiseEnum.d.ts.map

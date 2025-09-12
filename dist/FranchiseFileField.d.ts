@@ -38,18 +38,20 @@ declare class FranchiseFileField {
     set unformattedValue(unformattedValue: BitView);
     /** @returns {BitView} */
     get unformattedValue(): BitView;
+    /** @returns {FranchiseFileRecord} */
+    get parent(): FranchiseFileRecord;
     /** @param {OffsetTableEntry} offset */
     getValueAs(offset: OffsetTableEntry): any;
     _bubbleChangeToParent(): void;
     clearCachedValues(): void;
     _setUnformattedValueIfEmpty(): void;
-    /** @param {BitView} unformattedValue @param {boolean} suppressErrors */
-    setUnformattedValueWithoutChangeEvent(unformattedValue: BitView, suppressErrors: boolean): void;
+    /** @param {BitView} unformattedValue */
+    setUnformattedValueWithoutChangeEvent(unformattedValue: BitView): void;
     /** @returns {FranchiseEnumValue?} */
     _getEnumFromValue(value: any): FranchiseEnumValue | null;
     /** @param {BitView} unformatted, @param {OffsetTableEntry} offset */
     _parseFieldValue(unformatted: BitView, offset: OffsetTableEntry): any;
 }
-import FranchiseFileTable2Field from "./FranchiseFileTable2Field.js";
-import FranchiseFileTable3Field from "./FranchiseFileTable3Field.js";
+import FranchiseFileTable2Field from './FranchiseFileTable2Field.js';
+import FranchiseFileTable3Field from './FranchiseFileTable3Field.js';
 //# sourceMappingURL=FranchiseFileField.d.ts.map

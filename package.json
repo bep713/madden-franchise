@@ -1,6 +1,6 @@
 {
   "name": "madden-franchise",
-  "version": "4.1.1",
+  "version": "4.1.2",
   "description": "Tools to read and parse a madden franchise file",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
@@ -12,6 +12,7 @@
     "lint:fix": "npm run lint -- --fix",
     "make-types": "tsc --project ./tsconfig.json",
     "pack": "npm pack --pack-destination pack",
+    "publish": "npm run lint && npm run format && npm run build && npm publish",
     "test": "mocha tests/**/*.spec.js"
   },
   "keywords": [

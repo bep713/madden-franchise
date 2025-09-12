@@ -31,6 +31,8 @@ declare class FranchiseFileRecord {
     /** @param {boolean} changed */
     set isChanged(changed: boolean);
     get isChanged(): boolean;
+    /** @returns {FranchiseFileTable} */
+    get parent(): FranchiseFileTable;
     /** @param {string} key @returns {FranchiseFileField?} */
     getFieldByKey(key: string): FranchiseFileField | null;
     /** @param {string} key @returns {*?} */
@@ -43,5 +45,5 @@ declare class FranchiseFileRecord {
     /** @param {string} name @param {FranchiseFileField} field */
     onEvent(name: string, field: FranchiseFileField): void;
 }
-import FranchiseFileField from "./FranchiseFileField.js";
+import FranchiseFileField from './FranchiseFileField.js';
 //# sourceMappingURL=FranchiseFileRecord.d.ts.map

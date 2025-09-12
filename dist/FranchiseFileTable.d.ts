@@ -168,9 +168,8 @@ declare class FranchiseFileTable extends events {
     /** @param {string} name @param {*} object */
     onEvent(name: string, object: any): void;
 }
-import events from "events";
-import FranchiseFileRecord from "./FranchiseFileRecord.js";
-import FranchiseFileTable2Field from "./FranchiseFileTable2Field.js";
-import FranchiseFileTable3Field from "./FranchiseFileTable3Field.js";
-import FranchiseFileSettings from "./FranchiseFileSettings.js";
+import events from 'events';
+import FranchiseFileRecord from './FranchiseFileRecord.js';
+import FranchiseFileTable2Field from './FranchiseFileTable2Field.js';
+import FranchiseFileTable3Field from './FranchiseFileTable3Field.js';
 //# sourceMappingURL=FranchiseFileTable.d.ts.map
