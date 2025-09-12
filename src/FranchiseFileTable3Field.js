@@ -157,7 +157,6 @@ class FranchiseFileTable3Field {
 
         const field = this.fieldReference;
         const record = field.parent;
-        const table = record.parent;
 
         // If the referenced record is in the current table, clear it out and empty it
         const overflowRecord = utilService.getTable3OverflowRecord(record);

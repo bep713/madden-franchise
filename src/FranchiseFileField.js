@@ -213,8 +213,8 @@ class FranchiseFileField {
         this._unformattedValue.bigEndian = true;
     }
     ;
-    /** @param {BitView} unformattedValue @param {boolean} suppressErrors */
-    setUnformattedValueWithoutChangeEvent(unformattedValue, suppressErrors) {
+    /** @param {BitView} unformattedValue */
+    setUnformattedValueWithoutChangeEvent(unformattedValue) {
         if (!(unformattedValue instanceof BitView)) {
             throw new Error(`Argument must be of type BitView. You passed in a(n) ${typeof unformattedValue}.`);
         }
@@ -262,7 +262,7 @@ class FranchiseFileField {
                     return theEnum.name;
                 }
             }
-            catch (err) {
+            catch {
                 // console.log(err);
             }
             return enumUnformattedValue;
@@ -272,7 +272,7 @@ class FranchiseFileField {
                 const referenceData = utilService.getReferenceDataFromBitview(unformatted, offset.offset);
                 return utilService.getBinaryReferenceData(referenceData.tableId, referenceData.rowNumber);
             }
-            catch (err) {
+            catch {
                 console.warn(`Tried to read ${offset.name} as a reference, but received an error.`);
                 // tried to read a reference, but the offset was incorrect
                 return unformatted.getBits(offset.offset, offset.length);

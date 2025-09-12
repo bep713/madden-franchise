@@ -55,7 +55,7 @@ function readChviArray(arrayLength)
 
             switch(fieldType)
             {
-                case FIELD_TYPE_INT:
+                case FIELD_TYPE_INT: {
                     let intValue = readModifiedLebEncodedNumber();
 
                     if(!fieldName)
@@ -75,7 +75,8 @@ function readChviArray(arrayLength)
 
                     recordObject[fieldName] = intValue;
                     break;
-                case FIELD_TYPE_STRING:
+                }
+                case FIELD_TYPE_STRING: {
                     let stringLength = readModifiedLebEncodedNumber();
                     let stringValue = readBytes(stringLength);
                     // Remove null terminator from string
@@ -88,7 +89,8 @@ function readChviArray(arrayLength)
 
                     recordObject[fieldName] = stringValue;
                     break;
-                case FIELD_TYPE_FLOAT:
+                }
+                case FIELD_TYPE_FLOAT: {
                     let floatValue = readBytes(4).readFloatBE(0);
 
                     if(!fieldName)
@@ -98,7 +100,8 @@ function readChviArray(arrayLength)
 
                     recordObject[fieldName] = floatValue;
                     break;
-                case FIELD_TYPE_ARRAY:
+                }
+                case FIELD_TYPE_ARRAY: {
                     readByte(); // Unknown byte
                     let arrayLength = readModifiedLebEncodedNumber();
 
@@ -118,6 +121,7 @@ function readChviArray(arrayLength)
 
                     recordObject[fieldName] = arrayObject;
                     break;
+                }
                 default:
                     break;
             }
@@ -182,7 +186,7 @@ export function readChviRecord(dataBuf)
         }
         switch(fieldType)
         {
-            case FIELD_TYPE_INT:
+            case FIELD_TYPE_INT: {
                 let intValue = readModifiedLebEncodedNumber();
 
                 if(!fieldName)
@@ -202,7 +206,8 @@ export function readChviRecord(dataBuf)
 
                 recordObject[fieldName] = intValue;
                 break;
-            case FIELD_TYPE_STRING:
+            }
+            case FIELD_TYPE_STRING: {
                 let stringLength = readModifiedLebEncodedNumber();
                 let stringValue = readBytes(stringLength);
                 // Remove null terminator from string
@@ -215,7 +220,8 @@ export function readChviRecord(dataBuf)
 
                 recordObject[fieldName] = stringValue;
                 break;
-            case FIELD_TYPE_FLOAT:
+            }
+            case FIELD_TYPE_FLOAT: {
                 let floatValue = readBytes(4).readFloatBE(0);
 
                 if(!fieldName)
@@ -225,7 +231,8 @@ export function readChviRecord(dataBuf)
 
                 recordObject[fieldName] = floatValue;
                 break;
-            case FIELD_TYPE_ARRAY:
+            }
+            case FIELD_TYPE_ARRAY: {
                 readByte();
                 let arrayLength = readModifiedLebEncodedNumber();
                 let arrayObject = readChviArray(arrayLength);
@@ -241,6 +248,8 @@ export function readChviRecord(dataBuf)
                 }
 
                 recordObject[fieldName] = arrayObject;
+                break;
+            }
             default:
                 break;
 

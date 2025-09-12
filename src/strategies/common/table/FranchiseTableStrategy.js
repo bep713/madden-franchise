@@ -25,7 +25,7 @@ FranchiseTableStrategy.getTable2BinaryData = (table2Records, fullTable2Buffer) =
     }
     return table2Data;
 };
-FranchiseTableStrategy.getMandatoryOffsets = (offsets) => {
+FranchiseTableStrategy.getMandatoryOffsets = () => {
     return [];
 };
 FranchiseTableStrategy.recalculateStringOffsets = (table, record) => {

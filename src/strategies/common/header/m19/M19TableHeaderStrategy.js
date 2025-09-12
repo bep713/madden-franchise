@@ -38,7 +38,7 @@ M19TableHeaderStrategy.parseHeader = (data) => {
     const data2RecordWords = data.readUInt32BE(headerOffset + 44);
     const data2RecordCapacity = data.readUInt32BE(headerOffset + 48);
     const data2IndexEntries = data.readUInt32BE(headerOffset + 52);
-    const unknown4 = data.readUInt32BE(headerOffset + 56);
+    // const unknown4 = data.readUInt32BE(headerOffset + 56);
     const nextRecordToUse = data.readUInt32BE(headerOffset + 60);
     let offsetStart = 0xE4 + tableStoreLength;
     const hasSecondTable = tableTotalLength > table1Length;

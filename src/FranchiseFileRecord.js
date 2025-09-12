@@ -1,4 +1,3 @@
-import utilService from "./services/utilService.js";
 import FranchiseFileField from "./FranchiseFileField.js";
 class FranchiseFileRecord {
     /** @param {Buffer} data @param {number} index @param {OffsetTableEntry} offsetTable, @param {FranchiseFileTable} parent */
@@ -20,7 +19,7 @@ class FranchiseFileRecord {
         /** @type {FranchiseFileTable} */
         this._parent = parent;
         return new Proxy(this, {
-            get: function (target, prop, receiver) {
+            get: function (target, prop) {
                 return target.fields[prop] !== undefined ? target.fields[prop].value : target[prop] !== undefined ? target[prop] : null;
             },
             set: function (target, prop, receiver) {

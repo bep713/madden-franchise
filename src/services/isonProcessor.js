@@ -111,7 +111,7 @@ export class IsonProcessor {
     // Start reading the value into the object
     obj = this.readValue();
 
-    const lastByte = this.readBytes(1).readUInt8(0);
+    this.readBytes(1).readUInt8(0);
 
     return obj;
   }
@@ -177,7 +177,7 @@ export class IsonProcessor {
 
   // Helper to write a string
   writeString(buffer, offset, value) {
-    if (this.reverseStringLookup.hasOwnProperty(value.toLowerCase())) {
+    if (Object.prototype.hasOwnProperty.call(this.reverseStringLookup, value.toLowerCase())) {
       offset = this.writeByte(buffer, offset, IsonProcessor.ISON_INTERNED_STRING); // Write interned string type
       const stringKey = this.reverseStringLookup[value.toLowerCase()];
       buffer.writeUInt16LE(stringKey, offset); // Write the string key (2 bytes)
@@ -209,7 +209,7 @@ export class IsonProcessor {
       }
       offset = this.writeByte(buffer, offset, IsonProcessor.ISON_ARRAY_END); // Write array end byte
     } else if (typeof json === "string") {
-      if (this.reverseStringLookup.hasOwnProperty(json.toLowerCase())) {
+      if (Object.prototype.hasOwnProperty.call(this.reverseStringLookup, json.toLowerCase())) {
         offset = this.writeByte(buffer, offset, IsonProcessor.ISON_INTERNED_STRING); // Write interned string type
         const stringKey = this.reverseStringLookup[json.toLowerCase()];
         buffer.writeUInt16LE(stringKey, offset); // Write the string key (2 bytes)
@@ -246,7 +246,7 @@ export class IsonProcessor {
     if (valueType === IsonProcessor.ISON_INTERNED_STRING) {
       const stringKey = this.readBytes(2).readUInt16LE(0);
 
-      if (!this.stringLookup.hasOwnProperty(stringKey)) {
+      if (!Object.prototype.hasOwnProperty.call(this.stringLookup, stringKey)) {
         return "UnkString";
       }
       return this.stringLookup[stringKey]; // Return the interned string from the lookup

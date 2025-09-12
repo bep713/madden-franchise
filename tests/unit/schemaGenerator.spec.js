@@ -1,7 +1,6 @@
 import fs from 'fs';
 import zlib from 'zlib';
 import path, { dirname } from 'path';
-import crypto from 'crypto';
 import { expect } from 'chai';
 import schemaGenerator from '../../src/services/schemaGenerator.js';
 import { fileURLToPath } from 'url';
@@ -167,13 +166,3 @@ describe('schema generator unit tests', () => {
         // expect(compareData).to.eql(expectedData);
     });
 });
-
-function testBufferHashes(bufferToTest, bufferToCompare) {
-    let testHash = crypto.createHash('sha1');
-    testHash.update(bufferToTest);
-
-    let compareHash = crypto.createHash('sha1');
-    compareHash.update(bufferToCompare);
-
-    expect(testHash.digest('hex')).to.eql(compareHash.digest('hex'));
-};

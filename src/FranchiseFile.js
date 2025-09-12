@@ -112,7 +112,7 @@ class FranchiseFile extends EventEmitter {
                 reject(err);
             }
         });
-        let tablePromise = new Promise((resolve, reject) => {
+        let tablePromise = new Promise((resolve) => {
             const firstCheck = 0x53;
             const secondCheck = 0x50;
             const thirdCheck = 0x42;
@@ -164,7 +164,7 @@ class FranchiseFile extends EventEmitter {
             }
             resolve();
         });
-        let assetTablePromise = new Promise((resolve, reject) => {
+        let assetTablePromise = new Promise((resolve) => {
             /** @type {Array<AssetTable>} */
             this.assetTable = [];
             const assetTableOffset = this.unpackedFileContents.readUInt32BE(4);
@@ -183,7 +183,7 @@ class FranchiseFile extends EventEmitter {
         });
         Promise.all([schemaPromise, tablePromise, assetTablePromise])
             .then(() => {
-            that.tables.forEach((table, index) => {
+            that.tables.forEach((table) => {
                 const schema = that.schemaList.getSchema(table.name);
                 if (schema) {
                     table.schema = schema;

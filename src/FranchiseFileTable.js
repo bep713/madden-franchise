@@ -3,7 +3,6 @@ import utilService from "./services/utilService.js";
 import FranchiseFileRecord from "./FranchiseFileRecord.js";
 import FranchiseFileTable2Field from "./FranchiseFileTable2Field.js";
 import FranchiseFileTable3Field from "./FranchiseFileTable3Field.js";
-import FranchiseFileSettings from "./FranchiseFileSettings.js";
 const EventEmitter = events.EventEmitter;
 /**
  * @typedef {Object} FranchiseFileTableHeader
@@ -318,7 +317,7 @@ class FranchiseFileTable extends EventEmitter {
     // attribsToLoad is an array of attribute names (strings) to load. It is optional - if nothing is provided to the function it will load all attributes.
     /** @param {Array<string>?} [attribsToLoad] @returns {Promise<FranchiseFileTable>} */
     readRecords(attribsToLoad) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             if (!this.recordsRead || isLoadingNewOffsets(this.loadedOffsets, attribsToLoad, this.offsetTable)) {
                 if (this.isArray) {
                     const numberOfFields = this.header.record1Size / 4;

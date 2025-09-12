@@ -175,7 +175,7 @@ describe('Common File Strategy unit tests', () => {
             
             let data = Buffer.from([0x4F, 0x6C, 0x64, 0x44, 0x61, 0x74, 0x4F, 0x6C, 0x64, 0x44, 0x61, 0x74, 0x4F, 0x6C, 0x64, 0x44, 0x61, 0x74]);
 
-            const expectedData = Buffer.concat(tables.map((table) => {
+            Buffer.concat(tables.map((table) => {
                 return table.hexData;
             }));
 

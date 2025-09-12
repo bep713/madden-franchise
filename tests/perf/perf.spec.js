@@ -76,7 +76,7 @@ describe('madden franchise performance tests', function () {
             let fields = [];
 
             class Record {
-                constructor(buffer, value) {
+                constructor(buffer) {
                     this._buffer = buffer;
                 }
             };
@@ -143,11 +143,11 @@ describe('madden franchise performance tests', function () {
             });
 
             it('get from record', () => {
-                let value = table.records[0].PercentageSpline;
+                table.records[0].PercentageSpline;
             });
     
             it('get from field explicitly', () => {
-                let value = table.records[0].fields.PercentageSpline.value;
+                table.records[0].fields.PercentageSpline.value;
             });
         });
 
@@ -157,11 +157,11 @@ describe('madden franchise performance tests', function () {
             });
 
             it('get from record', () => {
-                let value = table.records[0].CareerStats;
+                table.records[0].CareerStats;
             });
     
             it('get from field explicitly', () => {
-                let value = table.records[0].CareerStats.value;
+                table.records[0].CareerStats.value;
             });
         });
     });
@@ -176,7 +176,7 @@ describe('madden franchise performance tests', function () {
 
             it('read', () => {
                 console.time('read');
-                let test = table.records[0].PlayerPosition;
+                table.records[0].PlayerPosition;
                 console.timeEnd('read');
     
                 expect(table.records[0].PlayerPosition).to.equal('CB');
@@ -230,7 +230,7 @@ describe('madden franchise performance tests', function () {
         console.timeEnd('read records');
 
         console.time('get all record values');
-        const tableData = player.records.map((record) => {
+        player.records.map((record) => {
             return record.fieldsArray.map((field) => {
                 return field.value;
             });

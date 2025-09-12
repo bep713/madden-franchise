@@ -7,7 +7,7 @@ M20TableHeaderStrategy.parseHeader = (data) => {
     const tablePad1 = data.readUInt32BE(headerStart + 4);
     const tableUnknown1 = data.readUInt32BE(headerStart + 8);
     const tableUnknown2 = data.readUInt32BE(headerStart + 12);
-    const tableUnknown3 = data.readUInt32BE(headerStart + 16);
+    // const tableUnknown3 = data.readUInt32BE(headerStart + 16);
     const data1Id = readTableName(data.slice(headerStart + 20, headerStart + 24));
     const data1Type = data.readUInt32BE(headerStart + 24);
     const data1Unknown1 = data.readUInt32BE(headerStart + 28);
@@ -38,15 +38,14 @@ M20TableHeaderStrategy.parseHeader = (data) => {
     const data2RecordWords = data.readUInt32BE(headerOffset + 44);
     const data2RecordCapacity = data.readUInt32BE(headerOffset + 48);
     const data2IndexEntries = data.readUInt32BE(headerOffset + 52);
-    const unknown4 = data.readUInt32BE(headerOffset + 56);
+    // const unknown4 = data.readUInt32BE(headerOffset + 56);
     const nextRecordToUse = data.readUInt32BE(headerOffset + 60);
     let offsetStart = 0xE8 + tableStoreLength;
     const hasSecondTable = tableTotalLength > table1Length;
     let headerSize = offsetStart;
     let records1Size = data2RecordWords * 4;
     let table1StartIndex, table2StartIndex;
-    if (tableStoreLength > 0) {
-    }
+
     if (!isArray) {
         headerSize = headerSize + (data2IndexEntries * 4);
         table1StartIndex = headerSize;

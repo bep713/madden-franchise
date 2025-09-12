@@ -100,12 +100,12 @@ utilService.getBitArray = function (data) {
     try {
         const bits = arr.map((decimal) => {
             return (decimal).toString(2).padStart(8, '0');
-        }).reduce((prev, curr, idx) => {
+        }).reduce((prev, curr) => {
             return prev + curr;
         });
         return bits;
     }
-    catch (err) {
+    catch {
         return null;
     }
 };

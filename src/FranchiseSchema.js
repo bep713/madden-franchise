@@ -63,7 +63,7 @@ class FranchiseSchema extends EventEmitter {
         return this.enums.find((theEnum) => { return theEnum.name === name; });
     }
     ;
-    evaluateSchemaGzip(schemaPath) {
+    evaluateSchemaGzip() {
         const schemaFile = fs.readFileSync(this.path);
         const uncompressed = zlib.gunzipSync(schemaFile);
         this.schema = JSON.parse(uncompressed.toString());

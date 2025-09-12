@@ -27,7 +27,7 @@ export async function generateSchemaV2({ fileMap, extraSchemas }) {
             const extraRaw = await fs.readFile(extraPath, 'utf8');
             extraSchemas = JSON.parse(extraRaw);
         }
-        catch (e) {
+        catch {
             // ignore if not present
         }
     }

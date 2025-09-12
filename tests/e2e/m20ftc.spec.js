@@ -550,7 +550,7 @@ describe('Madden 20 FTC end to end tests', function () {
                 await file.save(filePaths.saveTest.ftc);
                 let file2 = new FranchiseFile(filePaths.saveTest.ftc);
 
-                await new Promise((resolve, reject) => {
+                await new Promise((resolve) => {
                     file2.on('ready', () => {
                         resolve();
                     });

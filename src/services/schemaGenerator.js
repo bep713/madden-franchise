@@ -132,7 +132,7 @@ schemaGenerator.generateFromStream = (stream, showOutput, outputFile) => {
                 .replace(new RegExp('&amp;', 'g'), '&')
                 .replace(new RegExp('&gt;', 'g'), '>')
                 .replace(new RegExp('&lt;', 'g'), '<')
-                .replace(new RegExp('&quot;', 'g'), '\"');
+                .replace(new RegExp('&quot;', 'g'), '"');
             return defaultVal;
         }
     }
@@ -152,10 +152,6 @@ schemaGenerator.generateFromStream = (stream, showOutput, outputFile) => {
     ;
     function calculateInheritedSchemas() {
         schemaGenerator.calculateInheritedSchemas(schemaGenerator.schemas);
-    }
-    ;
-    function getSchema(name) {
-        return schemaGenerator.schemas.find((schema) => { return schema.name === name; });
     }
     ;
     function getEnum(name) {

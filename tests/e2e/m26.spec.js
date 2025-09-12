@@ -924,7 +924,6 @@ describe('Madden 26 end to end tests', function () {
       let table;
       const marcusMayeIndex = 1703;
       const bakerMayfieldIndex = 1705;
-      const firstEmptyRecordIndex = 3147;
 
       beforeEach(() => {
         table = file.getTableById(playerTableId);
@@ -1449,7 +1448,7 @@ describe('Madden 26 end to end tests', function () {
           
           let file2 = new FranchiseFile(filePathToSave);
 
-          let readyPromise = new Promise((resolve, reject) => {
+          let readyPromise = new Promise((resolve) => {
             file2.on('ready', () => {
               resolve();
             });
@@ -1518,7 +1517,7 @@ describe('Madden 26 end to end tests', function () {
             
             let file2 = new FranchiseFile(filePathToSave);
 
-            let readyPromise = new Promise((resolve, reject) => {
+            let readyPromise = new Promise((resolve) => {
               file2.on('ready', () => {
                 resolve();
               });
@@ -1757,7 +1756,7 @@ describe('Madden 26 end to end tests', function () {
 
         let file2 = new FranchiseFile(filePathToSave);
 
-        await new Promise((resolve, reject) => {
+        await new Promise((resolve) => {
           file2.on('ready', () => {
             resolve();
           });
@@ -1811,7 +1810,7 @@ describe('Madden 26 end to end tests', function () {
           await file.save(filePathToSave);
 
           let file2 = new FranchiseFile(filePathToSave);
-          await new Promise((resolve, reject) => {
+          await new Promise((resolve) => {
             file2.on('ready', () => {
               resolve();
             });
@@ -1910,8 +1909,8 @@ describe('Madden 26 end to end tests', function () {
       });
 
       it('will not clear out values changed if first column was edited before last column', () => {
-        let value = table.records[908].Depth;   // caching values
-        value = table.records[908].Severity;    // caching values
+        table.records[908].Depth;   // caching values
+        table.records[908].Severity;    // caching values
 
         table.records[908].Depth = 1;
         table.records[908].Severity = 25;
@@ -1940,7 +1939,7 @@ describe('Madden 26 end to end tests', function () {
           
         let file2 = new FranchiseFile(filePathToSave);
 
-        let readyPromise = new Promise((resolve, reject) => {
+        let readyPromise = new Promise((resolve) => {
           file2.on('ready', () => {
             resolve();
           });
@@ -1999,7 +1998,7 @@ describe('Madden 26 end to end tests', function () {
           
         let file2 = new FranchiseFile(filePathToSave);
 
-        let readyPromise = new Promise((resolve, reject) => {
+        let readyPromise = new Promise((resolve) => {
           file2.on('ready', () => {
             resolve();
           });

@@ -219,7 +219,6 @@ describe('Madden 24 end to end tests', function () {
             file2.on('ready', () => {
               division = file2.getTableByName('Division');
               popularityComponentTable = file2.getTableByName('PopularityComponentTable');
-              let playerArray2 = file.getTableById(playerArrayTableIdToTest);
 
               promises = [
                 division.readRecords(),
@@ -260,7 +259,6 @@ describe('Madden 24 end to end tests', function () {
             file2.on('ready', () => {
               division = file2.getTableByName('Division');
               popularityComponentTable = file2.getTableByName('PopularityComponentTable');
-              let playerArray2 = file.getTableById(playerArrayTableIdToTest);
 
               promises = [
                 division.readRecords(),
@@ -1452,7 +1450,7 @@ describe('Madden 24 end to end tests', function () {
           
           let file2 = new FranchiseFile(filePathToSave);
 
-          let readyPromise = new Promise((resolve, reject) => {
+          let readyPromise = new Promise((resolve) => {
             file2.on('ready', () => {
               resolve();
             });
@@ -1521,7 +1519,7 @@ describe('Madden 24 end to end tests', function () {
             
             let file2 = new FranchiseFile(filePathToSave);
 
-            let readyPromise = new Promise((resolve, reject) => {
+            let readyPromise = new Promise((resolve) => {
               file2.on('ready', () => {
                 resolve();
               });
@@ -1761,7 +1759,7 @@ describe('Madden 24 end to end tests', function () {
 
         let file2 = new FranchiseFile(filePathToSave);
 
-        await new Promise((resolve, reject) => {
+        await new Promise((resolve) => {
           file2.on('ready', () => {
             resolve();
           });
@@ -1815,7 +1813,7 @@ describe('Madden 24 end to end tests', function () {
           await file.save(filePathToSave);
 
           let file2 = new FranchiseFile(filePathToSave);
-          await new Promise((resolve, reject) => {
+          await new Promise((resolve) => {
             file2.on('ready', () => {
               resolve();
             });
@@ -1908,8 +1906,8 @@ describe('Madden 24 end to end tests', function () {
       });
 
       it('will not clear out values changed if first column was edited before last column', () => {
-        let value = table.records[836].Depth;   // caching values
-        value = table.records[836].Severity;    // caching values
+        table.records[836].Depth;   // caching values
+        table.records[836].Severity;    // caching values
 
         table.records[836].Depth = 1;
         table.records[836].Severity = 25;
@@ -1938,7 +1936,7 @@ describe('Madden 24 end to end tests', function () {
           
         let file2 = new FranchiseFile(filePathToSave);
 
-        let readyPromise = new Promise((resolve, reject) => {
+        let readyPromise = new Promise((resolve) => {
           file2.on('ready', () => {
             resolve();
           });
@@ -1997,7 +1995,7 @@ describe('Madden 24 end to end tests', function () {
           
         let file2 = new FranchiseFile(filePathToSave);
 
-        let readyPromise = new Promise((resolve, reject) => {
+        let readyPromise = new Promise((resolve) => {
           file2.on('ready', () => {
             resolve();
           });
