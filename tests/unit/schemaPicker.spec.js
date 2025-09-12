@@ -1,8 +1,13 @@
 import { expect } from 'chai';
 import schemaPicker from '../../src/services/schemaPicker.js';
+import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const schemaPickerSettings = {
-    schemaDirectory: 'C:\\Projects\\madden-franchise\\tests\\data\\test-schemas'
+    schemaDirectory: path.join(__dirname, '..', 'data', 'test-schemas')
 };
 
 describe('schema picker service unit tests', () => {

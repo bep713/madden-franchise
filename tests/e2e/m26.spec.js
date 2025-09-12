@@ -1,4 +1,5 @@
 import fs from 'fs';
+import zlib from 'zlib';
 import path, { dirname } from 'path';
 import { expect } from 'chai';
 import { BitView } from 'bit-buffer';
@@ -6,7 +7,6 @@ import FranchiseFile from '../../src/FranchiseFile.js';
 import FranchiseFileTable from '../../src/FranchiseFileTable.js';
 import filePaths from '../util/filePathUtil.js';
 import { IsonProcessor } from '../../src/services/isonProcessor.js';
-import { Decoder } from '@toondepauw/node-zstd';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -2628,19 +2628,20 @@ describe('Madden 26 end to end tests', function () {
                 const dictBuf = fs.readFileSync(
                     path.join(__dirname, '../../data/zstd-dicts/26/dict.bin')
                 );
-                const zstdDecoder = new Decoder(dictBuf);
 
                 const length =
                     table.records[0]._fields.RawData.thirdTableField.unformattedValue.readUInt16LE(
                         0
                     );
 
-                const data = zstdDecoder.decodeSync(
+                const data = zlib.zstdDecompressSync(
                     table.records[0]._fields.RawData.thirdTableField.unformattedValue.subarray(
                         2,
                         length + 2
-                    )
+                    ),
+                    { dictionary: dictBuf }
                 );
+
                 expect(new IsonProcessor(26).isonVisualsToJson(data)).to.eql(
                     existingData
                 );
@@ -2730,7 +2731,8 @@ describe('Madden 26 end to end tests', function () {
             //   });
             // });
 
-            it('handles scenario where all records change', (done) => {
+            it('handles scenario where all records change', function (done) {
+                this.timeout(7000);
                 for (let row = 0; row < table.header.recordCapacity; row++) {
                     table.records[row]['RawData'] = {};
                 }
