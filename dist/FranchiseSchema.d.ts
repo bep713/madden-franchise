@@ -4,25 +4,25 @@ export type SchemaAttribute = any;
 export type TableSchema = any;
 /**
  * @typedef SchemaAttribute
- * @param {string} index
- * @param {string} name
- * @param {string} type
- * @param {string} minValue
- * @param {string} maxValue
- * @param {string} maxLength
- * @param {string} default
- * @param {string} final
- * @param {FranchiseEnum?} [enum]
- * @param {string}
+ * @property {string} index
+ * @property {string} name
+ * @property {string} type
+ * @property {string} minValue
+ * @property {string} maxValue
+ * @property {string} maxLength
+ * @property {string} default
+ * @property {string} final
+ * @property {FranchiseEnum?} [enum]
+ * @property {string}
  */
 /**
  * @typedef TableSchema
- * @param {number} assetId
- * @param {number} ownerAssetId
- * @param {number} numMembers
- * @param {string} name
- * @param {string} base
- * @param {Array<SchemaAttribute>} attributes
+ * @property {number} assetId
+ * @property {number} ownerAssetId
+ * @property {number} numMembers
+ * @property {string} name
+ * @property {string} base
+ * @property {Array<SchemaAttribute>} attributes
  */
 declare class FranchiseSchema extends events {
     constructor(filePath: any, { useNewSchemaGeneration, extraSchemas, fileMap }?: {

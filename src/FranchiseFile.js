@@ -13,13 +13,13 @@ const EventEmitter = events.EventEmitter;
 const COMPRESSED_DATA_OFFSET = 0x52;
 /**
  * @typedef {Object} AssetTable
- * @param {number} assetId
- * @param {number} reference
+ * @property {number} assetId
+ * @property {number} reference
  */
 /**
  * @typedef {Object} RecordReference
- * @param {number} tableId
- * @param {number} rowNumber
+ * @property {number} tableId
+ * @property {number} rowNumber
  */
 class FranchiseFile extends EventEmitter {
     /**
@@ -408,9 +408,9 @@ class FranchiseFile extends EventEmitter {
     }
     /**
      * @typedef {Object} TableRecordReference
-     * @param {number} tableId
-     * @param {string} name
-     * @param {FranchiseFileTable} table
+     * @property {number} tableId
+     * @property {string} name
+     * @property {FranchiseFileTable} table
      */
     /**
      *

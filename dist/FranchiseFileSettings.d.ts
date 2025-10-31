@@ -2,11 +2,11 @@ export default FranchiseFileSettings;
 export type SettingsParam = Object;
 /**
  * @typedef {Object} SettingsParam
- * @param {boolean?} [saveOnChange]
- * @param {SchemaMetadata?} [schemaOverride]
- * @param {string?} [schemaDirectory]
- * @param {boolean?} [autoParse]
- * @param {boolean?} [autoUnempty]
+ * @property {boolean?} [saveOnChange]
+ * @property {SchemaMetadata?} [schemaOverride]
+ * @property {string?} [schemaDirectory]
+ * @property {boolean?} [autoParse]
+ * @property {boolean?} [autoUnempty]
  */
 declare class FranchiseFileSettings {
     /** @param {SettingsParam} settings */
