@@ -15,8 +15,14 @@ export type PartialSchemaMetadata = {
     major: number;
     minor: number;
 };
-export type AssetTable = Object;
-export type RecordReference = Object;
+export type AssetTable = {
+    assetId: number;
+    reference: number;
+};
+export type RecordReference = {
+    tableId: number;
+    rowNumber: number;
+};
 /**
  * @typedef {Object} AssetTable
  * @property {number} assetId
@@ -73,7 +79,7 @@ declare class FranchiseFile extends events {
     /** @type {Array<FranchiseFileTable>} */
     tables: FranchiseFileTable[] | undefined;
     /** @type {Array<AssetTable>} */
-    assetTable: Object[] | undefined;
+    assetTable: AssetTable[] | undefined;
     /**
      *
      * @param {string} outputFilePath
@@ -173,7 +179,11 @@ declare class FranchiseFile extends events {
      * @param {number} recordIndex
      * @returns {Array<TableRecordReference>}
      */
-    getReferencesToRecord(tableId: number, recordIndex: number): Object[];
+    getReferencesToRecord(tableId: number, recordIndex: number): {
+        tableId: number;
+        name: string;
+        table: FranchiseFileTable;
+    }[];
 }
 import events from 'events';
 import FranchiseSchema from './FranchiseSchema.js';

@@ -1,7 +1,25 @@
 /// <reference types="node" />
 export default FranchiseSchema;
-export type SchemaAttribute = any;
-export type TableSchema = any;
+export type SchemaAttribute = {
+    index: string;
+    name: string;
+    type: string;
+    minValue: string;
+    maxValue: string;
+    maxLength: string;
+    default: string;
+    final: string;
+    enum?: FranchiseEnum | null | undefined;
+    "": string;
+};
+export type TableSchema = {
+    assetId: number;
+    ownerAssetId: number;
+    numMembers: number;
+    name: string;
+    base: string;
+    attributes: Array<SchemaAttribute>;
+};
 /**
  * @typedef SchemaAttribute
  * @property {string} index
@@ -45,5 +63,6 @@ declare class FranchiseSchema extends events {
     enumMap: {} | undefined;
     evaluateSchemaXml(): void;
 }
+import FranchiseEnum from './FranchiseEnum.js';
 import events from 'events';
 //# sourceMappingURL=FranchiseSchema.d.ts.map

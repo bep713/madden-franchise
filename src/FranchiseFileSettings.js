@@ -1,10 +1,10 @@
 /**
  * @typedef {Object} SettingsParam
- * @param {boolean?} [saveOnChange]
- * @param {SchemaMetadata?} [schemaOverride]
- * @param {string?} [schemaDirectory]
- * @param {boolean?} [autoParse]
- * @param {boolean?} [autoUnempty]
+ * @property {boolean?} [saveOnChange]
+ * @property {SchemaMetadata?} [schemaOverride]
+ * @property {string?} [schemaDirectory]
+ * @property {boolean?} [autoParse]
+ * @property {boolean?} [autoUnempty]
  */
 class FranchiseFileSettings {
     /** @param {SettingsParam} settings */

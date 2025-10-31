@@ -1,75 +1,137 @@
 /// <reference types="node" />
 export default FranchiseFileTable;
-export type FranchiseFileTableHeader = Object;
-export type OffsetTableEntry = Object;
-export type EmptyRecordEntry = any;
+export type FranchiseFileTableHeader = {
+    name: string;
+    isArray: boolean;
+    tableId: number;
+    tablePad1: number;
+    uniqueId: number;
+    tableUnknown1: number;
+    tableUnknown2: number;
+    data1Id: string;
+    data1Type: number;
+    data1Unknown1: number;
+    data1Flag1: number;
+    data1Flag2: number;
+    data1Flag3: number;
+    data1Flag4: number;
+    tableStoreLength: number;
+    tableStoreName: string;
+    data1Offset: number;
+    data1TableId: string;
+    data1RecordCount: number;
+    data1Pad2: number;
+    table1Length: number;
+    table2Length: number;
+    data1Pad3: number;
+    data1Pad4: number;
+    headerSize: number;
+    headerOffset: number;
+    record1SizeOffset: number;
+    record1SizeLength: number;
+    record1Size: number;
+    offsetStart: number;
+    data2Id: string;
+    table1Length2: number;
+    tableTotalLength: number;
+    hasSecondTable: boolean;
+    table1StartIndex: number;
+    table2StartIndex: number;
+    recordWords: number;
+    recordCapacity: number;
+    numMembers: number;
+    nextRecordToUse: number;
+    hasThirdTable: boolean;
+};
+export type OffsetTableEntry = {
+    index: number;
+    originalIndex: number;
+    name: string;
+    type: string;
+    isReference: boolean;
+    valueInSecondTable: boolean;
+    valueInThirdTable: boolean;
+    isSigned: boolean;
+    minValue: number;
+    maxValue: number;
+    maxLength: number;
+    final: boolean;
+    indexOffset: number;
+    enum: FranchiseEnum;
+    const: boolean;
+    offset: number;
+};
+export type EmptyRecordEntry = {
+    previous: number;
+    next: number;
+};
 /**
  * @typedef {Object} FranchiseFileTableHeader
- * @param {string} name
- * @param {boolean} isArray
- * @param {number} tableId
- * @param {number} tablePad1
- * @param {number} uniqueId
- * @param {number} tableUnknown1
- * @param {number} tableUnknown2
- * @param {string} data1Id
- * @param {number} data1Type
- * @param {number} data1Unknown1
- * @param {number} data1Flag1
- * @param {number} data1Flag2
- * @param {number} data1Flag3
- * @param {number} data1Flag4
- * @param {number} tableStoreLength
- * @param {string} tableStoreName
- * @param {number} data1Offset
- * @param {string} data1TableId
- * @param {number} data1RecordCount
- * @param {number} data1Pad2
- * @param {number} table1Length
- * @param {number} table2Length
- * @param {number} data1Pad3
- * @param {number} data1Pad4
- * @param {number} headerSize
- * @param {number} headerOffset
- * @param {number} record1SizeOffset
- * @param {number} record1SizeLength
- * @param {number} record1Size
- * @param {number} offsetStart
- * @param {string} data2Id
- * @param {number} table1Length2
- * @param {number} tableTotalLength
- * @param {boolean} hasSecondTable
- * @param {number} table1StartIndex
- * @param {number} table2StartIndex
- * @param {number} recordWords
- * @param {number} recordCapacity
- * @param {number} numMembers
- * @param {number} nextRecordToUse
- * @param {boolean} hasThirdTable
+ * @property {string} name
+ * @property {boolean} isArray
+ * @property {number} tableId
+ * @property {number} tablePad1
+ * @property {number} uniqueId
+ * @property {number} tableUnknown1
+ * @property {number} tableUnknown2
+ * @property {string} data1Id
+ * @property {number} data1Type
+ * @property {number} data1Unknown1
+ * @property {number} data1Flag1
+ * @property {number} data1Flag2
+ * @property {number} data1Flag3
+ * @property {number} data1Flag4
+ * @property {number} tableStoreLength
+ * @property {string} tableStoreName
+ * @property {number} data1Offset
+ * @property {string} data1TableId
+ * @property {number} data1RecordCount
+ * @property {number} data1Pad2
+ * @property {number} table1Length
+ * @property {number} table2Length
+ * @property {number} data1Pad3
+ * @property {number} data1Pad4
+ * @property {number} headerSize
+ * @property {number} headerOffset
+ * @property {number} record1SizeOffset
+ * @property {number} record1SizeLength
+ * @property {number} record1Size
+ * @property {number} offsetStart
+ * @property {string} data2Id
+ * @property {number} table1Length2
+ * @property {number} tableTotalLength
+ * @property {boolean} hasSecondTable
+ * @property {number} table1StartIndex
+ * @property {number} table2StartIndex
+ * @property {number} recordWords
+ * @property {number} recordCapacity
+ * @property {number} numMembers
+ * @property {number} nextRecordToUse
+ * @property {boolean} hasThirdTable
  */
 /**
  * @typedef {Object} OffsetTableEntry
- * @param {number} index
- * @param {number} originalIndex
- * @param {string} name
- * @param {string} type
- * @param {boolean} isReference
- * @param {boolean} valueInSecondTable
- * @param {boolean} valueInThirdTable
- * @param {boolean} isSigned
- * @param {number} minValue
- * @param {number} maxValue
- * @param {number} maxLength
- * @param {boolean} final
- * @param {number} indexOffset
- * @param {FranchiseEnum} enum
- * @param {boolean} const
- * @param {number} offset
+ * @property {number} index
+ * @property {number} originalIndex
+ * @property {string} name
+ * @property {string} type
+ * @property {boolean} isReference
+ * @property {boolean} valueInSecondTable
+ * @property {boolean} valueInThirdTable
+ * @property {boolean} isSigned
+ * @property {number} minValue
+ * @property {number} maxValue
+ * @property {number} maxLength
+ * @property {boolean} final
+ * @property {number} indexOffset
+ * @property {FranchiseEnum} enum
+ * @property {boolean} const
+ * @property {number} offset
  */
 /**
  * @typedef EmptyRecordEntry
- * @param {number} previous
- * @param {number} next
+ * @property {number} previous
+ * @property {number} next
  */
 declare class FranchiseFileTable extends events {
     constructor(data: any, offset: any, gameYear: any, strategy: any, settings: any);
@@ -105,7 +167,7 @@ declare class FranchiseFileTable extends events {
     /** @type {Array<number>} */
     arraySizes: Array<number>;
     /** @type {Map<EmptyRecordEntry>} */
-    emptyRecords: Map<any, any>;
+    emptyRecords: Map<EmptyRecordEntry, any>;
     /** @type {FranchiseFileSettings} */
     _settings: FranchiseFileSettings;
     /** @returns {Buffer} */
@@ -152,7 +214,7 @@ declare class FranchiseFileTable extends events {
     /** @param {Array<string>?} [attribsToLoad] @returns {Promise<FranchiseFileTable>} */
     readRecords(attribsToLoad?: string[] | null | undefined): Promise<FranchiseFileTable>;
     /** @returns {Map<EmptyRecordEntry>} */
-    _parseEmptyRecords(): Map<any, any>;
+    _parseEmptyRecords(): Map<EmptyRecordEntry, any>;
     /** @param {FranchiseFileRecord} */
     _onRecordEmpty(record: any): void;
     /** @param {Buffer} data @param {FranchiseFileTableHeader} header @param {Array<FranchiseFileRecord>} records */

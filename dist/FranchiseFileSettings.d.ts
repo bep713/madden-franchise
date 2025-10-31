@@ -1,5 +1,11 @@
 export default FranchiseFileSettings;
-export type SettingsParam = Object;
+export type SettingsParam = {
+    saveOnChange?: boolean | null | undefined;
+    schemaOverride?: SchemaMetadata | null;
+    schemaDirectory?: string | null | undefined;
+    autoParse?: boolean | null | undefined;
+    autoUnempty?: boolean | null | undefined;
+};
 /**
  * @typedef {Object} SettingsParam
  * @property {boolean?} [saveOnChange]
