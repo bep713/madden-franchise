@@ -1,3 +1,9 @@
+/**
+ * @typedef {import('./FranchiseFileTable').default} FranchiseFileTable
+ * @typedef {import('./FranchiseFileField').default} FranchiseFileField
+ * @typedef {import('./strategies/StrategyPicker').Table2FieldStrategy} Table2FieldStrategy
+ */
+
 class FranchiseFileTable2Field {
     /** @param {number} index @param {number} maxLength @param {FranchiseFileTable} parent */
     constructor(index, maxLength, parent) {

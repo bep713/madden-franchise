@@ -1,4 +1,10 @@
 import FranchiseFileField from './FranchiseFileField.js';
+
+/**
+ * @typedef {import('./FranchiseFileTable.js').OffsetTableEntry} OffsetTableEntry
+ * @typedef {import('./FranchiseFileTable.js').default} FranchiseFileTable
+ * @typedef {import('./FranchiseFile.js').RecordReference} RecordReference
+ */
 class FranchiseFileRecord {
     /** @param {Buffer} data @param {number} index @param {OffsetTableEntry} offsetTable, @param {FranchiseFileTable} parent */
     constructor(data, index, offsetTable, parent) {

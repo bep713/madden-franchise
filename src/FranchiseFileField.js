@@ -2,6 +2,13 @@ import { BitView } from 'bit-buffer';
 import utilService from './services/utilService.js';
 import FranchiseFileTable2Field from './FranchiseFileTable2Field.js';
 import FranchiseFileTable3Field from './FranchiseFileTable3Field.js';
+
+/**
+ * @typedef {import('bit-buffer').BitView} BitView
+ * @typedef {import('./FranchiseFileTable.js').OffsetTableEntry} OffsetTableEntry
+ * @typedef {import('./FranchiseFileRecord.js').default} FranchiseFileRecord
+ * @typedef {import('./FranchiseEnumValue.js').default} FranchiseEnumValue
+ */
 class FranchiseFileField {
     /** @param {string} key @param {Buffer} value @param {OffsetTableEntry} offset @param {FranchiseFileRecord} parent */
     constructor(key, value, offset, parent) {

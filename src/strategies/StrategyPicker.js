@@ -6,6 +6,45 @@ import M25Strategy from './franchise/m25/M25Strategy.js';
 import M26Strategy from './franchise/m26/M26Strategy.js';
 import M19FTCStrategy from './franchise-common/m19/M19FTCStrategy.js';
 import M20FTCStrategy from './franchise-common/m20/M20FTCStrategy.js';
+
+/**
+ * @typedef FileStrategy
+ * @property {function(any, any): any} postPackFile
+ * @property {function(any, any): any} generateUnpackedContents
+ * 
+ * @typedef {import('../FranchiseFileTable.js').FranchiseFileTableHeader} FranchiseFileTableHeader
+ * @typedef TableStrategy
+ * @property {function(any): FranchiseFileTableHeader} parseHeader
+ * @property {function(any, any, any): {
+ *  headerSize: any;
+ *  record1Size: any;
+ *  table1StartIndex: any;
+ *  table2StartIndex: any;
+ * }} parseHeaderAttributesFromSchema
+ * @property {function(any, any): any[]} getTable2BinaryData
+ * @property {function(any, any): any[]} getTable3BinaryData
+ * @property {function(any): any[]} getMandatoryOffsets
+ * @property {function(any, any): void} recalculateStringOffsets
+ * @property {function(any, any): void} recalculateBlobOffsets
+ * 
+ * @typedef Table2FieldStrategy
+ * @property {function(any, any): any} getInitialUnformattedValue
+ * @property {function(any, any): any} setUnformattedValueFromFormatted
+ * 
+ * @typedef Table3FieldStrategy
+ * @property {function(any, any): any} getInitialUnformattedValue
+ * @property {function(any): any} getFormattedValueFromUnformatted
+ * @property {function(any, any, any): any} setUnformattedValueFromFormatted
+ * 
+ * @typedef GameStrategy
+ * @property {string} name
+ * @property {FileStrategy} file
+ * @property {TableStrategy} table
+ * @property {Table2FieldStrategy} table2Field
+ * @property {Table3FieldStrategy} table3Field
+ */
+
+
 let StrategyPicker = {};
 /**
  * @returns GameStrategy

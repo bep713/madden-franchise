@@ -1,6 +1,12 @@
 import utilService from './services/utilService.js';
 const emptyRef = '00000000000000000000000000000000';
 
+/**
+ * @typedef {import('./FranchiseFileTable').default} FranchiseFileTable
+ * @typedef {import('./FranchiseFileField').default} FranchiseFileField
+ * @typedef {import('./strategies/StrategyPicker').Table3FieldStrategy} Table3FieldStrategy
+ */
+
 class FranchiseFileTable3Field {
     /** @param {number} index @param {number} maxLength @param {FranchiseFileTable} parent */
     constructor(index, maxLength, parent) {

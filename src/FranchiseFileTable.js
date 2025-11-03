@@ -4,7 +4,7 @@ import FranchiseFileRecord from './FranchiseFileRecord.js';
 import FranchiseFileTable2Field from './FranchiseFileTable2Field.js';
 import FranchiseFileTable3Field from './FranchiseFileTable3Field.js';
 const EventEmitter = events.EventEmitter;
-/**
+/** 
  * @typedef {Object} FranchiseFileTableHeader
  * @property {string} name
  * @property {boolean} isArray
@@ -71,6 +71,14 @@ const EventEmitter = events.EventEmitter;
  * @typedef EmptyRecordEntry
  * @property {number} previous
  * @property {number} next
+ */
+
+/**
+ * @typedef {import('./FranchiseFileSettings.js').default} FranchiseFileSettings
+ * @typedef {import('./FranchiseSchema.js').TableSchema} TableSchema
+ * @typedef {import('./FranchiseEnum.js').default} FranchiseEnum
+ * @typedef {import('./strategies/StrategyPicker.js').GameStrategy} GameStrategy
+ * @typedef {import('./strategies/StrategyPicker.js').TableStrategy} TableStrategy
  */
 class FranchiseFileTable extends EventEmitter {
     constructor(data, offset, gameYear, strategy, settings) {

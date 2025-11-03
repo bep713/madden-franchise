@@ -1,4 +1,8 @@
 /**
+ * @typedef {import('./FranchiseFile').SchemaMetadata} SchemaMetadata
+ */
+
+/**
  * @typedef {Object} SettingsParam
  * @property {boolean?} [saveOnChange]
  * @property {SchemaMetadata?} [schemaOverride]

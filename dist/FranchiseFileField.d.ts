@@ -1,4 +1,14 @@
 export default FranchiseFileField;
+export type BitView = any;
+export type OffsetTableEntry = import('./FranchiseFileTable.js').OffsetTableEntry;
+export type FranchiseFileRecord = import('./FranchiseFileRecord.js').default;
+export type FranchiseEnumValue = import('./FranchiseEnumValue.js').default;
+/**
+ * @typedef {import('bit-buffer').BitView} BitView
+ * @typedef {import('./FranchiseFileTable.js').OffsetTableEntry} OffsetTableEntry
+ * @typedef {import('./FranchiseFileRecord.js').default} FranchiseFileRecord
+ * @typedef {import('./FranchiseEnumValue.js').default} FranchiseEnumValue
+ */
 declare class FranchiseFileField {
     /** @param {string} key @param {Buffer} value @param {OffsetTableEntry} offset @param {FranchiseFileRecord} parent */
     constructor(key: string, value: Buffer, offset: OffsetTableEntry, parent: FranchiseFileRecord);
@@ -21,7 +31,7 @@ declare class FranchiseFileField {
     /** @returns {string} */
     get key(): string;
     /** @returns {OffsetTableEntry} */
-    get offset(): OffsetTableEntry;
+    get offset(): import("./FranchiseFileTable.js").OffsetTableEntry;
     set value(value: any);
     /** @returns {*} */
     get value(): any;
@@ -39,7 +49,7 @@ declare class FranchiseFileField {
     /** @returns {BitView} */
     get unformattedValue(): BitView;
     /** @returns {FranchiseFileRecord} */
-    get parent(): FranchiseFileRecord;
+    get parent(): import("./FranchiseFileRecord.js").default;
     /** @param {OffsetTableEntry} offset */
     getValueAs(offset: OffsetTableEntry): any;
     _bubbleChangeToParent(): void;

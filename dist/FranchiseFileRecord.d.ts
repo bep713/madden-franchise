@@ -1,4 +1,12 @@
 export default FranchiseFileRecord;
+export type OffsetTableEntry = import('./FranchiseFileTable.js').OffsetTableEntry;
+export type FranchiseFileTable = import('./FranchiseFileTable.js').default;
+export type RecordReference = import('./FranchiseFile.js').RecordReference;
+/**
+ * @typedef {import('./FranchiseFileTable.js').OffsetTableEntry} OffsetTableEntry
+ * @typedef {import('./FranchiseFileTable.js').default} FranchiseFileTable
+ * @typedef {import('./FranchiseFile.js').RecordReference} RecordReference
+ */
 declare class FranchiseFileRecord {
     /** @param {Buffer} data @param {number} index @param {OffsetTableEntry} offsetTable, @param {FranchiseFileTable} parent */
     constructor(data: Buffer, index: number, offsetTable: OffsetTableEntry, parent: FranchiseFileTable);
@@ -32,7 +40,7 @@ declare class FranchiseFileRecord {
     set isChanged(changed: boolean);
     get isChanged(): boolean;
     /** @returns {FranchiseFileTable} */
-    get parent(): FranchiseFileTable;
+    get parent(): import("./FranchiseFileTable.js").default;
     /** @param {string} key @returns {FranchiseFileField?} */
     getFieldByKey(key: string): FranchiseFileField | null;
     /** @param {string} key @returns {*?} */

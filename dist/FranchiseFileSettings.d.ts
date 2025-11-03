@@ -1,11 +1,15 @@
 export default FranchiseFileSettings;
+export type SchemaMetadata = import('./FranchiseFile').SchemaMetadata;
 export type SettingsParam = {
     saveOnChange?: boolean | null | undefined;
-    schemaOverride?: SchemaMetadata | null;
+    schemaOverride?: import("./FranchiseFile").SchemaMetadata | null | undefined;
     schemaDirectory?: string | null | undefined;
     autoParse?: boolean | null | undefined;
     autoUnempty?: boolean | null | undefined;
 };
+/**
+ * @typedef {import('./FranchiseFile').SchemaMetadata} SchemaMetadata
+ */
 /**
  * @typedef {Object} SettingsParam
  * @property {boolean?} [saveOnChange]

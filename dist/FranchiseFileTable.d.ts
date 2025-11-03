@@ -65,6 +65,11 @@ export type EmptyRecordEntry = {
     previous: number;
     next: number;
 };
+export type FranchiseFileSettings = import('./FranchiseFileSettings.js').default;
+export type TableSchema = import('./FranchiseSchema.js').TableSchema;
+export type FranchiseEnum = import('./FranchiseEnum.js').default;
+export type GameStrategy = import('./strategies/StrategyPicker.js').GameStrategy;
+export type TableStrategy = import('./strategies/StrategyPicker.js').TableStrategy;
 /**
  * @typedef {Object} FranchiseFileTableHeader
  * @property {string} name
@@ -133,6 +138,13 @@ export type EmptyRecordEntry = {
  * @property {number} previous
  * @property {number} next
  */
+/**
+ * @typedef {import('./FranchiseFileSettings.js').default} FranchiseFileSettings
+ * @typedef {import('./FranchiseSchema.js').TableSchema} TableSchema
+ * @typedef {import('./FranchiseEnum.js').default} FranchiseEnum
+ * @typedef {import('./strategies/StrategyPicker.js').GameStrategy} GameStrategy
+ * @typedef {import('./strategies/StrategyPicker.js').TableStrategy} TableStrategy
+ */
 declare class FranchiseFileTable extends events {
     constructor(data: any, offset: any, gameYear: any, strategy: any, settings: any);
     index: number;
@@ -173,9 +185,9 @@ declare class FranchiseFileTable extends events {
     /** @returns {Buffer} */
     get hexData(): Buffer;
     /** @param {TableSchema} schema */
-    set schema(schema: TableSchema);
+    set schema(schema: import("./FranchiseSchema.js").TableSchema);
     /** @type {TableSchema} */
-    get schema(): TableSchema;
+    get schema(): import("./FranchiseSchema.js").TableSchema;
     /** @private @type {TableSchema} */
     private _schema;
     offsetTable: any[] | {
