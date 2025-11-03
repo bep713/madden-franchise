@@ -4,7 +4,7 @@ import FranchiseFileRecord from './FranchiseFileRecord.js';
 import FranchiseFileTable2Field from './FranchiseFileTable2Field.js';
 import FranchiseFileTable3Field from './FranchiseFileTable3Field.js';
 const EventEmitter = events.EventEmitter;
-/** 
+/**
  * @typedef {Object} FranchiseFileTableHeader
  * @property {string} name
  * @property {boolean} isArray

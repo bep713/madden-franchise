@@ -11,7 +11,7 @@ import M20FTCStrategy from './franchise-common/m20/M20FTCStrategy.js';
  * @typedef FileStrategy
  * @property {function(any, any): any} postPackFile
  * @property {function(any, any): any} generateUnpackedContents
- * 
+ *
  * @typedef {import('../FranchiseFileTable.js').FranchiseFileTableHeader} FranchiseFileTableHeader
  * @typedef TableStrategy
  * @property {function(any): FranchiseFileTableHeader} parseHeader
@@ -26,16 +26,16 @@ import M20FTCStrategy from './franchise-common/m20/M20FTCStrategy.js';
  * @property {function(any): any[]} getMandatoryOffsets
  * @property {function(any, any): void} recalculateStringOffsets
  * @property {function(any, any): void} recalculateBlobOffsets
- * 
+ *
  * @typedef Table2FieldStrategy
  * @property {function(any, any): any} getInitialUnformattedValue
  * @property {function(any, any): any} setUnformattedValueFromFormatted
- * 
+ *
  * @typedef Table3FieldStrategy
  * @property {function(any, any): any} getInitialUnformattedValue
  * @property {function(any): any} getFormattedValueFromUnformatted
  * @property {function(any, any, any): any} setUnformattedValueFromFormatted
- * 
+ *
  * @typedef GameStrategy
  * @property {string} name
  * @property {FileStrategy} file
@@ -43,7 +43,6 @@ import M20FTCStrategy from './franchise-common/m20/M20FTCStrategy.js';
  * @property {Table2FieldStrategy} table2Field
  * @property {Table3FieldStrategy} table3Field
  */
-
 
 let StrategyPicker = {};
 /**
