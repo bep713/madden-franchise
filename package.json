@@ -13,7 +13,7 @@
     "make-types": "tsc --project ./tsconfig.json",
     "pack": "npm pack --pack-destination pack",
     "pre-publish": "npm run lint && npm run format && npm run build",
-    "publish": "npm run pre-publish && npm publish",
+    "pub": "npm run pre-publish && npm publish",
     "test": "mocha tests/**/*.spec.js"
   },
   "keywords": [
