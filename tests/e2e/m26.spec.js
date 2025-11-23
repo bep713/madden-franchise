@@ -18,6 +18,8 @@ const playerArrayTableIdToTest = 5903;
 const filePathToUse = filePaths.compressed.m26;
 const filePathToSave = filePaths.saveTest.m26;
 
+const ftcFilePathToUse = filePaths.compressed.m26Ftc;
+
 let file;
 
 describe('Madden 26 end to end tests', function () {
@@ -2836,6 +2838,13 @@ describe('Madden 26 end to end tests', function () {
                         });
                     });
                 });
+            });
+
+            it('gracefully handles M26 FTC visuals data', async () => {
+                const ftc = await FranchiseFile.create(ftcFilePathToUse);
+                const ftcViz = ftc.getTableByName('CharacterVisuals');
+                await ftcViz.readRecords();
+                expect(ftcViz.records[0].RawData).to.not.be.null;
             });
 
             /* Not relevant for M26 as this scenario does not exist

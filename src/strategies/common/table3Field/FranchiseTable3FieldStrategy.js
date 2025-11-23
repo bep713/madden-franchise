@@ -15,19 +15,28 @@ FranchiseTable3FieldStrategy.getInitialUnformattedValue = (field, data) => {
 FranchiseTable3FieldStrategy.getFormattedValueFromUnformatted = (
     unformattedValue
 ) => {
-    const zlibDataStartIndex =
-        FranchiseTable3FieldStrategy.getZlibDataStartIndex(unformattedValue);
-    // first few bytes are the size of the zipped data & other flags, so skip those.
-    const decompressedData = zlib.gunzipSync(
-        unformattedValue.subarray(zlibDataStartIndex)
-    );
-    // If the size is followed by 0x7 before the gzip-compressed data, the decompressed data is in TDB2 format, so use the TDB2 converter
-    if (unformattedValue[2] === 0x7) {
-        const jsonData = readChviRecord(decompressedData);
-        return JSON.stringify(jsonData);
+    try {
+        const zlibDataStartIndex =
+            FranchiseTable3FieldStrategy.getZlibDataStartIndex(
+                unformattedValue
+            );
+        // first few bytes are the size of the zipped data & other flags, so skip those.
+        const decompressedData = zlib.gunzipSync(
+            unformattedValue.subarray(zlibDataStartIndex)
+        );
+        // If the size is followed by 0x7 before the gzip-compressed data, the decompressed data is in TDB2 format, so use the TDB2 converter
+        if (unformattedValue[2] === 0x7) {
+            const jsonData = readChviRecord(decompressedData);
+            return JSON.stringify(jsonData);
+        }
+        // Otherwise, it's a standard JSON, so just convert the buffer to a string
+        return decompressedData.toString();
+    } catch (err) {
+        console.log(
+            `Error occurred while attempting to fetch formatted value. Returning an empty string. Full error: ${err}`
+        );
+        return '';
     }
-    // Otherwise, it's a standard JSON, so just convert the buffer to a string
-    return decompressedData.toString();
 };
 FranchiseTable3FieldStrategy.setUnformattedValueFromFormatted = (
     formattedValue,

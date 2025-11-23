@@ -4,7 +4,8 @@ export default {
         m23: 'tests/data/CAREER-23COMPRESS',
         m24: 'tests/data/CAREER-24COMPRESS',
         m25: 'tests/data/CAREER-25COMPRESS',
-        m26: 'tests/data/CAREER-26COMPRESS'
+        m26: 'tests/data/CAREER-26COMPRESS',
+        m26Ftc: 'tests/data/M26_FTC_COMPRESS.FTC'
     },
     uncompressed: {
         m21: 'tests/data/21UNCOMPRESS.frt',
