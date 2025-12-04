@@ -192,11 +192,15 @@ export async function generateSchemaV2({ fileMap, extraSchemas }) {
                             (schemaAttribute) =>
                                 schemaAttribute?.name === baseAttribute?.name
                         );
-                        utilService.arrayMove(
-                            schema.attributes,
-                            oldIndex,
-                            index
-                        );
+
+                        if (oldIndex >= 0) {
+                            utilService.arrayMove(
+                                schema.attributes,
+                                oldIndex,
+                                index,
+                                false
+                            );
+                        }
                     });
                 }
             }

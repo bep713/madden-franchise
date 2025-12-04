@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const NUM_CUSTOM_SCHEMAS = 16;
+const NUM_CUSTOM_SCHEMAS = 19;
 const TEST_SCHEMA_FOLDER = path.join(__dirname, '../data/test-schemas/');
 const SCHEMA_PATHS = {
     m22: {
@@ -31,7 +31,7 @@ describe('schemaGeneratorV2 unit tests', () => {
     });
 
     it('contains the correct amount of schemas', async () => {
-        expect(schemaRoot.schemas.length).to.equal(2999);
+        expect(schemaRoot.schemas.length).to.equal(3002);
         expect(Object.keys(schemaRoot.schemaMap).length).to.equal(2982);
     });
 
@@ -78,7 +78,7 @@ describe('schemaGeneratorV2 unit tests', () => {
         it('correctly parses a max length attribute', () => {
             const schema = schemaRoot.schemaMap.AdvanceStageRequest;
             const attr = schema.attributes.find((attr) => attr.maxLength);
-            expect(attr.maxLength).to.equal('13');
+            expect(attr.maxLength).to.equal('33');
         });
 
         it('correctly parses a const attribute', () => {

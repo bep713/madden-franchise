@@ -840,5 +840,93 @@
                 "type": "Stage"
             }
         ]
+    },
+    {
+        "name": "ModifierView",
+        "numMembers": "4",
+        "base": "none()",
+        "attributes": [
+            {
+                "name": "Source",
+                "type": "record"
+            },
+            {
+                "name": "Subjects",
+                "type": "record"
+            },
+            {
+                "name": "Update",
+                "type": "none()"
+            },
+            {
+                "name": "Formula",
+                "type": "record"
+            }
+        ]
+    },
+    {
+        "name": "FilterView",
+        "numMembers": "6",
+        "base": "none()",
+        "attributes": [
+            {
+                "name": "Source",
+                "type": "record"
+            },
+            {
+                "name": "Subjects",
+                "type": "record"
+            },
+            {
+                "name": "Update",
+                "type": "record"
+            },
+            {
+                "name": "Results",
+                "type": "record"
+            },
+            {
+                "name": "Clear",
+                "type": "record"
+            },
+            {
+                "name": "Filter",
+                "type": "record"
+            }
+        ]
+    },
+    {
+        "name": "Generic_Array",
+        "numMembers": "8",
+        "base": "none()",
+        "attributes": [
+            {
+                "name": "Append"
+            },
+            {
+                "name": "Concatenate"
+            },
+            {
+                "name": "Find"
+            },
+            {
+                "name": "Erase"
+            },
+            {
+                "name": "FindAndErase"
+            },
+            {
+                "name": "EraseAll"
+            },
+            {
+                "name": "Contains"
+            },
+            {
+                "name": "Population"
+            },
+            {
+                "name": "Capacity"
+            }
+        ]
     }
 ]

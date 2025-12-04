@@ -33,7 +33,7 @@ FranchiseTable3FieldStrategy.getFormattedValueFromUnformatted = (
         return decompressedData.toString();
     } catch (err) {
         console.log(
-            `Error occurred while attempting to fetch formatted value. Returning an empty string. Full error: ${err}`
+            "Gracefully handling an error while attempting to fetch formatted value. Returning an empty string instead. Full error:\n", err
         );
         return '';
     }

@@ -144,8 +144,8 @@ utilService.show = function (element) {
 utilService.hide = function (element) {
     element.classList.add('hidden');
 };
-utilService.arrayMove = function (arr, old_index, new_index) {
-    if (new_index >= arr.length) {
+utilService.arrayMove = function (arr, old_index, new_index, expand = true) {
+    if (expand && new_index >= arr.length) {
         var k = new_index - arr.length + 1;
         while (k--) {
             arr.push(undefined);
