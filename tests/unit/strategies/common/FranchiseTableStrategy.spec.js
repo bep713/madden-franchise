@@ -90,6 +90,41 @@ describe('Franchise Table Strategy unit tests', () => {
             common.hashCompare(Buffer.concat(result), expectedResult);
         });
 
+        it('preserves original table2 buffer when no string fields were read (table2Records is empty)', () => {
+            // This test demonstrates the bug where table2 data is lost when
+            // no string fields are read before saving. This happens when
+            // modifying only non-string fields (like cap penalties).
+            //
+            // Bug scenario:
+            // 1. Open a franchise file
+            // 2. Read only non-string fields (e.g., TeamIndex, ThisYearCapPenalties)
+            // 3. Modify those fields and save
+            // 4. Re-open the file - string fields return BitView objects instead of strings
+            //
+            // Root cause: When table2Records.length === 0, the function returned
+            // an empty array, losing the original table2 data. On reload,
+            // tableTotalLength equals table1Length, so hasSecondTable becomes false,
+            // and string fields fall through to return raw BitView objects.
+
+            const table2Records = []; // No string fields were read
+
+            const originalTable2Buffer = Buffer.from([
+                0x34, 0x39, 0x65, 0x72, 0x73, 0x00, // "49ers\0"
+                0x42, 0x65, 0x61, 0x72, 0x73, 0x00, // "Bears\0"
+                0x50, 0x61, 0x63, 0x6b, 0x65, 0x72, 0x73, 0x00 // "Packers\0"
+            ]);
+
+            const result = FranchiseTableStrategy.getTable2BinaryData(
+                table2Records,
+                originalTable2Buffer
+            );
+
+            // The original table2 buffer should be preserved, not lost
+            const combinedResult = Buffer.concat(result);
+            expect(combinedResult.length).to.be.greaterThan(0);
+            common.hashCompare(combinedResult, originalTable2Buffer);
+        });
+
         // it('performance test', () => {
         //     let table2RecordsPerformanceTest = [];
 
