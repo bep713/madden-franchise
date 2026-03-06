@@ -1,9 +1,13 @@
 // USAGE:
-//  node schema-generator-script.js [input file folder] [output file folder] [main schema name] [extra schema path]
-const fs = require('fs/promises');
-const path = require('path');
-const { gzipSync } = require('zlib');
-const { generateSchemaV2 } = require('../src/services/schemaGeneratorV2');
+//  node schema-generator-script.js [input file folder] [output file folder] [main schema name (include extension)] [extra schema path]
+import fs from 'fs/promises';
+import path, { dirname } from 'path';
+import { gzipSync } from 'zlib';
+import { generateSchemaV2 } from '../src/services/schemaGeneratorV2.js';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 let done = false;
 
@@ -35,7 +39,13 @@ let done = false;
     });
 
     const outputPath = process.argv[3] || __dirname;
-    const compressed = gzipSync(JSON.stringify(schema));
+    const compressed = gzipSync(
+        JSON.stringify({
+            enumMap: schema.enumMap,
+            meta: schema.meta,
+            schemas: schema.schemas
+        })
+    );
     await fs.writeFile(
         path.join(
             outputPath,

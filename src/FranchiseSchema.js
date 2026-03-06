@@ -73,15 +73,24 @@ class FranchiseSchema extends EventEmitter {
         this.meta = this.schema.meta;
         this.schemas = this.schema.schemas;
         this.schemaMap = {};
-        this.enumMap = {};
+        this.enumMap = this.schema.enumMap || {};
         for (let i = 0; i < this.schemas.length; i++) {
             const schema = this.schemas[i];
             this.schemaMap[schema.name] = schema;
             for (let j = 0; j < schema.attributes.length; j++) {
                 const attribute = schema.attributes[j];
                 if (attribute.enum) {
-                    attribute.enum = new FranchiseEnum(attribute.enum);
-                    this.enumMap[attribute.enum.name] = attribute.enum;
+                    if (attribute.enum.name) {
+                        // V1 schema - enums are denormalized
+                        attribute.enum = new FranchiseEnum(attribute.enum);
+                        this.enumMap[attribute.enum] = attribute.enum;
+                    } else {
+                        // V2 schema - enums are normalized
+                        // !!!!!! Need to account for extra schema enums ------------------------------
+                        attribute.enum = new FranchiseEnum(
+                            this.enumMap[attribute.enum]
+                        );
+                    }
                 }
             }
         }
@@ -114,6 +123,7 @@ class FranchiseSchema extends EventEmitter {
             }).then((schema) => {
                 this.schema = schema;
                 this.meta = schema.meta;
+                this.enums = schema.enums;
                 this.schemas = schema.schemas;
                 this.schemaMap = schema.schemaMap;
                 this.emit('schemas:done');

@@ -1,6 +1,6 @@
 // USAGE:
 //  node schema-generator-script.js [input file path] [output file folder]
-const schemaGenerator = require('../src/services/schemaGenerator');
+import schemaGenerator from '../src/services/schemaGenerator.js';
 
 schemaGenerator.eventEmitter.on('schemas:done', () => {
     done = true;

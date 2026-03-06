@@ -17,6 +17,7 @@ const __dirname = dirname(__filename);
 export async function generateSchemaV2({ fileMap, extraSchemas }) {
     const parsedFiles = {};
     const enums = [];
+    const enumMap = {};
     const schemas = [];
     const schemaMap = {};
     let schemaMeta = {};
@@ -103,6 +104,7 @@ export async function generateSchemaV2({ fileMap, extraSchemas }) {
                         }
                     }
                     enums.push(theEnum);
+                    enumMap[theEnum.name] = theEnum;
                 } else if (item.tag === 'schema') {
                     const schema = {
                         assetId: item.assetId,
@@ -138,7 +140,9 @@ export async function generateSchemaV2({ fileMap, extraSchemas }) {
             maxLength: attributeAttributes.maxLen,
             default: getDefaultValue(attributeAttributes.default),
             final: attributeAttributes.final,
-            enum: getEnum(attributeAttributes.type),
+            enum: enumMap[attributeAttributes.type]
+                ? attributeAttributes.type
+                : null,
             const: attributeAttributes.const
         };
         function getDefaultValue(defaultVal) {
@@ -218,6 +222,8 @@ export async function generateSchemaV2({ fileMap, extraSchemas }) {
     const gameYearMatch = /Madden(\d{2})/.exec(databaseName);
     const gameYear = gameYearMatch ? parseInt(gameYearMatch[1]) : null;
     const root = {
+        enums,
+        enumMap,
         meta: {
             major: parseInt(majorVersion),
             minor: parseInt(minorVersion),
