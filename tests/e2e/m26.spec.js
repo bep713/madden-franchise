@@ -193,6 +193,49 @@ describe('Madden 26 end to end tests', function () {
                 });
             });
 
+            it('can save a table2 field containing a non-utf8 character without data loss', (done) => {
+                let table = file.getTableByName('TeamSetting');
+                console.time('read records 1');
+
+                table.readRecords('MaxCloudReplaysDescription').then(() => {
+                    console.timeEnd('read records 1');
+                    
+                    const originalValue = table.records[0].MaxCloudReplaysDescription;
+                    const modifiedValue = originalValue.replace('Cloud', 'Dloud');
+
+                    console.time('set value');
+                    table.records[0].MaxCloudReplaysDescription = modifiedValue;
+                    console.timeEnd('set value');
+
+                    console.time('actual save call');
+
+                    file.save(filePathToSave).then(() => {
+                        console.timeEnd('actual save call');
+                        console.time('read file');
+                        let file2 = new FranchiseFile(filePathToSave);
+
+                        file2.on('ready', () => {
+                            console.timeEnd('read file');
+                            let table2 = file2.getTableByName('TeamSetting');
+                            console.time('read records 2');
+
+                            table2.readRecords('MaxCloudReplaysDescription').then(() => {
+                                console.timeEnd('read records 2');
+                                expect(table2.records[0].MaxCloudReplaysDescription).to.equal(
+                                    modifiedValue
+                                );
+
+                                // Ensure adjacent table2 field hasn't been impacted
+                                expect(table2.records[1].MaxCloudReplaysDescription).to.equal(
+                                    originalValue
+                                );
+                                done();
+                            });
+                        });
+                    });
+                });
+            });
+
             it('can save a table2 field and a normal field together', (done) => {
                 let division = file.getTableByName('Division');
                 let popularityComponentTable = file.getTableByName(
