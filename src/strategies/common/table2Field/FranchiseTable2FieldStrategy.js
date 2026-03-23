@@ -9,14 +9,15 @@ FranchiseTable2FieldStrategy.setUnformattedValueFromFormatted = (
     formattedValue,
     maxLength
 ) => {
-    let valuePadded = formattedValue;
-    if (valuePadded.length > maxLength) {
-        valuePadded = valuePadded.substring(0, maxLength);
+    // Convert formatted value to buffer first to ensure accurate length
+    let valueBuffer = Buffer.from(formattedValue);
+    if (valueBuffer.length > maxLength) {
+        valueBuffer = valueBuffer.subarray(0, maxLength);
     }
-    const numberOfNullCharactersToAdd = maxLength - formattedValue.length;
+    const numberOfNullCharactersToAdd = maxLength - valueBuffer.length;
     for (let i = 0; i < numberOfNullCharactersToAdd; i++) {
-        valuePadded += String.fromCharCode(0);
+        valueBuffer = Buffer.concat([valueBuffer, Buffer.from([0])]);
     }
-    return Buffer.from(valuePadded);
+    return valueBuffer;
 };
 export default FranchiseTable2FieldStrategy;
