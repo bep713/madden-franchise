@@ -31,6 +31,9 @@ FranchiseTableStrategy.getTable2BinaryData = (
     }
     if (table2Records.length > 0) {
         table2Data.push(fullTable2Buffer.slice(currentOffset));
+    } else {
+        // No string fields were read, preserve original table2 data entirely
+        table2Data.push(fullTable2Buffer);
     }
     return table2Data;
 };
