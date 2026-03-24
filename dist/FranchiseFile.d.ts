@@ -23,6 +23,10 @@ export type RecordReference = {
     tableId: number;
     rowNumber: number;
 };
+export type FileStrategy = import('./strategies/StrategyPicker.js').FileStrategy;
+export type TableStrategy = import('./strategies/StrategyPicker.js').TableStrategy;
+export type Table2FieldStrategy = import('./strategies/StrategyPicker.js').Table2FieldStrategy;
+export type Table3FieldStrategy = import('./strategies/StrategyPicker.js').Table3FieldStrategy;
 /**
  * @typedef {Object} AssetTable
  * @property {number} assetId
@@ -32,6 +36,12 @@ export type RecordReference = {
  * @typedef {Object} RecordReference
  * @property {number} tableId
  * @property {number} rowNumber
+ */
+/**
+ * @typedef {import('./strategies/StrategyPicker.js').FileStrategy} FileStrategy
+ * @typedef {import('./strategies/StrategyPicker.js').TableStrategy} TableStrategy
+ * @typedef {import('./strategies/StrategyPicker.js').Table2FieldStrategy} Table2FieldStrategy
+ * @typedef {import('./strategies/StrategyPicker.js').Table3FieldStrategy} Table3FieldStrategy
  */
 declare class FranchiseFile extends events {
     /**

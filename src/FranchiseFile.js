@@ -21,6 +21,12 @@ const COMPRESSED_DATA_OFFSET = 0x52;
  * @property {number} tableId
  * @property {number} rowNumber
  */
+/**
+ * @typedef {import('./strategies/StrategyPicker.js').FileStrategy} FileStrategy
+ * @typedef {import('./strategies/StrategyPicker.js').TableStrategy} TableStrategy
+ * @typedef {import('./strategies/StrategyPicker.js').Table2FieldStrategy} Table2FieldStrategy
+ * @typedef {import('./strategies/StrategyPicker.js').Table3FieldStrategy} Table3FieldStrategy
+ */
 class FranchiseFile extends EventEmitter {
     /**
      *

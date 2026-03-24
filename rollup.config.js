@@ -15,8 +15,7 @@ const commonConfig = {
         }),
         nodeResolve(),
         commonjs()
-    ],
-    external: ['@toondepauw/node-zstd']
+    ]
 };
 
 export default [

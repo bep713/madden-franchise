@@ -109,9 +109,26 @@ describe('Franchise Table Strategy unit tests', () => {
             const table2Records = []; // No string fields were read
 
             const originalTable2Buffer = Buffer.from([
-                0x34, 0x39, 0x65, 0x72, 0x73, 0x00, // "49ers\0"
-                0x42, 0x65, 0x61, 0x72, 0x73, 0x00, // "Bears\0"
-                0x50, 0x61, 0x63, 0x6b, 0x65, 0x72, 0x73, 0x00 // "Packers\0"
+                0x34,
+                0x39,
+                0x65,
+                0x72,
+                0x73,
+                0x00, // "49ers\0"
+                0x42,
+                0x65,
+                0x61,
+                0x72,
+                0x73,
+                0x00, // "Bears\0"
+                0x50,
+                0x61,
+                0x63,
+                0x6b,
+                0x65,
+                0x72,
+                0x73,
+                0x00 // "Packers\0"
             ]);
 
             const result = FranchiseTableStrategy.getTable2BinaryData(

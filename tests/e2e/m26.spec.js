@@ -199,9 +199,13 @@ describe('Madden 26 end to end tests', function () {
 
                 table.readRecords('MaxCloudReplaysDescription').then(() => {
                     console.timeEnd('read records 1');
-                    
-                    const originalValue = table.records[0].MaxCloudReplaysDescription;
-                    const modifiedValue = originalValue.replace('Cloud', 'Dloud');
+
+                    const originalValue =
+                        table.records[0].MaxCloudReplaysDescription;
+                    const modifiedValue = originalValue.replace(
+                        'Cloud',
+                        'Dloud'
+                    );
 
                     console.time('set value');
                     table.records[0].MaxCloudReplaysDescription = modifiedValue;
@@ -219,18 +223,22 @@ describe('Madden 26 end to end tests', function () {
                             let table2 = file2.getTableByName('TeamSetting');
                             console.time('read records 2');
 
-                            table2.readRecords('MaxCloudReplaysDescription').then(() => {
-                                console.timeEnd('read records 2');
-                                expect(table2.records[0].MaxCloudReplaysDescription).to.equal(
-                                    modifiedValue
-                                );
+                            table2
+                                .readRecords('MaxCloudReplaysDescription')
+                                .then(() => {
+                                    console.timeEnd('read records 2');
+                                    expect(
+                                        table2.records[0]
+                                            .MaxCloudReplaysDescription
+                                    ).to.equal(modifiedValue);
 
-                                // Ensure adjacent table2 field hasn't been impacted
-                                expect(table2.records[1].MaxCloudReplaysDescription).to.equal(
-                                    originalValue
-                                );
-                                done();
-                            });
+                                    // Ensure adjacent table2 field hasn't been impacted
+                                    expect(
+                                        table2.records[1]
+                                            .MaxCloudReplaysDescription
+                                    ).to.equal(originalValue);
+                                    done();
+                                });
                         });
                     });
                 });

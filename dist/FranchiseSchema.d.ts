@@ -60,8 +60,9 @@ declare class FranchiseSchema extends events {
     schema: any;
     meta: any;
     schemaMap: any;
-    enumMap: {} | undefined;
+    enumMap: any;
     evaluateSchemaXml(): void;
+    enums: any;
 }
 import FranchiseEnum from './FranchiseEnum.js';
 import events from 'events';

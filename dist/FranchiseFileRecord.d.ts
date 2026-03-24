@@ -8,6 +8,7 @@ export type RecordReference = import('./FranchiseFile.js').RecordReference;
  * @typedef {import('./FranchiseFile.js').RecordReference} RecordReference
  */
 declare class FranchiseFileRecord {
+    [key: string]: any;
     /** @param {Buffer} data @param {number} index @param {OffsetTableEntry} offsetTable, @param {FranchiseFileTable} parent */
     constructor(data: Buffer, index: number, offsetTable: OffsetTableEntry, parent: FranchiseFileTable);
     /** @type {Buffer}  */

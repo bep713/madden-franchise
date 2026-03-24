@@ -16,7 +16,7 @@ declare namespace utilService {
     function byteArrayToLong(byteArray: any, reverse: any): number;
     function show(element: any): void;
     function hide(element: any): void;
-    function arrayMove(arr: any, old_index: any, new_index: any): any;
+    function arrayMove(arr: any, old_index: any, new_index: any, expand?: boolean): any;
     function removeChildNodes(node: any): void;
     function isString(str: any): boolean;
     function stringOnlyContainsBinaryDigits(str: any): boolean;
