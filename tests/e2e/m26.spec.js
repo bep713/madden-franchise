@@ -2956,9 +2956,6 @@ describe('Madden 26 end to end tests', function () {
 
                             const tableNewRawData = table.hexData;
 
-                            console.log('Original table raw data length:', originalTableLength);
-                            console.log('New table raw data length:', tableNewRawData.length);
-
                             expect(tableNewRawData.length).to.equal(originalTableLength);
 
                             done();
