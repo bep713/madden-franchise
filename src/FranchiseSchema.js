@@ -80,10 +80,10 @@ class FranchiseSchema extends EventEmitter {
             for (let j = 0; j < schema.attributes.length; j++) {
                 const attribute = schema.attributes[j];
                 if (attribute.enum) {
-                    if (attribute.enum.name) {
+                    if (attribute.enum._name) {
                         // V1 schema - enums are denormalized
                         attribute.enum = new FranchiseEnum(attribute.enum);
-                        this.enumMap[attribute.enum] = attribute.enum;
+                        this.enumMap[attribute.enum._name] = attribute.enum;
                     } else {
                         // V2 schema - enums are normalized
                         // !!!!!! Need to account for extra schema enums ------------------------------

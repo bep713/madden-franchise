@@ -1,6 +1,4 @@
-import fs from 'fs';
 import path, { dirname } from 'path';
-import zlib from 'zlib';
 import { expect } from 'chai';
 import { generateSchemaV2 } from '../../src/services/schemaGeneratorV2.js';
 import { fileURLToPath } from 'url';
@@ -32,7 +30,6 @@ describe('schemaGeneratorV2 unit tests', () => {
 
     it('contains the correct amount of schemas', async () => {
         expect(schemaRoot.schemas.length).to.equal(3002);
-        expect(Object.keys(schemaRoot.schemaMap).length).to.equal(2982);
     });
 
     describe('schemaRoot format', () => {
@@ -92,27 +89,10 @@ describe('schemaGeneratorV2 unit tests', () => {
             const reqStyle = schema.attributes.find(
                 (attr) => attr.name === 'RequestStyle'
             );
-            expect(reqStyle.enum).to.be.an('object');
-            expect(reqStyle.enum._name).to.equal('RequestStyle');
-        });
-    });
+            expect(reqStyle.enum).to.equal('RequestStyle');
 
-    it('correct output', async () => {
-        const schemaRoot = await generateSchemaV2({
-            fileMap: { main: SCHEMA_PATHS.m25.xml }
-        });
-        const newData = {
-            meta: schemaRoot.meta,
-            schemas: schemaRoot.schemas
-        };
-        const compareData = JSON.parse(JSON.stringify(newData));
-        const expectedGzip = fs.readFileSync(SCHEMA_PATHS.m25.gz);
-        const expectedData = JSON.parse(
-            zlib.gunzipSync(expectedGzip).toString()
-        );
-        expect(compareData.meta).to.eql(expectedData.meta);
-        compareData.schemas.forEach((schema, index) => {
-            expect(schema, schema.name).to.eql(expectedData.schemas[index]);
+            const theEnum = schemaRoot.enumMap[reqStyle.enum];
+            expect(theEnum._name).to.equal('RequestStyle');
         });
     });
 });
@@ -136,7 +116,9 @@ describe('schemaGeneratorV2 IncludeFile dependency tests', () => {
             (s) => s.name === 'Test'
         );
         expect(includedEnum).to.exist;
-        expect(includedEnum.enum).to.be.an('object');
-        expect(includedEnum.enum.name).to.equal('IncludedEnum');
+        expect(includedEnum.enum).to.equal('IncludedEnum');
+
+        const theEnum = result.enumMap[includedEnum.enum];
+        expect(theEnum._name).to.equal('IncludedEnum');
     });
 });

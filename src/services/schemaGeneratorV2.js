@@ -2,7 +2,6 @@ import fs from 'fs/promises';
 import path, { dirname } from 'path';
 import { XMLParser } from 'fast-xml-parser';
 import FranchiseEnum from '../FranchiseEnum.js';
-import utilService from './utilService.js';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -159,51 +158,70 @@ export async function generateSchemaV2({ fileMap, extraSchemas }) {
                 .replace(/&quot;/g, '"');
         }
     }
-    function getEnum(name) {
-        return enums.find((theEnum) => theEnum.name === name);
-    }
+
     function addExtraSchemas() {
         if (!Array.isArray(extraSchemas)) return;
+
+        // extra enums
+        extraSchemas
+            .filter((schema) => schema.type === 'enum')
+            .forEach((theEnum) => {
+                if (theEnum.forceOverride || !enumMap[theEnum.name]) {
+                    const newEnum = new FranchiseEnum(
+                        theEnum.name,
+                        theEnum.assetId,
+                        Boolean(theEnum.isRecordPersistent)
+                    );
+                    newEnum._members = theEnum.members || [];
+                    enums.unshift(newEnum);
+                    enumMap[newEnum.name] = newEnum;
+                }
+            });
+
+        // extra schemas
         extraSchemas.forEach((schema) => {
-            if (!schemaMap[schema.name]) {
-                schema.attributes
-                    .filter((attrib) => {
-                        return (
-                            attrib.enum &&
-                            !(attrib.enum instanceof FranchiseEnum)
-                        );
-                    })
-                    .forEach((attrib) => {
-                        attrib.enum = getEnum(attrib.enum);
-                    });
-                schemas.unshift(schema);
+            if (schema.type === 'enum') return;
+
+            if (schema.forceOverride || !schemaMap[schema.name]) {
+                const newSchema = {
+                    ...schema,
+                    attributes: schema.attributes?.map((attrib, index) => ({
+                        ...attrib,
+                        index: attrib.index || String(index)
+                    }))
+                };
+
+                schemas.unshift(newSchema);
+                schemaMap[newSchema.name] = newSchema;
             }
         });
     }
+
     function calculateInheritedSchemas(schemaList) {
         const schemasWithBase = schemaList.filter(
             (schema) => schema.base && schema.base.indexOf('()') === -1
         );
+
         schemasWithBase.forEach((schema) => {
             if (schema.base && schema.base.indexOf('()') === -1) {
                 schema.originalAttributesOrder = schema.attributes;
                 const baseSchema = schemaList.find(
                     (schemaToSearch) => schemaToSearch.name === schema.base
                 );
+
                 if (baseSchema) {
                     baseSchema.attributes.forEach((baseAttribute, index) => {
-                        let oldIndex = schema.attributes.findIndex(
+                        const oldIndex = schema.attributes.findIndex(
                             (schemaAttribute) =>
                                 schemaAttribute?.name === baseAttribute?.name
                         );
 
                         if (oldIndex >= 0) {
-                            utilService.arrayMove(
-                                schema.attributes,
+                            const [item] = schema.attributes.splice(
                                 oldIndex,
-                                index,
-                                false
+                                1
                             );
+                            schema.attributes.splice(index, 0, item);
                         }
                     });
                 }

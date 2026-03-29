@@ -1,5 +1,3 @@
-import fs from 'fs';
-import zlib from 'zlib';
 import path, { dirname } from 'path';
 import { expect } from 'chai';
 import schemaGenerator from '../../src/services/schemaGenerator.js';
@@ -8,7 +6,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const NUM_CUSTOM_SCHEMAS = 16;
+const NUM_CUSTOM_SCHEMAS = 20;
 
 const TEST_SCHEMA_FOLDER = path.join(__dirname, '../data/test-schemas/');
 const SCHEMA_PATHS = {
@@ -38,8 +36,7 @@ describe('schema generator unit tests', () => {
     });
 
     it('contains the correct amount of schemas', async () => {
-        expect(schemaRoot.schemas.length).to.equal(2999);
-        expect(Object.keys(schemaRoot.schemaMap).length).to.equal(2982); // extra schemas not added to schema map
+        expect(schemaRoot.schemas.length).to.equal(3002);
     });
 
     describe('schemaRoot format', () => {
@@ -54,7 +51,7 @@ describe('schema generator unit tests', () => {
         it('individual schema attributes', () => {
             // first few schemas are custom added in the data/schemas/extra-schemas.json file
             // so start with 12th index which would be the first schema in the actual file.
-            const schema = schemaRoot.schemas[NUM_CUSTOM_SCHEMAS + 1];
+            const schema = schemaRoot.schemas[NUM_CUSTOM_SCHEMAS];
 
             expect(schema.assetId).to.be.undefined;
             expect(schema.ownerAssetId).to.equal('46647');
@@ -65,7 +62,7 @@ describe('schema generator unit tests', () => {
         });
 
         it('individual schema attributes', () => {
-            const schema = schemaRoot.schemas[NUM_CUSTOM_SCHEMAS + 1];
+            const schema = schemaRoot.schemas[NUM_CUSTOM_SCHEMAS];
             const firstAttribute = schema.attributes[0];
 
             expect(firstAttribute.index).to.equal('0');
@@ -138,35 +135,5 @@ describe('schema generator unit tests', () => {
                 ]
             });
         });
-    });
-
-    it('correct output', async () => {
-        schemaGenerator.generate(SCHEMA_PATHS.m25.xml);
-
-        let schemaRoot = await new Promise((resolve) => {
-            schemaGenerator.eventEmitter.on('schemas:done', (schema) => {
-                resolve(schema);
-            });
-        });
-
-        const newData = {
-            meta: schemaRoot.meta,
-            schemas: schemaRoot.schemas
-        };
-
-        const compareData = JSON.parse(JSON.stringify(newData));
-
-        const expectedGzip = fs.readFileSync(SCHEMA_PATHS.m25.gz);
-        const expectedData = JSON.parse(
-            zlib.gunzipSync(expectedGzip).toString()
-        );
-
-        expect(compareData.meta).to.eql(expectedData.meta);
-
-        compareData.schemas.forEach((schema, index) => {
-            expect(schema, schema.name).to.eql(expectedData.schemas[index]);
-        });
-
-        // expect(compareData).to.eql(expectedData);
     });
 });

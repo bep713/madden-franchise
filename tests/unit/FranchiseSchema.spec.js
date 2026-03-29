@@ -17,7 +17,7 @@ describe('FranchiseSchema unit tests', () => {
             expect(schema.meta.gameYear).to.equal(20);
 
             // will add extra schemas if they don't already exist
-            expect(schema.schemas.length).to.equal(2641);
+            expect(schema.schemas.length).to.equal(2644);
             expect(
                 schema.schemas.find((schema) => {
                     return schema.name === 'Scheduler';
@@ -98,7 +98,7 @@ describe('FranchiseSchema unit tests', () => {
             expect(schema.meta.major).to.equal(95);
             expect(schema.meta.minor).to.equal(7);
             expect(schema.meta.gameYear).to.equal(19);
-            expect(schema.schemas.length).to.equal(2413);
+            expect(schema.schemas.length).to.equal(2416);
             done();
         });
 
@@ -112,7 +112,7 @@ describe('FranchiseSchema unit tests', () => {
             expect(schema.meta.major).to.equal(367);
             expect(schema.meta.minor).to.equal(1);
             expect(schema.meta.gameYear).to.equal(20);
-            expect(schema.schemas.length).to.equal(2646);
+            expect(schema.schemas.length).to.equal(2649);
             done();
         });
 
@@ -133,7 +133,7 @@ describe('FranchiseSchema unit tests', () => {
                 expect(schema.meta.major).to.equal(95);
                 expect(schema.meta.minor).to.equal(7);
                 expect(schema.meta.gameYear).to.equal(19);
-                expect(schema.schemas.length).to.equal(2413);
+                expect(schema.schemas.length).to.equal(2416);
                 done();
             });
 
@@ -160,7 +160,7 @@ describe('FranchiseSchema unit tests', () => {
                     extraSchemas: extraSchemas.slice(0, extraSchemas.length - 1) // remove last schema to test extra schemas
                 }
             ).once('schemas:done', () => {
-                expect(schema.schemas.length).to.equal(2412);
+                expect(schema.schemas.length).to.equal(2415);
                 done();
             });
 
@@ -183,7 +183,7 @@ describe('FranchiseSchema unit tests', () => {
                 expect(schema.meta.major).to.equal(367);
                 expect(schema.meta.minor).to.equal(1);
                 expect(schema.meta.gameYear).to.equal(20);
-                expect(schema.schemas.length).to.equal(2646);
+                expect(schema.schemas.length).to.equal(2649);
                 done();
             });
 
