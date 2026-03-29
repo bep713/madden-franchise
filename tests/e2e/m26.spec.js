@@ -2938,6 +2938,32 @@ describe('Madden 26 end to end tests', function () {
         });
       });
       */
+            
+            it('handles replacing raw table data', (done) => {
+                const tableRawData = table.hexData;
+
+                const originalTableLength = tableRawData.length;
+
+
+                table.replaceRawData(tableRawData).then(() => {
+                    file.save(filePathToSave).then(() => {
+                        let file2 = new FranchiseFile(filePathToSave);
+                        file2.on('ready', async () => {
+                            let table2 = file2.getTableByUniqueId(
+                                characterVisualsUniqueId
+                            );
+                            await table2.readRecords();
+
+                            const tableNewRawData = table.hexData;
+
+                            expect(tableNewRawData.length).to.equal(originalTableLength);
+
+                            done();
+                        });
+                    });
+                });
+            });
+        
         });
     });
 });

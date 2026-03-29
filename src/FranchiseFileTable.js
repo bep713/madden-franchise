@@ -173,9 +173,12 @@ class FranchiseFileTable extends EventEmitter {
     }
     updateBuffer() {
         // need to check table2 & table3 data first because it may change offsets of the legit records.
+        const table2EndIndex = this.header.hasThirdTable
+            ? this.header.table3StartIndex // make sure we don't also grab table3 data when slicing
+            : this.data.length;
         let table2Data = this.strategy.getTable2BinaryData(
             this.table2Records,
-            this.data.slice(this.header.table2StartIndex)
+            this.data.slice(this.header.table2StartIndex, table2EndIndex)
         );
         let table3Data = [];
         if (this.header.table3StartIndex) {
@@ -196,9 +199,9 @@ class FranchiseFileTable extends EventEmitter {
                 table3DataLength += arr.length;
             });
             this.header.table2Length = table2DataLength;
-            this.header.tableTotalLength =
-                this.header.table1Length + this.header.table2Length;
             this.header.table3Length = table3DataLength;
+            this.header.tableTotalLength =
+                this.header.table1Length + this.header.table2Length + this.header.table3Length;
             this.data.writeUInt32BE(
                 this.header.table2Length,
                 this.header.offsetStart - 44
@@ -252,7 +255,10 @@ class FranchiseFileTable extends EventEmitter {
             this.header.hasSecondTable &&
             table2Data.length === 0
         ) {
-            table2Data = this.data.slice(this.header.table2StartIndex);
+            table2Data = this.data.slice(
+                this.header.table2StartIndex,
+                table2EndIndex
+            );
         }
         bufferArrays = bufferArrays.concat(table2Data);
         if (
