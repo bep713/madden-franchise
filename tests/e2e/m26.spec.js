@@ -244,6 +244,38 @@ describe('Madden 26 end to end tests', function () {
                 });
             });
 
+            it('can save a table2 field ending with a non-utf8 character with complete truncation', (done) => {
+                let table = file.getTableByName('Player');
+                console.time('read records 1');
+                table.readRecords(['LastName']).then(() => {
+                    console.timeEnd('read records 1');
+                    console.time('set value');
+                    table.records[20].LastName = 'Allen™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™';
+                    console.timeEnd('set value');
+
+                    console.time('actual save call');
+                    file.save(filePathToSave).then(() => {
+                        console.timeEnd('actual save call');
+                        console.time('read file');
+                        let file2 = new FranchiseFile(filePathToSave);
+
+                        file2.on('ready', () => {
+                            console.timeEnd('read file');
+                            let table2 = file2.getTableByName('Player');
+                            console.time('read records 2');
+
+                            table2.readRecords(['LastName']).then(() => {
+                                console.timeEnd('read records 2');
+                                expect(table2.records[20].LastName).to.equal(
+                                    'Allen™™™™™'
+                                );
+                                done();
+                            });
+                        });
+                    });
+                });
+            });
+
             it('can save a table2 field and a normal field together', (done) => {
                 let division = file.getTableByName('Division');
                 let popularityComponentTable = file.getTableByName(

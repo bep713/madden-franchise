@@ -9,14 +9,10 @@ FranchiseTable2FieldStrategy.setUnformattedValueFromFormatted = (
     formattedValue,
     maxLength
 ) => {
-    // Convert formatted value to buffer first to ensure accurate length
-    let valueBuffer = Buffer.from(formattedValue);
-    if (valueBuffer.length > maxLength) {
-        valueBuffer = valueBuffer.subarray(0, maxLength);
-    }
-    const numberOfNullCharactersToAdd = maxLength - valueBuffer.length;
-    const padBuffer = Buffer.alloc(numberOfNullCharactersToAdd, 0);
-    valueBuffer = Buffer.concat([valueBuffer, padBuffer]);
+    // We can simply allocate a buffer of maxLength size and then use
+    // buffer.write, which automatically handles UTF-8 and truncation
+    let valueBuffer = Buffer.alloc(maxLength, 0);
+    valueBuffer.write(formattedValue, 0, maxLength, 'utf-8');
     return valueBuffer;
 };
 export default FranchiseTable2FieldStrategy;
