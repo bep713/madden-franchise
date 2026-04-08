@@ -201,7 +201,9 @@ class FranchiseFileTable extends EventEmitter {
             this.header.table2Length = table2DataLength;
             this.header.table3Length = table3DataLength;
             this.header.tableTotalLength =
-                this.header.table1Length + this.header.table2Length + this.header.table3Length;
+                this.header.table1Length +
+                this.header.table2Length +
+                this.header.table3Length;
             this.data.writeUInt32BE(
                 this.header.table2Length,
                 this.header.offsetStart - 44

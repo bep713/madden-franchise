@@ -250,7 +250,8 @@ describe('Madden 26 end to end tests', function () {
                 table.readRecords(['LastName']).then(() => {
                     console.timeEnd('read records 1');
                     console.time('set value');
-                    table.records[20].LastName = 'Allen™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™';
+                    table.records[20].LastName =
+                        'Allen™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™™';
                     console.timeEnd('set value');
 
                     console.time('actual save call');
@@ -2970,12 +2971,11 @@ describe('Madden 26 end to end tests', function () {
         });
       });
       */
-            
+
             it('handles replacing raw table data', (done) => {
                 const tableRawData = table.hexData;
 
                 const originalTableLength = tableRawData.length;
-
 
                 table.replaceRawData(tableRawData).then(() => {
                     file.save(filePathToSave).then(() => {
@@ -2988,14 +2988,15 @@ describe('Madden 26 end to end tests', function () {
 
                             const tableNewRawData = table.hexData;
 
-                            expect(tableNewRawData.length).to.equal(originalTableLength);
+                            expect(tableNewRawData.length).to.equal(
+                                originalTableLength
+                            );
 
                             done();
                         });
                     });
                 });
             });
-        
         });
     });
 });
