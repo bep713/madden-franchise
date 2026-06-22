@@ -237,7 +237,8 @@ export async function generateSchemaV2({ fileMap, extraSchemas }) {
     const majorVersion = schemaMeta.dataMajorVersion;
     const minorVersion = schemaMeta.dataMinorVersion;
     const databaseName = schemaMeta.databaseName;
-    const gameYearMatch = /Madden(\d{2})/.exec(databaseName);
+    const gameName = databaseName.includes('CollegeFB') ? 'CollegeFB' : 'Madden';
+    const gameYearMatch = new RegExp(`${gameName}(\\d{2})`).exec(databaseName);
     const gameYear = gameYearMatch ? parseInt(gameYearMatch[1]) : null;
     const root = {
         enums,

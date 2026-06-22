@@ -67,6 +67,8 @@ class FranchiseFile extends EventEmitter {
         this._type = getFileType(this._rawContents, this._settings);
         /** @private @type {number} */
         this._gameYear = this._type.year;
+        /** @private @type {string} */
+        this._gameType = this._type.gameType;
         /** @private @type {SchemaMetadata} */
         this._expectedSchemaVersion = getSchemaMetadata(
             this.rawContents,
@@ -86,7 +88,9 @@ class FranchiseFile extends EventEmitter {
                     this._settings
                 );
                 this._type.year = newType.year;
+                this._type.gameType = newType.gameType;
                 this._gameYear = this._type.year;
+                this._gameType = this._type.gameType;
                 this._expectedSchemaVersion = getSchemaMetadata(
                     this.unpackedFileContents,
                     newType
@@ -117,7 +121,8 @@ class FranchiseFile extends EventEmitter {
                           this._gameYear,
                           schemaMeta.major,
                           schemaMeta.minor,
-                          this.settings
+                          this.settings,
+                          this._gameType
                       ).path;
             try {
                 this.schemaList = new FranchiseSchema(schemaPath, {
@@ -184,7 +189,8 @@ class FranchiseFile extends EventEmitter {
                     currentTable,
                     this._gameYear,
                     this.strategy,
-                    this.settings
+                    this.settings,
+                    this._gameType
                 );
                 newFranchiseTable.index = i;
                 this.tables.push(newFranchiseTable);
@@ -322,6 +328,12 @@ class FranchiseFile extends EventEmitter {
      */
     get gameYear() {
         return this._gameYear;
+    }
+    /**
+     * @returns {string}
+     */
+    get gameType() {
+        return this._gameType;
     }
     /**
      * @returns {FileType}
@@ -523,6 +535,7 @@ function _saveSync(destination, packedContents) {
  * @property {string} format
  * @property {number} year
  * @property {boolean} compressed
+ * @property {string} gameType
  */
 /**
  *
@@ -536,10 +549,14 @@ function getFileType(data, settings) {
     const year =
         settings?.gameYearOverride ??
         getGameYear(data, isDataCompressed, format);
+    const gameType =
+        settings?.gameTypeOverride ??
+        getGameType(data, isDataCompressed, format, year);
     return {
         format: format,
         compressed: isDataCompressed,
-        year: year
+        year: year,
+        gameType: gameType
     };
 }
 /**
@@ -592,7 +609,7 @@ function getGameYear(data, isCompressed, format) {
             max: 95
         },
         {
-            year: 26,
+            year: 27,
             max: 999
         }
     ];
@@ -628,6 +645,10 @@ function getGameYear(data, isCompressed, format) {
             return 25;
         } else if (data[0x2a] === 0x36) {
             return 26;
+        }
+        else if (data[0x2a] === 0x37 || data[0x2b] === 0x37) {
+            // C27's indicator is one byte later
+            return 27;
         } else {
             const schemaMajor = getCompressedSchema(data).major;
             const year = schemaMax.find((schema) => {
@@ -649,6 +670,29 @@ function getGameYear(data, isCompressed, format) {
             }
         }
     }
+}
+/**
+ *
+ * @param {Buffer} data
+ * @param {Boolean} isCompressed
+ * @param {string} format
+ * @param {number} year
+ * @returns {string}
+ */
+function getGameType(data, isCompressed, format, year) {
+    if (year && year <= 26) {
+        return Constants.GAME_TYPE.MADDEN;
+    }
+    if (isCompressed && format === Constants.FORMAT.FRANCHISE) {
+        const yearIdentifier = data.slice(0x22, 0x25);
+        if (yearIdentifier[0] === 0x43) {
+            return Constants.GAME_TYPE.COLLEGE;
+        }
+        if (year === 27 && data[0x2b] === 0x37 && data[0x2a] !== 0x37) {
+            return Constants.GAME_TYPE.COLLEGE;
+        }
+    }
+    return Constants.GAME_TYPE.MADDEN;
 }
 /**
  * @typedef {Object} SchemaMetadata

@@ -1,4 +1,5 @@
 import events from 'events';
+import Constants from './Constants.js';
 import utilService from './services/utilService.js';
 import FranchiseFileRecord from './FranchiseFileRecord.js';
 import FranchiseFileTable2Field from './FranchiseFileTable2Field.js';
@@ -81,7 +82,7 @@ const EventEmitter = events.EventEmitter;
  * @typedef {import('./strategies/StrategyPicker.js').TableStrategy} TableStrategy
  */
 class FranchiseFileTable extends EventEmitter {
-    constructor(data, offset, gameYear, strategy, settings) {
+    constructor(data, offset, gameYear, strategy, settings, gameType) {
         super();
         this.index = -1;
         /** @type {Buffer} */
@@ -97,6 +98,8 @@ class FranchiseFileTable extends EventEmitter {
         this.recordsRead = false;
         /** @type {number} */
         this._gameYear = gameYear;
+        /** @type {string} */
+        this._gameType = gameType || Constants.GAME_TYPE.MADDEN;
         /** @type {FranchiseFileTableHeader} */
         this.header = this.strategy.parseHeader(this.data);
         /** @type {string} */
@@ -593,13 +596,19 @@ class FranchiseFileTable extends EventEmitter {
             const overflowRecord = utilService.getTable3OverflowRecord(record);
 
             fieldsReferencingThirdTable.forEach((field) => {
+                const strategyContext = {
+                    gameYear: that._gameYear,
+                    gameType: that._gameType
+                };
                 field.thirdTableField.unformattedValue =
                     that.strategyBase.table3Field.getInitialUnformattedValue(
                         field,
                         thirdTableData,
-                        overflowRecord ? overflowRecord.fields[field.key] : null
+                        overflowRecord ? overflowRecord.fields[field.key] : null,
+                        strategyContext
                     );
                 field.thirdTableField.strategy = that.strategyBase.table3Field;
+                field.thirdTableField.strategyContext = strategyContext;
                 that.table3Records.push(field.thirdTableField);
                 field.thirdTableField.parent = that;
             });

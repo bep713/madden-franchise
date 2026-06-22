@@ -24,12 +24,14 @@ export class IsonProcessor {
     static ISON_BYTE = 0x03;
     static ISON_END = 0x11;
 
-    constructor(gameYear = 25) {
+    constructor(gameYear = 25, gameType = 'madden') {
         this.gameYear = gameYear;
+        this.gameType = gameType;
         this.stringLookup = null;
         this.reverseStringLookup = {};
         this.fileData = null;
         this.isonOffset = 0;
+        this.cacheKey = `${gameYear}_${gameType}`;
 
         // Static cache shared across all instances to avoid reloading the same data
         if (!IsonProcessor.internedLookups) {
@@ -37,60 +39,62 @@ export class IsonProcessor {
         }
 
         // Initialize the lookup data for this game year
-        this.loadGameYearData();
+        this.loadGameData();
     }
 
     /**
      * Lazy load the interned string lookup for the specified game year
      */
-    loadGameYearData() {
+    loadGameData() {
         // Check if we already have this game year's lookup loaded into memory, and if not, load it from file
-        if (!IsonProcessor.internedLookups[this.gameYear]) {
+        if (!IsonProcessor.internedLookups[this.cacheKey]) {
+            const dirKey = (this.gameType === 'college' ? 'c' : '') + this.gameYear;
             const lookupFilePath = path.join(
                 __dirname,
-                `../../data/interned-strings/${this.gameYear.toString()}/lookup.json`
+                `../../data/interned-strings/${dirKey}/lookup.json`
             );
             if (fs.existsSync(lookupFilePath)) {
-                IsonProcessor.internedLookups[this.gameYear] = JSON.parse(
+                IsonProcessor.internedLookups[this.cacheKey] = JSON.parse(
                     fs.readFileSync(lookupFilePath, 'utf8')
                 );
             } else {
                 // If we don't have a lookup for this game year, recursively fall back to Madden 25 (which we should always have a lookup for)
                 if (this.gameYear !== 25) {
-                    IsonProcessor.internedLookups[this.gameYear] =
+                    IsonProcessor.internedLookups[this.cacheKey] =
                         this.loadGameYearDataStatic(25);
                 } else {
                     throw new Error(
-                        `Interned string lookup file not found for game year ${this.gameYear} and no fallback available`
+                        `Interned string lookup file not found for game year ${this.gameYear} and game type ${this.gameType} and no fallback available`
                     );
                 }
             }
         }
 
-        this.stringLookup = IsonProcessor.internedLookups[this.gameYear];
+        this.stringLookup = IsonProcessor.internedLookups[this.cacheKey];
         this.populateReverseStringLookup();
     }
 
     /**
      * Static helper method for loading game year data (used for fallback)
      */
-    loadGameYearDataStatic(gameYear) {
-        if (!IsonProcessor.internedLookups[gameYear]) {
+    loadGameYearDataStatic(gameYear, gameType = 'madden') {
+        if (!IsonProcessor.internedLookups[this.cacheKey]) {
+            const dirKey = (gameType === 'college' ? 'c' : '') + gameYear;
             const lookupFilePath = path.join(
                 __dirname,
-                `../../data/interned-strings/${gameYear.toString()}/lookup.json`
+                `../../data/interned-strings/${dirKey}/lookup.json`
             );
             if (fs.existsSync(lookupFilePath)) {
-                IsonProcessor.internedLookups[gameYear] = JSON.parse(
+                IsonProcessor.internedLookups[this.cacheKey] = JSON.parse(
                     fs.readFileSync(lookupFilePath, 'utf8')
                 );
             } else {
                 throw new Error(
-                    `Interned string lookup file not found for game year ${gameYear}`
+                    `Interned string lookup file not found for game year ${gameYear} and game type ${gameType}`
                 );
             }
         }
-        return IsonProcessor.internedLookups[gameYear];
+        return IsonProcessor.internedLookups[this.cacheKey];
     }
 
     /**

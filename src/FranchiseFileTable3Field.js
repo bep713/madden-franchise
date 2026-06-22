@@ -25,6 +25,8 @@ class FranchiseFileTable3Field {
         this.index = index;
         this._offset = this.index;
         this._parent = parent;
+        /** @private */
+        this._strategyContext = {};
     }
     get unformattedValue() {
         return this._unformattedValue;
@@ -44,7 +46,8 @@ class FranchiseFileTable3Field {
     get value() {
         if (this._value === null) {
             this._value = this._strategy.getFormattedValueFromUnformatted(
-                this._unformattedValue
+                this._unformattedValue,
+                this._strategyContext
             );
         }
         return this._value;
@@ -59,7 +62,8 @@ class FranchiseFileTable3Field {
             this._strategy.setUnformattedValueFromFormatted(
                 value,
                 this._unformattedValue,
-                this.maxLength
+                this.maxLength,
+                this._strategyContext
             );
         if (newUnformattedValue.length > this.maxLength + 2) {
             // Get the portion of data that we will be writing to the current record's field
@@ -86,6 +90,12 @@ class FranchiseFileTable3Field {
     /** @param {Table3FieldStrategy} strategy */
     set strategy(strategy) {
         this._strategy = strategy;
+    }
+    get strategyContext() {
+        return this._strategyContext;
+    }
+    set strategyContext(strategyContext) {
+        this._strategyContext = strategyContext || {};
     }
     /** @returns {number} */
     get offset() {

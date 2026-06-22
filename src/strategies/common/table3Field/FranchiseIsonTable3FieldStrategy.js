@@ -2,8 +2,22 @@ import zlib from 'zlib';
 import { IsonProcessor } from '../../../services/isonProcessor.js';
 
 let FranchiseTable3FieldStrategy = {};
-// Create a single IsonProcessor instance for M25 and reuse it for better performance
-const isonProcessor = new IsonProcessor(25);
+const DEFAULT_GAME_YEAR = 25;
+const isonProcessorCache = new Map();
+
+function getGameYear(context) {
+    return context?.gameYear || DEFAULT_GAME_YEAR;
+}
+
+function getIsonProcessor(gameYear) {
+    if (isonProcessorCache.has(gameYear)) {
+        return isonProcessorCache.get(gameYear);
+    }
+
+    const processor = new IsonProcessor(gameYear);
+    isonProcessorCache.set(gameYear, processor);
+    return processor;
+}
 
 FranchiseTable3FieldStrategy.getZlibDataStartIndex = (unformattedValue) => {
     return unformattedValue.indexOf(Buffer.from([0x1f, 0x8b]));
@@ -18,8 +32,10 @@ FranchiseTable3FieldStrategy.getInitialUnformattedValue = (field, data) => {
 };
 
 FranchiseTable3FieldStrategy.getFormattedValueFromUnformatted = (
-    unformattedValue
+    unformattedValue,
+    strategyContext
 ) => {
+    const isonProcessor = getIsonProcessor(getGameYear(strategyContext));
     // First two bytes are the size of the zipped data, so skip those and get the raw ISON buffer
     const zlibDataStartIndex =
         FranchiseTable3FieldStrategy.getZlibDataStartIndex(unformattedValue);
@@ -34,8 +50,10 @@ FranchiseTable3FieldStrategy.getFormattedValueFromUnformatted = (
 FranchiseTable3FieldStrategy.setUnformattedValueFromFormatted = (
     formattedValue,
     oldUnformattedValue,
-    maxLength
+    maxLength,
+    strategyContext
 ) => {
+    const isonProcessor = getIsonProcessor(getGameYear(strategyContext));
     // Parse the JSON string into a JSON object
     let jsonObj = JSON.parse(formattedValue);
     // Convert the object into an ISON buffer using the class instance
