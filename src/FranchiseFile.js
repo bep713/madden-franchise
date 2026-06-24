@@ -680,18 +680,27 @@ function getGameYear(data, isCompressed, format) {
  * @returns {string}
  */
 function getGameType(data, isCompressed, format, year) {
+    // CFB only came to PC starting with 27. So we can reasonably assume 26 and older are Madden.
     if (year && year <= 26) {
         return Constants.GAME_TYPE.MADDEN;
     }
+
+    // We can only do this check for compressed save files. Uncompressed files (such as FTCs) do not have the game type indicator.
     if (isCompressed && format === Constants.FORMAT.FRANCHISE) {
         const yearIdentifier = data.slice(0x22, 0x25);
+        
+        // CFB files have a 'C' at the start of the name string (College), so we can check for that
         if (yearIdentifier[0] === 0x43) {
             return Constants.GAME_TYPE.COLLEGE;
         }
+
+        // Otherwise, we can also check using the location of the year indicator, as CFB's is one byte later due to College being longer than Madden.
         if (year === 27 && data[0x2b] === 0x37 && data[0x2a] !== 0x37) {
             return Constants.GAME_TYPE.COLLEGE;
         }
     }
+
+    // Fall back to Madden in all other cases
     return Constants.GAME_TYPE.MADDEN;
 }
 /**
