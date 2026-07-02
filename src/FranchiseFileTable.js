@@ -598,7 +598,8 @@ class FranchiseFileTable extends EventEmitter {
             fieldsReferencingThirdTable.forEach((field) => {
                 const strategyContext = {
                     gameYear: that._gameYear,
-                    gameType: that._gameType
+                    gameType: that._gameType,
+                    tableName: that.name
                 };
                 field.thirdTableField.unformattedValue =
                     that.strategyBase.table3Field.getInitialUnformattedValue(
