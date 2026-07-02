@@ -13,6 +13,10 @@ const DEFAULT_GAME_TYPE = 'madden';
 const dictionaryCache = new Map();
 const isonProcessorCache = new Map();
 
+const DEFAULT_DICT_NAME = 'dict.bin';
+const CGA_DICT_PATH = 'dict-cga.bin';
+const CGA_TABLE_NAME = 'CharacterGameplay';
+
 function getGameYear(context) {
     return context?.gameYear || DEFAULT_GAME_YEAR;
 }
@@ -21,21 +25,22 @@ function getGameType(context) {
     return context?.gameType || DEFAULT_GAME_TYPE;
 }
 
-function getDictionary(gameYear, gameType) {
-    const cacheKey = `${gameYear}_${gameType}`;
+function getDictionary(gameYear, gameType, tableName) {
+    const cacheKey = `${gameYear}_${gameType}_${tableName}`;
     if (dictionaryCache.has(cacheKey)) {
         return dictionaryCache.get(cacheKey);
     }
 
     const dirKey = (gameType === 'college' ? 'c' : '') + gameYear;
+    const dictName = tableName === CGA_TABLE_NAME ? CGA_DICT_PATH : DEFAULT_DICT_NAME;
 
     const dictPath = path.join(
         __dirname,
-        `../../../../data/zstd-dicts/${dirKey}/dict.bin`
+        `../../../../data/zstd-dicts/${dirKey}/${dictName}`
     );
     const fallbackPath = path.join(
         __dirname,
-        `../../../../data/zstd-dicts/${DEFAULT_GAME_YEAR}/dict.bin`
+        `../../../../data/zstd-dicts/${DEFAULT_GAME_YEAR}/${DEFAULT_DICT_NAME}`
     );
     const filePath = fs.existsSync(dictPath) ? dictPath : fallbackPath;
     const dictionary = fs.readFileSync(filePath);
@@ -43,13 +48,13 @@ function getDictionary(gameYear, gameType) {
     return dictionary;
 }
 
-function getIsonProcessor(gameYear, gameType) {
-    const cacheKey = `${gameYear}_${gameType}`;
+function getIsonProcessor(gameYear, gameType, tableName) {
+    const cacheKey = `${gameYear}_${gameType}_${tableName}`;
     if (isonProcessorCache.has(cacheKey)) {
         return isonProcessorCache.get(cacheKey);
     }
 
-    const processor = new IsonProcessor(gameYear, gameType);
+    const processor = new IsonProcessor(gameYear, gameType, tableName);
     isonProcessorCache.set(cacheKey, processor);
     return processor;
 }
@@ -91,8 +96,9 @@ FranchiseZstdTable3FieldStrategy.getFormattedValueFromUnformatted = (
 ) => {
     const gameYear = getGameYear(strategyContext);
     const gameType = getGameType(strategyContext);
-    const dictionary = getDictionary(gameYear, gameType);
-    const isonProcessor = getIsonProcessor(gameYear, gameType);
+    const tableName = strategyContext?.tableName || 'CharacterVisuals';
+    const dictionary = getDictionary(gameYear, gameType, tableName);
+    const isonProcessor = getIsonProcessor(gameYear, gameType, tableName);
     // First two bytes are the size of the zipped data, so skip those and get the raw ISON buffer
     const zstdDataStartIndex =
         FranchiseZstdTable3FieldStrategy.getZstdDataStartIndex(
@@ -122,8 +128,9 @@ FranchiseZstdTable3FieldStrategy.setUnformattedValueFromFormatted = (
 ) => {
     const gameYear = getGameYear(strategyContext);
     const gameType = getGameType(strategyContext);
-    const dictionary = getDictionary(gameYear, gameType);
-    const isonProcessor = getIsonProcessor(gameYear, gameType);
+    const tableName = strategyContext?.tableName || 'CharacterVisuals';
+    const dictionary = getDictionary(gameYear, gameType, tableName);
+    const isonProcessor = getIsonProcessor(gameYear, gameType, tableName);
     // Parse the JSON string into a JSON object
     let jsonObj = JSON.parse(formattedValue);
     // Convert the object into an ISON buffer using the class instance

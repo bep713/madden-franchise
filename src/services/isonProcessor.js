@@ -23,15 +23,20 @@ export class IsonProcessor {
     static ISON_DOUBLE = 0x09;
     static ISON_BYTE = 0x03;
     static ISON_END = 0x11;
+    
+    static DEFAULT_LOOKUP_NAME = 'lookup.json';
+    static CGA_LOOKUP_NAME = 'lookup-cga.json';
+    static CGA_TABLE_NAME = 'CharacterGameplay';
 
-    constructor(gameYear = 25, gameType = 'madden') {
+    constructor(gameYear = 25, gameType = 'madden', tableName = 'CharacterVisuals') {
         this.gameYear = gameYear;
         this.gameType = gameType;
+        this.tableName = tableName;
         this.stringLookup = null;
         this.reverseStringLookup = {};
         this.fileData = null;
         this.isonOffset = 0;
-        this.cacheKey = `${gameYear}_${gameType}`;
+        this.cacheKey = `${gameYear}_${gameType}_${tableName}`;
 
         // Static cache shared across all instances to avoid reloading the same data
         if (!IsonProcessor.internedLookups) {
@@ -49,9 +54,10 @@ export class IsonProcessor {
         // Check if we already have this game year's lookup loaded into memory, and if not, load it from file
         if (!IsonProcessor.internedLookups[this.cacheKey]) {
             const dirKey = (this.gameType === 'college' ? 'c' : '') + this.gameYear;
+            const lookupName = this.tableName === IsonProcessor.CGA_TABLE_NAME ? IsonProcessor.CGA_LOOKUP_NAME : IsonProcessor.DEFAULT_LOOKUP_NAME;
             const lookupFilePath = path.join(
                 __dirname,
-                `../../data/interned-strings/${dirKey}/lookup.json`
+                `../../data/interned-strings/${dirKey}/${lookupName}`
             );
             if (fs.existsSync(lookupFilePath)) {
                 IsonProcessor.internedLookups[this.cacheKey] = JSON.parse(
