@@ -5,7 +5,8 @@ const defaultSettings = {
     saveOnChange: false,
     schemaOverride: false,
     schemaDirectory: false,
-    autoParse: true
+    autoParse: true,
+    gameTypeOverride: null
 };
 
 function checkSettings(settings, args) {
@@ -77,6 +78,15 @@ describe('FranchiseFileSettings unit tests', () => {
             },
             schemaDirectory: 'C:\\Users\\Test\\Schemas',
             autoParse: false
+        };
+
+        const settings = new FranchiseFileSettings(args);
+        checkSettings(settings, args);
+    });
+
+    it('gameTypeOverride', () => {
+        let args = {
+            gameTypeOverride: 'college'
         };
 
         const settings = new FranchiseFileSettings(args);

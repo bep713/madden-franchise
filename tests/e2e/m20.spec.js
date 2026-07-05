@@ -54,7 +54,8 @@ describe('Madden 20 end to end tests', function () {
                     useNewSchemaGeneration: false,
                     schemaFileMap: {},
                     extraSchemas: undefined,
-                    gameYearOverride: null
+                    gameYearOverride: null,
+                    gameTypeOverride: null
                 });
 
                 expect(file.isLoaded).to.be.true;

@@ -46,4 +46,28 @@ describe('Strategy Picker unit tests', () => {
         const result = StrategyPicker.pick(type);
         expect(result.name).to.equal('M20FTCStrategy');
     });
+
+    it('M27', () => {
+        let type = {
+            format: Constants.FORMAT.FRANCHISE,
+            compressed: true,
+            year: 27,
+            gameType: Constants.GAME_TYPE.MADDEN
+        };
+
+        const result = StrategyPicker.pick(type);
+        expect(result.name).to.equal('M26Strategy');
+    });
+
+    it('C27', () => {
+        let type = {
+            format: Constants.FORMAT.FRANCHISE,
+            compressed: true,
+            year: 27,
+            gameType: Constants.GAME_TYPE.COLLEGE
+        };
+
+        const result = StrategyPicker.pick(type);
+        expect(result.name).to.equal('M26Strategy');
+    });
 });

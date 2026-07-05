@@ -9,6 +9,7 @@
  * @property {string?} [schemaDirectory]
  * @property {boolean?} [autoParse]
  * @property {boolean?} [autoUnempty]
+ * @property {string?} [gameTypeOverride]
  */
 class FranchiseFileSettings {
     /** @param {SettingsParam} settings */
@@ -52,6 +53,11 @@ class FranchiseFileSettings {
             settings.gameYearOverride !== null &&
             settings.gameYearOverride !== undefined
                 ? settings.gameYearOverride
+                : null;
+        /** @type {string} */
+        this.gameTypeOverride =
+            settings && settings.gameTypeOverride
+                ? settings.gameTypeOverride
                 : null;
     }
 }

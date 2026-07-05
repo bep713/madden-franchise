@@ -1,7 +1,7 @@
 # madden-franchise
 [![npm](https://img.shields.io/npm/v/madden-franchise)](https://www.npmjs.com/package/madden-franchise)
 
-madden-franchise is a Madden franchise file parser written in NodeJS that allows you to read and modify your PC franchise file saves.
+madden-franchise is a Madden franchise file parser written in NodeJS that allows you to read and modify your PC franchise file saves. PC Dynasty file saves from College Football 27+ are supported as well.
 
 ## Installation
     npm i madden-franchise
@@ -40,6 +40,8 @@ If your project still uses CommonJS, you will need to use v3.8.0 or older.
 | Madden 24 | ✅ Full |
 | Madden 25 | ✅ Full |
 | Madden 26 | ✅ Full |
+| Madden 27 | ✅ Full |
+| College Football 27 | ✅ Full |
 
 ### Quick Start
 #### Initializing
@@ -86,6 +88,9 @@ If your project still uses CommonJS, you will need to use v3.8.0 or older.
 
       // GAME YEAR OVERRIDE - use to override the game year to adjust schema picker logic. Helpful for FTC files and other files that can't auto-detect year accurately.
       gameYearOverride: number
+
+      // GAME TYPE OVERRIDE - use to override the game type (Madden or CFB) to adjust schema picker and strategy logic. Helpful for FTC files and other files that can't auto-detect game type accurately. Supported values: 'madden' | 'college'.
+      gameTypeOverride: string
     }
 
 #### Terminology
@@ -103,6 +108,7 @@ If your project still uses CommonJS, you will need to use v3.8.0 or older.
 | File type | Franchise or FTC, which file type has been loaded |
 | FTC | Pre-loaded file within the game files that contains common data |
 | Game year | The year on the title of the game. Ex: M24 = 24 |
+| Game type | Madden Franchise or College Football Dynasty, returns `madden` or `college` respectively |
 | Strategy | Custom logic to ensure each file type and game year works properly |
 
 #### Schemas
@@ -129,6 +135,7 @@ Represents the file as a whole. Contains metadata, list of tables, and allows sa
 | settings | (FranchiseFileSettings) Settings object |
 | type | (String) Represents the file type (franchise or franchise-common) |
 | game year | (Number) Represents the year on the game title. M24 = 24 |
+| game type | (String) Represents the game the file is from. Madden = madden, College Football = college |
 
 
 ##### Functions
@@ -175,8 +182,9 @@ Tables can hold zero or many records. Each table has a capacity defined in its h
 | table3Records | (Array<`FranchiseFileTable3Field`) all table3 fields |
 | arraySizes | (Array<Number>) For array stores, the number of items in each record |
 | emptyRecords | (Map<Number, Object>) Map of empty records to the next/previous empty record |
-| gameYear | (Number) same as the table game year field |
-| strategy | (Strategy module) Functions that contain custom logic for the game year |
+| gameYear | (Number) same as the file game year field |
+| gameType | (String) same as the file game type field |
+| strategy | (Strategy module) Functions that contain custom logic for the game year and game type |
 | hexData | (Buffer) Generates and returns updated data based on changes |
 
 #### Functions

@@ -78,7 +78,8 @@ describe('Franchise File unit tests', () => {
             expect(file.type).to.eql({
                 format: Constants.FORMAT.FRANCHISE,
                 compressed: false,
-                year: 19
+                year: 19,
+                gameType: Constants.GAME_TYPE.MADDEN
             });
         });
 
@@ -90,7 +91,8 @@ describe('Franchise File unit tests', () => {
             expect(file.type).to.eql({
                 format: Constants.FORMAT.FRANCHISE,
                 compressed: true,
-                year: 19
+                year: 19,
+                gameType: Constants.GAME_TYPE.MADDEN
             });
         });
 
@@ -102,7 +104,8 @@ describe('Franchise File unit tests', () => {
             expect(file.type).to.eql({
                 format: Constants.FORMAT.FRANCHISE,
                 compressed: false,
-                year: null
+                year: null,
+                gameType: Constants.GAME_TYPE.MADDEN
             });
         });
 
@@ -114,7 +117,8 @@ describe('Franchise File unit tests', () => {
             expect(file.type).to.eql({
                 format: Constants.FORMAT.FRANCHISE,
                 compressed: true,
-                year: 20
+                year: 20,
+                gameType: Constants.GAME_TYPE.MADDEN
             });
         });
 
@@ -126,7 +130,8 @@ describe('Franchise File unit tests', () => {
             expect(file.type).to.eql({
                 format: Constants.FORMAT.FRANCHISE,
                 compressed: true,
-                year: 21
+                year: 21,
+                gameType: Constants.GAME_TYPE.MADDEN
             });
         });
 
@@ -138,7 +143,8 @@ describe('Franchise File unit tests', () => {
             expect(file.type).to.eql({
                 format: Constants.FORMAT.FRANCHISE,
                 compressed: false,
-                year: 21
+                year: 21,
+                gameType: Constants.GAME_TYPE.MADDEN
             });
         });
 
@@ -150,7 +156,8 @@ describe('Franchise File unit tests', () => {
             expect(file.type).to.eql({
                 format: Constants.FORMAT.FRANCHISE_COMMON,
                 compressed: true,
-                year: null
+                year: null,
+                gameType: Constants.GAME_TYPE.MADDEN
             });
         });
 
@@ -162,7 +169,8 @@ describe('Franchise File unit tests', () => {
             expect(file.type).to.eql({
                 format: Constants.FORMAT.FRANCHISE_COMMON,
                 compressed: false,
-                year: null
+                year: null,
+                gameType: Constants.GAME_TYPE.MADDEN
             });
         });
     });

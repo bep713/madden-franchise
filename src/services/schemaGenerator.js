@@ -38,7 +38,8 @@ schemaGenerator.generateFromStream = (stream, showOutput, outputFile) => {
         const majorVersion = schemaGenerator.schemaMeta.dataMajorVersion;
         const minorVersion = schemaGenerator.schemaMeta.dataMinorVersion;
         const databaseName = schemaGenerator.schemaMeta.databaseName;
-        const gameYear = /Madden(\d{2})/.exec(databaseName)[1];
+        let gameName = databaseName.includes('CollegeFB') ? 'CollegeFB' : 'Madden';
+        const gameYear = new RegExp(`${gameName}(\\d{2})`).exec(databaseName)[1];
         addExtraSchemas();
         calculateInheritedSchemas();
         schemaGenerator.root = {

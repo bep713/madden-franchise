@@ -8,11 +8,56 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 let FranchiseZstdTable3FieldStrategy = {};
-let dictionary = fs.readFileSync(
-    path.join(__dirname, '../../../../data/zstd-dicts/26/dict.bin')
-);
-// Create a single IsonProcessor instance for M26 and reuse it for better performance
-const isonProcessor = new IsonProcessor(26);
+const DEFAULT_GAME_YEAR = 26;
+const DEFAULT_GAME_TYPE = 'madden';
+const dictionaryCache = new Map();
+const isonProcessorCache = new Map();
+
+const DEFAULT_DICT_NAME = 'dict.bin';
+const CGA_DICT_PATH = 'dict-cga.bin';
+const CGA_TABLE_NAME = 'CharacterGameplay';
+
+function getGameYear(context) {
+    return context?.gameYear || DEFAULT_GAME_YEAR;
+}
+
+function getGameType(context) {
+    return context?.gameType || DEFAULT_GAME_TYPE;
+}
+
+function getDictionary(gameYear, gameType, tableName) {
+    const cacheKey = `${gameYear}_${gameType}_${tableName}`;
+    if (dictionaryCache.has(cacheKey)) {
+        return dictionaryCache.get(cacheKey);
+    }
+
+    const dirKey = (gameType === 'college' ? 'c' : '') + gameYear;
+    const dictName = tableName === CGA_TABLE_NAME ? CGA_DICT_PATH : DEFAULT_DICT_NAME;
+
+    const dictPath = path.join(
+        __dirname,
+        `../../../../data/zstd-dicts/${dirKey}/${dictName}`
+    );
+    const fallbackPath = path.join(
+        __dirname,
+        `../../../../data/zstd-dicts/${DEFAULT_GAME_YEAR}/${DEFAULT_DICT_NAME}`
+    );
+    const filePath = fs.existsSync(dictPath) ? dictPath : fallbackPath;
+    const dictionary = fs.readFileSync(filePath);
+    dictionaryCache.set(cacheKey, dictionary);
+    return dictionary;
+}
+
+function getIsonProcessor(gameYear, gameType, tableName) {
+    const cacheKey = `${gameYear}_${gameType}_${tableName}`;
+    if (isonProcessorCache.has(cacheKey)) {
+        return isonProcessorCache.get(cacheKey);
+    }
+
+    const processor = new IsonProcessor(gameYear, gameType, tableName);
+    isonProcessorCache.set(cacheKey, processor);
+    return processor;
+}
 
 FranchiseZstdTable3FieldStrategy.getZstdDataStartIndex = (unformattedValue) => {
     return unformattedValue.indexOf(Buffer.from([0x28, 0xb5, 0x2f, 0xfd]));
@@ -21,7 +66,8 @@ FranchiseZstdTable3FieldStrategy.getZstdDataStartIndex = (unformattedValue) => {
 FranchiseZstdTable3FieldStrategy.getInitialUnformattedValue = (
     field,
     data,
-    overflowField
+    overflowField,
+    strategyContext
 ) => {
     // extend maxLength + 2 because the first 2 bytes are the size of the compressed data
     const table3InitialData = data.slice(
@@ -45,8 +91,14 @@ FranchiseZstdTable3FieldStrategy.getInitialUnformattedValue = (
 };
 
 FranchiseZstdTable3FieldStrategy.getFormattedValueFromUnformatted = (
-    unformattedValue
+    unformattedValue,
+    strategyContext
 ) => {
+    const gameYear = getGameYear(strategyContext);
+    const gameType = getGameType(strategyContext);
+    const tableName = strategyContext?.tableName || 'CharacterVisuals';
+    const dictionary = getDictionary(gameYear, gameType, tableName);
+    const isonProcessor = getIsonProcessor(gameYear, gameType, tableName);
     // First two bytes are the size of the zipped data, so skip those and get the raw ISON buffer
     const zstdDataStartIndex =
         FranchiseZstdTable3FieldStrategy.getZstdDataStartIndex(
@@ -71,8 +123,14 @@ FranchiseZstdTable3FieldStrategy.getFormattedValueFromUnformatted = (
 FranchiseZstdTable3FieldStrategy.setUnformattedValueFromFormatted = (
     formattedValue,
     oldUnformattedValue,
-    maxLength
+    maxLength,
+    strategyContext
 ) => {
+    const gameYear = getGameYear(strategyContext);
+    const gameType = getGameType(strategyContext);
+    const tableName = strategyContext?.tableName || 'CharacterVisuals';
+    const dictionary = getDictionary(gameYear, gameType, tableName);
+    const isonProcessor = getIsonProcessor(gameYear, gameType, tableName);
     // Parse the JSON string into a JSON object
     let jsonObj = JSON.parse(formattedValue);
     // Convert the object into an ISON buffer using the class instance

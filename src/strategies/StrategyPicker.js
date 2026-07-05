@@ -5,7 +5,8 @@ import M24Strategy from './franchise/m24/M24Strategy.js';
 import M25Strategy from './franchise/m25/M25Strategy.js';
 import M26Strategy from './franchise/m26/M26Strategy.js';
 import M19FTCStrategy from './franchise-common/m19/M19FTCStrategy.js';
-import M20FTCStrategy from './franchise-common/m20/M20FTCStrategy.js';
+import M20FTCStrategy from './franchise-common/m27/M27FTCStrategy.js';
+import M27FTCStrategy from './franchise-common/m27/M27FTCStrategy.js';
 
 /**
  * @typedef FileStrategy
@@ -32,9 +33,9 @@ import M20FTCStrategy from './franchise-common/m20/M20FTCStrategy.js';
  * @property {function(any, any): any} setUnformattedValueFromFormatted
  *
  * @typedef Table3FieldStrategy
- * @property {function(any, any): any} getInitialUnformattedValue
- * @property {function(any): any} getFormattedValueFromUnformatted
- * @property {function(any, any, any): any} setUnformattedValueFromFormatted
+ * @property {function(any, any, any, any): any} getInitialUnformattedValue
+ * @property {function(any, any): any} getFormattedValueFromUnformatted
+ * @property {function(any, any, any, any): any} setUnformattedValueFromFormatted
  *
  * @typedef GameStrategy
  * @property {string} name
@@ -49,32 +50,63 @@ let StrategyPicker = {};
  * @returns GameStrategy
  */
 StrategyPicker.pick = (type) => {
+    const gameType = type.gameType || Constants.GAME_TYPE.MADDEN;
     if (type.format === Constants.FORMAT.FRANCHISE) {
-        switch (type.year) {
-            case 19:
-                return M19Strategy;
-            case 20:
-            case 21:
-            case 22:
-            case 23:
-            default:
-                return M20Strategy;
-            case 24:
-                return M24Strategy;
-            case 25:
-                return M25Strategy;
-            case 26:
-                return M26Strategy;
-        }
+        return gameType === Constants.GAME_TYPE.COLLEGE
+            ? pickCollegeFranchiseStrategy(type.year)
+            : pickMaddenFranchiseStrategy(type.year);
     } else {
-        switch (type.year) {
-            case 19:
-                return M19FTCStrategy;
-            case 20:
-            case 21:
-            default:
-                return M20FTCStrategy;
-        }
+        return gameType === Constants.GAME_TYPE.COLLEGE
+            ? pickCollegeCommonStrategy(type.year)
+            : pickMaddenCommonStrategy(type.year);
     }
 };
+
+function pickMaddenFranchiseStrategy(year) {
+    switch (year) {
+        case 19:
+            return M19Strategy;
+        case 20:
+        case 21:
+        case 22:
+        case 23:
+        default:
+            return M20Strategy;
+        case 24:
+            return M24Strategy;
+        case 25:
+            return M25Strategy;
+        case 26:
+        case 27:
+            return M26Strategy;
+    }
+}
+
+function pickCollegeFranchiseStrategy(year) {
+    switch (year) {
+        default:
+            return pickMaddenFranchiseStrategy(year);
+    }
+}
+
+function pickMaddenCommonStrategy(year) {
+    switch (year) {
+        case 19:
+            return M19FTCStrategy;
+        case 20:
+        case 21:
+            return M20FTCStrategy;
+        case 27:
+            return M27FTCStrategy;
+        default:
+            return M20FTCStrategy;
+    }
+}
+
+function pickCollegeCommonStrategy(year) {
+    switch (year) {
+        default:
+            return pickMaddenCommonStrategy(year);
+    }
+}
 export default StrategyPicker;

@@ -1,0 +1,18 @@
+{
+    "0": "characterAnimationsPlayerMap",
+    "1": "wrStance",
+    "2": "bcLocomotionStyle",
+    "3": "bcStance",
+    "4": "qbUnderCenterStance",
+    "5": "qbBallHoldStyle",
+    "6": "bcCarryStyle",
+    "7": "qbThrowStyle",
+    "8": "dbAndLBStance",
+    "9": "qbShotgunStance",
+    "10": "characterAnimations",
+    "11": "hb2PtStance",
+    "12": "wr2PtStance",
+    "13": "lb2PtStance",
+    "14": "db2PtStance",
+    "15": "characterGameplayPlayerMap"
+}
