@@ -10,17 +10,6 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22.19.0'
-      - run: npm run pre-publish
-      - run: npm run test
-
-  publish-npm:
-    needs: build
     permissions:
       contents: read
       id-token: write # Required for Trusted Publishing OIDC
@@ -30,6 +19,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22.19.0'
-          registry-url: https://registry.npmjs.org/
+      - run: npm i
       - run: npm run pre-publish
-      - run: npm publish --provenance
+      - run: npm run test
+      - run: npm publish --provenance    
