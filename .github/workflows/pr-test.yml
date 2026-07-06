@@ -1,7 +1,7 @@
 name: Run PR Tests
 on:
   pull_request:
-    branches: [ main ] # Triggers on PRs to main
+    branches: [ master ] # Triggers on PRs to main
 
 jobs:
   test:
