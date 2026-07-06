@@ -32,7 +32,8 @@ function getDictionary(gameYear, gameType, tableName) {
     }
 
     const dirKey = (gameType === 'college' ? 'c' : '') + gameYear;
-    const dictName = tableName === CGA_TABLE_NAME ? CGA_DICT_PATH : DEFAULT_DICT_NAME;
+    const dictName =
+        tableName === CGA_TABLE_NAME ? CGA_DICT_PATH : DEFAULT_DICT_NAME;
 
     const dictPath = path.join(
         __dirname,
@@ -67,7 +68,7 @@ FranchiseZstdTable3FieldStrategy.getInitialUnformattedValue = (
     field,
     data,
     overflowField,
-    strategyContext
+    strategyContext // eslint-disable-line no-unused-vars
 ) => {
     // extend maxLength + 2 because the first 2 bytes are the size of the compressed data
     const table3InitialData = data.slice(
