@@ -20,8 +20,8 @@ jobs:
         with:
           node-version: '22.19.0'
           registry-url: 'https://registry.npmjs.org'
-          package-manager-cache: false
       - run: npm i
+      - run: npm install -g npm@latest
       - run: npm run pre-publish
       - run: npm run test
       - run: NODE_AUTH_TOKEN="" npm publish --provenance    
