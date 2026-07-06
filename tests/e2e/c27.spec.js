@@ -1,24 +1,14 @@
-import fs from 'fs';
-import zlib from 'zlib';
 import path, { dirname } from 'path';
 import { expect } from 'chai';
-import { BitView } from 'bit-buffer';
 import FranchiseFile from '../../src/FranchiseFile.js';
-import FranchiseFileTable from '../../src/FranchiseFileTable.js';
 import filePaths from '../util/filePathUtil.js';
-import { IsonProcessor } from '../../src/services/isonProcessor.js';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const playerTableId = 4244;
-const playerArrayTableIdToTest = 5903;
-
 const filePathToUse = filePaths.compressed.c27;
 const filePathToSave = filePaths.saveTest.c27;
-
-const ftcFilePathToUse = filePaths.compressed.m26Ftc;
 
 let file;
 
@@ -160,7 +150,7 @@ describe('College Football 27 end to end tests', function () {
                     });
                 });
             });
-            
+
             it('can save table2 fields', (done) => {
                 let table = file.getTableByName('Player');
                 console.time('read records 1');
