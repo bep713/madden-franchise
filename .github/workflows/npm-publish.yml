@@ -24,4 +24,4 @@ jobs:
       - run: npm i
       - run: npm run pre-publish
       - run: npm run test
-      - run: npm publish --provenance    
+      - run: NODE_AUTH_TOKEN="" npm publish --provenance    
