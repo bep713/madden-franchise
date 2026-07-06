@@ -5,7 +5,7 @@ import M24Strategy from './franchise/m24/M24Strategy.js';
 import M25Strategy from './franchise/m25/M25Strategy.js';
 import M26Strategy from './franchise/m26/M26Strategy.js';
 import M19FTCStrategy from './franchise-common/m19/M19FTCStrategy.js';
-import M20FTCStrategy from './franchise-common/m27/M27FTCStrategy.js';
+import M20FTCStrategy from './franchise-common/m20/M20FTCStrategy.js';
 import M27FTCStrategy from './franchise-common/m27/M27FTCStrategy.js';
 
 /**
