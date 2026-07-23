@@ -795,7 +795,14 @@ describe('Madden 26 end to end tests', function () {
                                 table.header.table1StartIndex + 4
                             );
 
+                            const cachedValue = record.LocalPopularity;
                             record.empty();
+
+                            // Expect that the field value has changed after being emptied
+                            // because the first 4 bytes of the record have changed.
+                            expect(record.LocalPopularity).to.not.equal(
+                                cachedValue
+                            );
 
                             expect(record.isEmpty).to.be.true;
                             expect(table.emptyRecords.size).to.equal(96);
