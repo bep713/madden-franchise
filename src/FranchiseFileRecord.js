@@ -120,6 +120,9 @@ class FranchiseFileRecord {
         return fields;
     }
     empty() {
+        // Clear cached field values because the empty record may change the first 4 data bytes
+        this.fieldsArray.forEach((field) => field.clearCachedValues());
+        // Trigger the empty event
         this._parent.onEvent('empty', this);
         this.isEmpty = true;
     }
