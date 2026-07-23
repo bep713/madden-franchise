@@ -345,7 +345,7 @@ class FranchiseFile extends EventEmitter {
         this._filePath = path;
     }
     set settings(settings) {
-        this._settings = new FranchiseFileSettings(settings);
+        this._settings.update(settings);
     }
     /**
      *
@@ -645,8 +645,7 @@ function getGameYear(data, isCompressed, format) {
             return 25;
         } else if (data[0x2a] === 0x36) {
             return 26;
-        }
-        else if (data[0x2a] === 0x37 || data[0x2b] === 0x37) {
+        } else if (data[0x2a] === 0x37 || data[0x2b] === 0x37) {
             // C27's indicator is one byte later
             return 27;
         } else {
@@ -688,7 +687,7 @@ function getGameType(data, isCompressed, format, year) {
     // We can only do this check for compressed save files. Uncompressed files (such as FTCs) do not have the game type indicator.
     if (isCompressed && format === Constants.FORMAT.FRANCHISE) {
         const yearIdentifier = data.slice(0x22, 0x25);
-        
+
         // CFB files have a 'C' at the start of the name string (College), so we can check for that
         if (yearIdentifier[0] === 0x43) {
             return Constants.GAME_TYPE.COLLEGE;
