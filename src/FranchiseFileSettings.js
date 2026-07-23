@@ -14,6 +14,11 @@
 class FranchiseFileSettings {
     /** @param {SettingsParam} settings */
     constructor(settings) {
+        this.update(settings);
+    }
+
+    /** @param {SettingsParam} settings */
+    update(settings) {
         /** @type {boolean} */
         this.saveOnChange =
             settings && settings.saveOnChange ? settings.saveOnChange : false;

@@ -401,4 +401,21 @@ describe('Franchise File unit tests', () => {
             expect(file.packedFileContents).to.not.be.undefined;
         });
     });
+
+    describe('settings', () => {
+        it('can change settings and propagate the change', async () => {
+            const file = await FranchiseFile.create(filePaths.compressed.m21, {
+                autoUnempty: true
+            });
+            expect(file.settings.autoUnempty).to.be.true;
+            expect(file.tables[0]._settings.autoUnempty).to.be.true;
+
+            file.settings = {
+                autoUnempty: false
+            };
+
+            expect(file.settings.autoUnempty).to.be.false;
+            expect(file.tables[0]._settings.autoUnempty).to.be.false;
+        });
+    });
 });
