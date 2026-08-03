@@ -176,6 +176,9 @@ describe('Franchise Table Strategy unit tests', () => {
 
     it('can recalculate string offsets for a given record', () => {
         const table = {
+            header: {
+                hasCompactTable2: false
+            },
             offsetTable: [
                 {
                     index: 0,

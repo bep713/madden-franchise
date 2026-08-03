@@ -22,7 +22,7 @@ import M27FTCStrategy from './franchise-common/m27/M27FTCStrategy.js';
  *  table1StartIndex: any;
  *  table2StartIndex: any;
  * }} parseHeaderAttributesFromSchema
- * @property {function(any, any): any[]} getTable2BinaryData
+ * @property {function(any, any, boolean): any[]} getTable2BinaryData
  * @property {function(any, any): any[]} getTable3BinaryData
  * @property {function(any): any[]} getMandatoryOffsets
  * @property {function(any, any): void} recalculateStringOffsets

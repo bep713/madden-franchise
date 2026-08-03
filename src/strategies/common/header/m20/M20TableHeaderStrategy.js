@@ -4,8 +4,8 @@ M20TableHeaderStrategy.parseHeader = (data) => {
     const tableName = readTableName(data);
     const isArray = tableName.indexOf('[]') >= 0;
     const tableId = data.readUInt32BE(headerStart);
-    const tablePad1 = data.readUInt32BE(headerStart + 4);
-    const tableUnknown1 = data.readUInt32BE(headerStart + 8);
+    const tableUniqueId = data.readUInt32BE(headerStart + 4);
+    const table2Capcity = data.readUInt32BE(headerStart + 8);
     const tableUnknown2 = data.readUInt32BE(headerStart + 12);
     // const tableUnknown3 = data.readUInt32BE(headerStart + 16);
     const data1Id = readTableName(
@@ -64,9 +64,10 @@ M20TableHeaderStrategy.parseHeader = (data) => {
         name: tableName,
         isArray: isArray,
         tableId: tableId,
-        tablePad1: tablePad1,
-        uniqueId: tablePad1,
-        tableUnknown1: tableUnknown1,
+        tablePad1: tableUniqueId,
+        uniqueId: tableUniqueId,
+        tableUnknown1: table2Capcity,
+        table2Capacity: table2Capcity,
         tableUnknown2: tableUnknown2,
         data1Id: data1Id,
         data1Type: data1Type,
@@ -101,7 +102,8 @@ M20TableHeaderStrategy.parseHeader = (data) => {
         recordCapacity: data2RecordCapacity,
         numMembers: data2IndexEntries,
         nextRecordToUse: nextRecordToUse,
-        hasThirdTable: false
+        hasThirdTable: false,
+        hasCompactTable2: table2Capcity > 0
     };
 };
 M20TableHeaderStrategy.parseHeaderAttributesFromSchema = (

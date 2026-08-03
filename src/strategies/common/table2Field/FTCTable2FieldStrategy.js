@@ -1,5 +1,9 @@
 let FTCTable2FieldStrategy = {};
 FTCTable2FieldStrategy.getInitialUnformattedValue = (field, data) => {
+    if (field?.parent?.isEmpty) {
+        return null;
+    }
+
     let fieldData = data.slice(
         field.secondTableField.index,
         field.secondTableField.index + field.offset.maxLength

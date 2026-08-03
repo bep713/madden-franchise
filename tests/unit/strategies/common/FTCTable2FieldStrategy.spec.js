@@ -10,6 +10,9 @@ describe('FTC Table2 Field Strategy', () => {
                 },
                 offset: {
                     maxLength: 14
+                },
+                parent: {
+                    isEmpty: false
                 }
             };
 
@@ -32,6 +35,9 @@ describe('FTC Table2 Field Strategy', () => {
                 },
                 offset: {
                     maxLength: 14
+                },
+                parent: {
+                    isEmpty: false
                 }
             };
 

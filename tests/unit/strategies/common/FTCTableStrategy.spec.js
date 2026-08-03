@@ -38,7 +38,8 @@ describe('FTC Table Strategy unit tests', () => {
 
             const result = FTCTableStrategy.getTable2BinaryData(
                 table2Records,
-                oldData
+                oldData,
+                true
             );
 
             const expectedResult = [
@@ -91,7 +92,8 @@ describe('FTC Table Strategy unit tests', () => {
 
             const result = FTCTableStrategy.getTable2BinaryData(
                 table2Records,
-                oldData
+                oldData,
+                true
             );
 
             expect(result).to.eql([expectedResult]);
@@ -145,7 +147,8 @@ describe('FTC Table Strategy unit tests', () => {
 
             const result = FTCTableStrategy.getTable2BinaryData(
                 table2Records,
-                oldData
+                oldData,
+                true
             );
 
             expect(result).to.eql([expectedResult]);

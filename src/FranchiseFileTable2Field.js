@@ -39,6 +39,10 @@ class FranchiseFileTable2Field {
         }
     }
     get value() {
+        if (!this._unformattedValue) {
+            return null;
+        }
+
         if (this._value === null) {
             this._value = this._unformattedValue
                 .toString()
@@ -102,6 +106,6 @@ class FranchiseFileTable2Field {
     }
 }
 function getLengthOfUnformattedValue(value) {
-    return value.length;
+    return value?.length || 0;
 }
 export default FranchiseFileTable2Field;

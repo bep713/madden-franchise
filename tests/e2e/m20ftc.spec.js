@@ -3,6 +3,7 @@ import { expect } from 'chai';
 import FranchiseFile from '../../src/FranchiseFile.js';
 import FranchiseFileTable from '../../src/FranchiseFileTable.js';
 import { fileURLToPath } from 'url';
+import sinon from 'sinon';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -10,7 +11,8 @@ const __dirname = dirname(__filename);
 const filePaths = {
     compressed: {
         ftc: 'tests/data/FTC_COMPRESS.FTC',
-        m22: 'tests/data/M22_FTC_COMPRESS.FTC'
+        m22: 'tests/data/M22_FTC_COMPRESS.FTC',
+        m26Fran: 'tests/data/M26_FTC_COMPRESS.FTC'
     },
     uncompressed: {
         ftc: 'tests/data/FTC_UNCOMPRESS',
@@ -527,6 +529,10 @@ describe('Madden 20 FTC end to end tests', function () {
         });
 
         describe('can save changes', () => {
+            afterEach(() => {
+                file.settings.saveOnChange = false;
+            });
+
             it('can save without any changes', (done) => {
                 file.save(filePaths.saveTest.ftc).then(() => {
                     let file2 = new FranchiseFile(filePaths.saveTest.ftc);
@@ -571,6 +577,10 @@ describe('Madden 20 FTC end to end tests', function () {
                     table.records[7].Name = 'DraftTestTestPosition';
 
                     file.save(filePaths.saveTest.ftc).then(() => {
+                        expect(table.data.readUInt32BE(0x88)).to.equal(
+                            table.header.table2Length
+                        );
+
                         let file2 = new FranchiseFile(filePaths.saveTest.ftc);
                         file2.on('ready', () => {
                             let table2 = file2.getTableByName('EnumTable');
@@ -587,11 +597,149 @@ describe('Madden 20 FTC end to end tests', function () {
                                 expect(table2.records[10].Name).to.equal(
                                     'Free Agent Negotiation Status Enum Table'
                                 );
+                                expect(table2.header.hasCompactTable2).to.be
+                                    .true;
+                                expect(table2.header.table2Capacity).to.equal(
+                                    table2.header.table2Length
+                                );
                                 done();
                             });
                         });
                     });
                 });
+            });
+
+            it('autosaves only once for table2 fields', async () => {
+                await file.save(filePaths.saveTest.ftc);
+                const file2 = await FranchiseFile.create(
+                    filePaths.saveTest.ftc,
+                    {
+                        saveOnChange: true,
+                        schemaDirectory: path.join(
+                            __dirname,
+                            '../data/test-schemas'
+                        )
+                    }
+                );
+
+                const oldPack = file2.packFile;
+                const newPack = sinon.spy(oldPack);
+
+                try {
+                    file2.packFile = newPack;
+                    let table = file2.getTableByName('EnumTable');
+                    await table.readRecords();
+
+                    table.records[7].Name = 'DraftTestTestPosition';
+
+                    expect(newPack.callCount).to.equal(1);
+                } finally {
+                    file2.packFile = oldPack;
+                }
+            });
+
+            it('can save a table2 field with empty rows', async () => {
+                // protect original file from autosave overwrite
+                const pristineFile = await FranchiseFile.create(
+                    filePaths.compressed.m26Fran
+                );
+                await pristineFile.save(filePaths.saveTest.ftc);
+                const workingFile = await FranchiseFile.create(
+                    filePaths.saveTest.ftc,
+                    {
+                        saveOnChange: true,
+                        schemaDirectory: path.join(
+                            __dirname,
+                            '../data/test-schemas'
+                        )
+                    }
+                );
+
+                let table = workingFile.getTableByName('Player');
+                await table.readRecords();
+
+                table.records[0].FirstName = 'Test';
+                expect(table.records[0].FirstName).to.equal('Test');
+                expect(table.records[8].FirstName).to.equal('Davante');
+
+                await workingFile.save();
+
+                const file2 = await FranchiseFile.create(
+                    filePaths.saveTest.ftc,
+                    {
+                        schemaDirectory: path.join(
+                            __dirname,
+                            '../data/test-schemas'
+                        )
+                    }
+                );
+
+                let table2 = file2.getTableByName('Player');
+                await table2.readRecords();
+                expect(table2.records[0].FirstName).to.equal('Test');
+                expect(table2.records[8].FirstName).to.equal('Davante');
+            });
+
+            it('can un-empty a table2 field', async () => {
+                // protect original file with autosave
+                const pristineFile = await FranchiseFile.create(
+                    filePaths.compressed.m26Fran
+                );
+                await pristineFile.save(filePaths.saveTest.ftc);
+                const workingFile = await FranchiseFile.create(
+                    filePaths.saveTest.ftc,
+                    {
+                        autoUnempty: true,
+                        saveOnChange: true,
+                        schemaDirectory: path.join(
+                            __dirname,
+                            '../data/test-schemas'
+                        )
+                    }
+                );
+
+                let table = workingFile.getTableByName('Player');
+                await table.readRecords();
+
+                table.records[3168].FirstName = 'Test';
+                expect(table.records[3168].FirstName).to.equal('Test');
+                expect(table.records[3168].isEmpty).to.equal(false);
+
+                // !! Note: This table does NOT have a compact table2
+                const expectedNewOffset =
+                    table.records[3167].fields.PLYR_HOME_TOWN.secondTableField
+                        .offset + 26; // 26 = PLYR_HOME_TOWN max length
+
+                expect(
+                    table.records[3168].fields.FirstName.secondTableField.index
+                ).to.equal(expectedNewOffset);
+                expect(
+                    table.records[3168].fields.FirstName.secondTableField.offset
+                ).to.equal(expectedNewOffset);
+
+                await workingFile.save();
+
+                const file2 = await FranchiseFile.create(
+                    filePaths.saveTest.ftc,
+                    {
+                        schemaDirectory: path.join(
+                            __dirname,
+                            '../data/test-schemas'
+                        )
+                    }
+                );
+
+                let table2 = file2.getTableByName('Player');
+                await table2.readRecords();
+                expect(table2.records[3168].FirstName).to.equal('Test');
+                expect(table2.records[3168].isEmpty).to.equal(false);
+                expect(
+                    table2.records[3168].fields.FirstName.secondTableField.index
+                ).to.equal(expectedNewOffset);
+                expect(
+                    table2.records[3168].fields.FirstName.secondTableField
+                        .offset
+                ).to.equal(expectedNewOffset);
             });
 
             it('record field values remain correct after modifiying a table2 value and saving', (done) => {

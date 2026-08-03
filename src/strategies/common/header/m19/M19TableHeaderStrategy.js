@@ -6,7 +6,7 @@ M19TableHeaderStrategy.parseHeader = (data) => {
     const isArray = tableName.indexOf('[]') >= 0;
     const tableId = data.readUInt32BE(headerStart);
     const tablePad1 = data.readUInt32BE(headerStart + 4);
-    const tableUnknown1 = data.readUInt32BE(headerStart + 8);
+    const table2Capacity = data.readUInt32BE(headerStart + 8);
     const tableUnknown2 = data.readUInt32BE(headerStart + 12);
     const data1Id = readTableName(
         data.slice(headerStart + 16, headerStart + 20)
@@ -61,7 +61,8 @@ M19TableHeaderStrategy.parseHeader = (data) => {
         tableId: tableId,
         tablePad1: tablePad1,
         uniqueId: tablePad1,
-        tableUnknown1: tableUnknown1,
+        tableUnknown1: table2Capacity,
+        table2Capacity: table2Capacity,
         tableUnknown2: tableUnknown2,
         data1Id: data1Id,
         data1Type: data1Type,
@@ -104,7 +105,8 @@ M19TableHeaderStrategy.parseHeader = (data) => {
         recordCapacity: data2RecordCapacity,
         numMembers: data2IndexEntries,
         nextRecordToUse: nextRecordToUse,
-        hasThirdTable: false
+        hasThirdTable: false,
+        hasCompactTable2: table2Capacity > 0
     };
 };
 M19TableHeaderStrategy.parseHeaderAttributesFromSchema = (

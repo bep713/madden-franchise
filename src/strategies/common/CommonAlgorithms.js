@@ -1,5 +1,5 @@
 let CommonAlgorithms = {};
-CommonAlgorithms.save = (units, oldData) => {
+CommonAlgorithms.save = (units, oldData, customUnitSortFn) => {
     // first check if any records changed. If not, we can return immediately because nothing changed.
     const changedUnits = units.find((unit) => {
         return unit.isChanged;
@@ -12,9 +12,13 @@ CommonAlgorithms.save = (units, oldData) => {
     let oldOffsetCounter = 0;
     let bufferArrays = [];
     // Ensure the units are sorted by index in the actual file. Otherwise, we may overwrite data
-    units.sort((a, b) => {
-        return a.index - b.index;
-    });
+    if (customUnitSortFn) {
+        customUnitSortFn(units);
+    } else {
+        units.sort((a, b) => {
+            return a.index - b.index;
+        });
+    }
     units.forEach((unit, index) => {
         if (unit.offset === 0 && index > 0) {
             // there are usually trailing records at the end of the table that reference

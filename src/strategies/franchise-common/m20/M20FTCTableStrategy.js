@@ -11,5 +11,8 @@ M20FTCTableStrategy.parseHeaderAttributesFromSchema =
 M20FTCTableStrategy.getTable2BinaryData = FTCTableStrategy.getTable2BinaryData;
 M20FTCTableStrategy.getTable3BinaryData = FTCTableStrategy.getTable2BinaryData;
 M20FTCTableStrategy.getMandatoryOffsets = FTCTableStrategy.getMandatoryOffsets;
-M20FTCTableStrategy.recalculateStringOffsets = () => {};
+M20FTCTableStrategy.recalculateStringOffsets =
+    FTCTableStrategy.recalculateStringOffsets;
+M20FTCTableStrategy.recalculateBlobOffsets =
+    FTCTableStrategy.recalculateBlobOffsets;
 export default M20FTCTableStrategy;
