@@ -663,6 +663,7 @@ describe('Madden 20 FTC end to end tests', function () {
                 expect(table.records[8].FirstName).to.equal('Davante');
 
                 await workingFile.save();
+                await new Promise((resolve) => setTimeout(resolve, 500)); // wait after save before reading the file again
 
                 const file2 = await FranchiseFile.create(
                     filePaths.saveTest.ftc,
