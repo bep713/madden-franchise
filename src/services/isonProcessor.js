@@ -22,6 +22,7 @@ export class IsonProcessor {
     static ISON_KEYVALUEPAIR = 0x10;
     static ISON_DOUBLE = 0x09;
     static ISON_BYTE = 0x03;
+    static ISON_SIGNED_BYTE = 0x00;
     static ISON_END = 0x11;
     
     static DEFAULT_LOOKUP_NAME = 'lookup.json';
@@ -197,6 +198,16 @@ export class IsonProcessor {
         return offset + 1;
     }
 
+    // Helper to write a signed byte
+    writeSignedByte(buffer, offset, byte) {
+        if (byte < -128 || byte > 127) {
+            byte = 0;
+        }
+
+        buffer.writeInt8(byte, offset);
+        return offset + 1;
+    }
+
     // Helper to write a double
     writeDouble(buffer, offset, value) {
         buffer.writeDoubleLE(value, offset);
@@ -286,9 +297,12 @@ export class IsonProcessor {
         } else if (typeof json === 'number' && !Number.isInteger(json)) {
             offset = this.writeByte(buffer, offset, IsonProcessor.ISON_DOUBLE); // Write double type
             offset = this.writeDouble(buffer, offset, json); // Write the double value
-        } else if (typeof json === 'boolean' || typeof json === 'number') {
+        } else if (typeof json === 'boolean' || (typeof json === 'number' && json >= 0)) {
             offset = this.writeByte(buffer, offset, IsonProcessor.ISON_BYTE); // Write byte type for boolean or byte
             offset = this.writeByte(buffer, offset, json); // Write the byte value
+        } else if (typeof json === 'number' && json < 0) {
+            offset = this.writeByte(buffer, offset, IsonProcessor.ISON_SIGNED_BYTE);
+            offset = this.writeSignedByte(buffer, offset, json); // Write the signed byte value
         }
         return offset;
     }
@@ -331,6 +345,8 @@ export class IsonProcessor {
             return this.readBytes(8).readDoubleLE(0); // Read and return a double value
         } else if (valueType === IsonProcessor.ISON_BYTE) {
             return this.readBytes(1).readUInt8(0); // Read and return a byte value
+        } else if (valueType === IsonProcessor.ISON_SIGNED_BYTE) {
+            return this.readBytes(1).readInt8(0); // Read and return a malformed byte value
         } else if (valueType === IsonProcessor.ISON_OBJECT_START) {
             return this.readObject(); // Recursively read an object
         } else if (valueType === IsonProcessor.ISON_ARRAY_START) {

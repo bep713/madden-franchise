@@ -2887,6 +2887,61 @@ describe('College Football 27 end to end tests', function () {
                     });
                 });
             });
+
+            it('handles reading signed ISON bytes', (done) => {
+                let file2 = new FranchiseFile(
+                    path.join(__dirname, '../data/DYNASTY-SIGNEDISON')
+                );
+                file2.on('ready', async () => {
+                    let table2 = file2.getTableByUniqueId(
+                        characterVisualsUniqueId
+                    );
+                    await table2.readRecords();
+
+                    const visualsData = JSON.parse(
+                        table2.records[10760]['RawData']
+                    );
+
+                    expect(visualsData.skinTone).to.equal(-1);
+
+                    done();
+                });
+            });
+
+            it('handles saving signed ISON bytes', (done) => {
+                let file = new FranchiseFile(
+                    path.join(__dirname, '../data/DYNASTY-SIGNEDISON')
+                );
+                file.on('ready', async () => {
+                    let table2 = file.getTableByUniqueId(
+                        characterVisualsUniqueId
+                    );
+                    await table2.readRecords();
+
+                    const visualsData = JSON.parse(
+                        table2.records[0]['RawData']
+                    );
+
+                    visualsData.skinTone = -1;
+
+                    table2.records[0]['RawData'] = visualsData;
+
+                    file.save(filePathToSave).then(() => {
+                        let file2 = new FranchiseFile(filePathToSave);
+                        file2.on('ready', async () => {
+                            let table3 = file2.getTableByUniqueId(
+                                characterVisualsUniqueId
+                            );
+                            await table3.readRecords();
+                            const visualsData2 = JSON.parse(
+                                table3.records[0]['RawData']
+                            );
+                            expect(visualsData2.skinTone).to.equal(-1);
+                            done();
+                        });
+                    });
+                });
+            });
         });
 
         describe('CharacterGameplay', () => {
