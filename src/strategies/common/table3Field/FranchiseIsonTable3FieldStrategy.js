@@ -24,6 +24,10 @@ FranchiseTable3FieldStrategy.getZlibDataStartIndex = (unformattedValue) => {
 };
 
 FranchiseTable3FieldStrategy.getInitialUnformattedValue = (field, data) => {
+    if (field?.parent?.isEmpty) {
+        return null;
+    }
+
     return data.slice(
         field.thirdTableField.index,
         field.thirdTableField.index + field.offset.maxLength + 2
@@ -35,6 +39,10 @@ FranchiseTable3FieldStrategy.getFormattedValueFromUnformatted = (
     unformattedValue,
     strategyContext
 ) => {
+    if (!unformattedValue) {
+        return null;
+    }
+
     const isonProcessor = getIsonProcessor(getGameYear(strategyContext));
     // First two bytes are the size of the zipped data, so skip those and get the raw ISON buffer
     const zlibDataStartIndex =

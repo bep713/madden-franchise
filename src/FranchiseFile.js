@@ -260,6 +260,10 @@ class FranchiseFile extends EventEmitter {
         const that = this;
         this.emit('saving');
         return new Promise((resolve, reject) => {
+            // Disable save on change while generating unpacked contents
+            const saveOnChangeEnabled = that.settings.saveOnChange;
+            that.settings.saveOnChange = false;
+
             this.unpackedFileContents =
                 this.strategy.file.generateUnpackedContents(
                     this.tables,
@@ -280,6 +284,10 @@ class FranchiseFile extends EventEmitter {
                     });
                 }
                 function postSaveActions(err) {
+                    if (saveOnChangeEnabled) {
+                        // Re-enable save on change after packing
+                        that.settings.saveOnChange = true;
+                    }
                     if (err) {
                         reject(err);
                         that.emit('save-error');

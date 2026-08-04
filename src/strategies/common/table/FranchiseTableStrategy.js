@@ -1,70 +1,103 @@
+import CommonAlgorithms from '../CommonAlgorithms.js';
+
 let FranchiseTableStrategy = {};
 FranchiseTableStrategy.getTable2BinaryData = (
     table2Records,
-    fullTable2Buffer
+    fullTable2Buffer,
+    isCompact
 ) => {
-    let table2Data = [];
-    // Make sure to sort the table2 records by index
-    const changedTable2Records = table2Records
-        .filter((record) => {
-            return record.isChanged;
-        })
-        .sort((a, b) => {
-            return a.index - b.index;
-        });
-    let currentOffset = 0;
-    for (let i = 0; i < changedTable2Records.length; i++) {
-        let record = changedTable2Records[i];
-        record.isChanged = false;
-        const recordOffset = record.index;
-        if (i > 0 && recordOffset === 0) {
-            // this case is true for the last few rows with no data in them. They reference the first table2 value.
-            continue;
-        }
-        const preData = fullTable2Buffer.slice(currentOffset, recordOffset);
-        if (preData.length > 0) {
-            table2Data.push(preData);
-        }
-        const recordHexData = record.hexData;
-        table2Data.push(recordHexData);
-        currentOffset = recordOffset + recordHexData.length;
-    }
-    if (table2Records.length > 0) {
-        table2Data.push(fullTable2Buffer.slice(currentOffset));
+    // isCompact - if `true`, the table2 data takes up only as much space as needed.
+    // If `false`, each table2 field takes up its maximum defined capacity
+
+    if (isCompact) {
+        return [CommonAlgorithms.save(table2Records, fullTable2Buffer)];
     } else {
-        // No string fields were read, preserve original table2 data entirely
-        table2Data.push(fullTable2Buffer);
+        let table2Data = [];
+        // Make sure to sort the table2 records by index
+        const changedTable2Records = table2Records
+            .filter((record) => {
+                return record.isChanged;
+            })
+            .sort((a, b) => {
+                return a.index - b.index;
+            });
+        let currentOffset = 0;
+        for (let i = 0; i < changedTable2Records.length; i++) {
+            let record = changedTable2Records[i];
+            record.isChanged = false;
+            const recordOffset = record.index;
+            if (i > 0 && recordOffset === 0) {
+                // this case is true for the last few rows with no data in them. They reference the first table2 value.
+                continue;
+            }
+            const preData = fullTable2Buffer.slice(currentOffset, recordOffset);
+            if (preData.length > 0) {
+                table2Data.push(preData);
+            }
+            const recordHexData = record.hexData;
+            table2Data.push(recordHexData);
+            currentOffset = recordOffset + recordHexData.length;
+        }
+        if (table2Records.length > 0) {
+            table2Data.push(fullTable2Buffer.slice(currentOffset));
+        } else {
+            // No string fields were read, preserve original table2 data entirely
+            table2Data.push(fullTable2Buffer);
+        }
+        return table2Data;
     }
-    return table2Data;
 };
 FranchiseTableStrategy.getMandatoryOffsets = () => {
     return [];
 };
 FranchiseTableStrategy.recalculateStringOffsets = (table, record) => {
-    // First, calculate length allocated per record in table2
-    const byteLengthPerRecord = table.offsetTable
-        .filter((offsetEntry) => {
-            return offsetEntry.type === 'string';
-        })
-        .reduce((accum, cur) => {
-            return accum + cur.maxLength;
-        }, 0);
-    // Then, go through each string field sorted by offset index, and assign offsets to the table2 fields
-    let runningOffset = 0;
-    record.fieldsArray
-        .filter((field) => {
-            return field.offset.type === 'string';
-        })
-        .sort((a, b) => {
-            return a.offset.index - b.offset.index;
-        })
-        .forEach((field) => {
-            if (field.secondTableField) {
-                field.secondTableField.offset =
-                    record.index * byteLengthPerRecord + runningOffset;
-            }
-            runningOffset += field.offset.maxLength;
-        });
+    // !! This function is called when a previously empty record is un-emptied !!
+
+    if (table.header.hasCompactTable2) {
+        // For compact table2, each field only takes up how much it needs
+        // Since the field was empty, we will append the new data offset to the end of the data
+        let runningOffset = table.header.table2Length;
+
+        record.fieldsArray
+            .filter((field) => {
+                return field.offset.type === 'string';
+            })
+            .sort((a, b) => {
+                return a.offset.index - b.offset.index;
+            })
+            .forEach((field) => {
+                if (field.secondTableField) {
+                    field.secondTableField.offset = runningOffset;
+                }
+                runningOffset += field.value.length + 1;
+            });
+    } else {
+        // For non-compact table2, each field takes up its maximum capacity
+        // First, calculate length allocated per record in table2
+        const byteLengthPerRecord = table.offsetTable
+            .filter((offsetEntry) => {
+                return offsetEntry.type === 'string';
+            })
+            .reduce((accum, cur) => {
+                return accum + cur.maxLength;
+            }, 0);
+        // Then, go through each string field sorted by offset index, and assign offsets to the table2 fields
+        let runningOffset = 0;
+        record.fieldsArray
+            .filter((field) => {
+                return field.offset.type === 'string';
+            })
+            .sort((a, b) => {
+                return a.offset.index - b.offset.index;
+            })
+            .forEach((field) => {
+                if (field.secondTableField) {
+                    field.secondTableField.offset =
+                        record.index * byteLengthPerRecord + runningOffset;
+                }
+                runningOffset += field.offset.maxLength;
+            });
+    }
 };
 FranchiseTableStrategy.recalculateBlobOffsets = (table, record) => {
     // First, calculate length allocated per record in table2

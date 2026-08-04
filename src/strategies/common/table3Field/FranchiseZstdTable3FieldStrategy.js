@@ -70,7 +70,7 @@ FranchiseZstdTable3FieldStrategy.getInitialUnformattedValue = (
     overflowField,
     strategyContext // eslint-disable-line no-unused-vars
 ) => {
-    if (field.parent.isEmpty) {
+    if (field?.parent?.isEmpty) {
         return null;
     }
 

@@ -6,6 +6,10 @@ FranchiseTable3FieldStrategy.getZlibDataStartIndex = (unformattedValue) => {
     return unformattedValue.indexOf(Buffer.from([0x1f, 0x8b]));
 };
 FranchiseTable3FieldStrategy.getInitialUnformattedValue = (field, data) => {
+    if (field?.parent?.isEmpty) {
+        return null;
+    }
+
     return data.slice(
         field.thirdTableField.index,
         field.thirdTableField.index + field.offset.maxLength + 2
@@ -15,6 +19,10 @@ FranchiseTable3FieldStrategy.getInitialUnformattedValue = (field, data) => {
 FranchiseTable3FieldStrategy.getFormattedValueFromUnformatted = (
     unformattedValue
 ) => {
+    if (!unformattedValue) {
+        return null;
+    }
+
     try {
         const zlibDataStartIndex =
             FranchiseTable3FieldStrategy.getZlibDataStartIndex(

@@ -29,6 +29,7 @@ const EventEmitter = events.EventEmitter;
  * @property {number} data1Pad2
  * @property {number} table1Length
  * @property {number} table2Length
+ * @property {number} table3Length
  * @property {number} data1Pad3
  * @property {number} data1Pad4
  * @property {number} headerSize
@@ -43,11 +44,14 @@ const EventEmitter = events.EventEmitter;
  * @property {boolean} hasSecondTable
  * @property {number} table1StartIndex
  * @property {number} table2StartIndex
+ * @property {number} table3StartIndex
  * @property {number} recordWords
  * @property {number} recordCapacity
  * @property {number} numMembers
  * @property {number} nextRecordToUse
  * @property {boolean} hasThirdTable
+ * @property {boolean} hasCompactTable2
+ * @property {number} table2Capacity
  */
 /**
  * @typedef {Object} OffsetTableEntry
@@ -181,10 +185,11 @@ class FranchiseFileTable extends EventEmitter {
             : this.data.length;
         let table2Data = this.strategy.getTable2BinaryData(
             this.table2Records,
-            this.data.slice(this.header.table2StartIndex, table2EndIndex)
+            this.data.slice(this.header.table2StartIndex, table2EndIndex),
+            this.header.hasCompactTable2
         );
         let table3Data = [];
-        if (this.header.table3StartIndex) {
+        if (this.header.hasThirdTable) {
             table3Data = this.strategy.getTable3BinaryData(
                 this.table3Records,
                 this.data.slice(this.header.table3StartIndex)
@@ -203,10 +208,24 @@ class FranchiseFileTable extends EventEmitter {
             });
             this.header.table2Length = table2DataLength;
             this.header.table3Length = table3DataLength;
+
+            // Calculate the maximum length that the table2 could be
+            const maxTable2LengthPerRecord = this.offsetTable
+                .filter((offsetEntry) => {
+                    return offsetEntry.type === 'string';
+                })
+                .reduce((accum, cur) => {
+                    return accum + cur.maxLength;
+                }, 0);
+            const maxTable2Length =
+                maxTable2LengthPerRecord * this.records.length;
+
+            // tableTotalLength is treated more like a max capacity than a length
             this.header.tableTotalLength =
                 this.header.table1Length +
-                this.header.table2Length +
+                maxTable2Length +
                 this.header.table3Length;
+
             this.data.writeUInt32BE(
                 this.header.table2Length,
                 this.header.offsetStart - 44
@@ -219,6 +238,13 @@ class FranchiseFileTable extends EventEmitter {
                 this.header.tableTotalLength,
                 this.header.offsetStart - 24
             );
+
+            if (this.header.hasCompactTable2) {
+                // write table2 capacity if the table uses compact strings
+                this.header.table2Capacity = this.header.table2Length;
+                this.header.tableUnknown1 = this.header.table2Capacity; // backwards compatibility
+                this.data.writeUInt32BE(this.header.table2Length, 0x88);
+            }
         }
         const changedRecords = this.records.filter((record) => {
             return record.isChanged;
@@ -457,13 +483,6 @@ class FranchiseFileTable extends EventEmitter {
                     offsetTableToUse,
                     this
                 );
-                if (this.header.hasSecondTable) {
-                    this._parseTable2Values(
-                        this.data,
-                        this.header,
-                        this.records
-                    );
-                }
                 this.emptyRecords = this._parseEmptyRecords();
                 this.records.forEach((record, index) => {
                     if (this.isArray) {
@@ -473,6 +492,13 @@ class FranchiseFileTable extends EventEmitter {
                         record.isEmpty = true;
                     }
                 });
+                if (this.header.hasSecondTable) {
+                    this._parseTable2Values(
+                        this.data,
+                        this.header,
+                        this.records
+                    );
+                }
                 if (this.header.hasThirdTable) {
                     this._parseTable3Values(
                         this.data,

@@ -1,5 +1,9 @@
 let FranchiseTable2FieldStrategy = {};
 FranchiseTable2FieldStrategy.getInitialUnformattedValue = (field, data) => {
+    if (field?.parent?.isEmpty) {
+        return null;
+    }
+
     return data.slice(
         field.secondTableField.index,
         field.secondTableField.index + field.offset.maxLength
