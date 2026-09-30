@@ -332,6 +332,24 @@ describe('Madden 22 FTC end to end tests', function () {
                 expect(table.records[9].Value).to.be.null;
             });
 
+            it('can empty a table2 field', async () => {
+                const file = await FranchiseFile.create(
+                    filePaths.compressed.generator
+                );
+
+                const table = file.getTableByName('FixedValue');
+                await table.readRecords();
+
+                const emptyRecordsCount = table.emptyRecords.size;
+
+                expect(table.records[8].isEmpty).to.be.false;
+
+                table.records[8].empty();
+                expect(table.records[8].isEmpty).to.be.true;
+                expect(table.emptyRecords.size).to.equal(emptyRecordsCount + 1);
+                expect(table.emptyRecords.get(8).next).to.equal(33);
+            });
+
             it('can make multiple saves on a table2 field', async () => {
                 const tableId = 543;
 

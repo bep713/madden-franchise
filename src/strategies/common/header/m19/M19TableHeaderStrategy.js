@@ -55,6 +55,14 @@ M19TableHeaderStrategy.parseHeader = (data) => {
         // const binaryData = utilService.getBitArray(data.slice(0, headerSize));
         records1Size = data2RecordWords * 4;
     }
+    const table2StartIndex =
+        tableStoreLength === 0 && !isArray
+            ? headerSize + data1RecordCount * records1Size
+            : headerSize +
+              data1RecordCount * 4 +
+              data1RecordCount * records1Size;
+    const hasThirdTable = data1Pad3 != tablePad1;
+
     return {
         name: tableName,
         isArray: isArray,
@@ -79,6 +87,7 @@ M19TableHeaderStrategy.parseHeader = (data) => {
         data1Pad2: data1Pad2,
         table1Length: table1Length,
         table2Length: table2Length,
+        table3Length: hasThirdTable ? data1Pad3 : 0,
         data1Pad3: data1Pad3,
         data1Pad4: data1Pad4,
         headerSize: headerSize,
@@ -95,17 +104,15 @@ M19TableHeaderStrategy.parseHeader = (data) => {
             tableStoreLength === 0 && !isArray
                 ? headerSize
                 : headerSize + data1RecordCount * 4,
-        table2StartIndex:
-            tableStoreLength === 0 && !isArray
-                ? headerSize + data1RecordCount * records1Size
-                : headerSize +
-                  data1RecordCount * 4 +
-                  data1RecordCount * records1Size,
+        table2StartIndex,
+        table3StartIndex: hasThirdTable
+            ? table2StartIndex + table2Length
+            : undefined,
         recordWords: data2RecordWords,
         recordCapacity: data2RecordCapacity,
         numMembers: data2IndexEntries,
         nextRecordToUse: nextRecordToUse,
-        hasThirdTable: false,
+        hasThirdTable,
         hasCompactTable2: table2Capacity > 0
     };
 };
