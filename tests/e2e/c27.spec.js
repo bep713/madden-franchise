@@ -3005,4 +3005,19 @@ describe('College Football 27 end to end tests', function () {
             });
         });
     });
+
+    describe('SPEX string in table data', () => {
+        let file;
+
+        before(async function () {
+            this.timeout(150000);
+            file = await FranchiseFile.create('tests/data/DYNASTY-SPEXISSUE', {
+                schemaDirectory: path.join(__dirname, '../data/test-schemas')
+            });
+        });
+
+        it('reads file correctly', async () => {
+            expect(file.tables.length).to.equal(2895);
+        });
+    });
 });

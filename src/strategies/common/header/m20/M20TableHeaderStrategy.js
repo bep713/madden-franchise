@@ -60,6 +60,9 @@ M20TableHeaderStrategy.parseHeader = (data) => {
         table1StartIndex = headerSize + data1RecordCount * 4;
         table2StartIndex = table1StartIndex + data1RecordCount * records1Size;
     }
+
+    const hasThirdTable = data1Pad3 != tableUniqueId;
+
     return {
         name: tableName,
         isArray: isArray,
@@ -84,6 +87,7 @@ M20TableHeaderStrategy.parseHeader = (data) => {
         data1Pad2: data1Pad2,
         table1Length: table1Length,
         table2Length: table2Length,
+        table3Length: hasThirdTable ? data1Pad3 : 0,
         data1Pad3: data1Pad3,
         data1Pad4: data1Pad4,
         headerSize: headerSize,
@@ -98,11 +102,14 @@ M20TableHeaderStrategy.parseHeader = (data) => {
         hasSecondTable: hasSecondTable,
         table1StartIndex: table1StartIndex,
         table2StartIndex: table2StartIndex,
+        table3StartIndex: hasThirdTable
+            ? table2StartIndex + table2Length
+            : undefined,
         recordWords: data2RecordWords,
         recordCapacity: data2RecordCapacity,
         numMembers: data2IndexEntries,
         nextRecordToUse: nextRecordToUse,
-        hasThirdTable: false,
+        hasThirdTable,
         hasCompactTable2: table2Capcity > 0
     };
 };

@@ -139,60 +139,48 @@ class FranchiseFile extends EventEmitter {
             }
         });
         let tablePromise = new Promise((resolve) => {
-            const firstCheck = 0x53;
-            const secondCheck = 0x50;
-            const thirdCheck = 0x42;
-            const fourthCheck = 0x46;
-            const altFirstCheck = 0x41;
-            const altSecondCheck = 0x53;
-            const altThirdCheck = 0x54;
-            const altFourthCheck = 0x4f;
-            const alt2FirstCheck = 0x53;
-            const alt2SecondCheck = 0x50;
-            const alt2ThirdCheck = 0x45;
-            const alt2FourthCheck = 0x58;
-            const tableIndicies = [];
-            for (let i = 0; i <= this.unpackedFileContents.length - 4; i += 1) {
-                if (
-                    (this.unpackedFileContents[i] === firstCheck &&
-                        this.unpackedFileContents[i + 1] === secondCheck &&
-                        this.unpackedFileContents[i + 2] === thirdCheck &&
-                        this.unpackedFileContents[i + 3] === fourthCheck) ||
-                    (this.unpackedFileContents[i] === altFirstCheck &&
-                        this.unpackedFileContents[i + 1] === altSecondCheck &&
-                        this.unpackedFileContents[i + 2] === altThirdCheck &&
-                        this.unpackedFileContents[i + 3] === altFourthCheck) ||
-                    (this.unpackedFileContents[i] === alt2FirstCheck &&
-                        this.unpackedFileContents[i + 1] === alt2SecondCheck &&
-                        this.unpackedFileContents[i + 2] === alt2ThirdCheck &&
-                        this.unpackedFileContents[i + 3] === alt2FourthCheck)
-                ) {
-                    const tableStart =
-                        i - getTableStartOffsetByGameYear(this._gameYear);
-                    tableIndicies.push(tableStart);
-                }
-            }
+            const assetTableOffset = this.unpackedFileContents.readUInt32BE(4);
+            const assetTableEntries =
+                this.unpackedFileContents.readUInt32BE(36);
+            const tableOffsetStart = assetTableOffset + assetTableEntries * 8;
+            let currentOffset = tableOffsetStart;
+
             /** @type {Array<FranchiseFileTable>} */
             this.tables = [];
-            for (let i = 0; i < tableIndicies.length; i++) {
-                const currentTable = tableIndicies[i];
-                const nextTable =
-                    tableIndicies.length > i + 1
-                        ? tableIndicies[i + 1]
-                        : this.unpackedFileContents.length - 8; // Ignore trailing 8 bytes on last table
+            while (currentOffset < this.unpackedFileContents.length - 8) {
+                const currentTableHeader = this.unpackedFileContents.slice(
+                    currentOffset,
+                    Math.min(
+                        currentOffset + 0x1000,
+                        this.unpackedFileContents.length
+                    ) // we don't truly know the header size at this point so read ahead to be safe
+                );
+                const header =
+                    this.strategy.table.parseHeader(currentTableHeader);
+                const tableEndOffset =
+                    currentOffset +
+                    (this.gameYear === 19 ? 0xe4 : 0xe8) +
+                    header.tableStoreLength +
+                    (header.isArray
+                        ? header.data1RecordCount * 4
+                        : header.numMembers * 4) +
+                    header.recordWords * 4 * header.data1RecordCount +
+                    (header.table2Length || 0) +
+                    (header.table3Length || 0);
+
                 const tableData = this.unpackedFileContents.slice(
-                    currentTable,
-                    nextTable
+                    currentOffset,
+                    tableEndOffset
                 );
                 const newFranchiseTable = new FranchiseFileTable(
                     tableData,
-                    currentTable,
+                    currentOffset,
                     this._gameYear,
                     this.strategy,
                     this.settings,
                     this._gameType
                 );
-                newFranchiseTable.index = i;
+                newFranchiseTable.index = this.tables.length;
                 this.tables.push(newFranchiseTable);
                 newFranchiseTable.on('change', function () {
                     this.isChanged = true;
@@ -201,6 +189,8 @@ class FranchiseFile extends EventEmitter {
                     }
                     that.emit('change', newFranchiseTable);
                 });
+
+                currentOffset = tableEndOffset;
             }
             resolve();
         });
@@ -494,16 +484,7 @@ class FranchiseFile extends EventEmitter {
         }
     }
 }
-function getTableStartOffsetByGameYear(gameYear) {
-    switch (gameYear) {
-        case 19:
-            return 0x90;
-        case 20:
-        case 21:
-        default:
-            return 0x94;
-    }
-}
+
 function unpackFile(data, type) {
     let offset = 0;
     if (type.format === Constants.FORMAT.FRANCHISE) {
@@ -511,6 +492,7 @@ function unpackFile(data, type) {
     }
     return zlib.inflateSync(data.slice(offset));
 }
+
 function _packFile(data, options) {
     return new Promise((resolve, reject) => {
         if (options && options.sync) {
@@ -532,12 +514,15 @@ function _packFile(data, options) {
         }
     });
 }
+
 function _save(destination, packedContents, callback) {
     fs.writeFile(destination, packedContents, callback);
 }
+
 function _saveSync(destination, packedContents) {
     fs.writeFileSync(destination, packedContents);
 }
+
 /**
  * @typedef {Object} FileType
  * @property {string} format
@@ -551,6 +536,7 @@ function _saveSync(destination, packedContents) {
  * @param {FranchiseFileSettings} settings
  * @returns {FileType}
  */
+
 function getFileType(data, settings) {
     const isDataCompressed = isCompressed(data);
     const format = getFormat(data, isDataCompressed);
@@ -567,6 +553,7 @@ function getFileType(data, settings) {
         gameType: gameType
     };
 }
+
 /**
  *
  * @param {Buffer} data
@@ -579,6 +566,7 @@ function isCompressed(data) {
     }
     return true;
 }
+
 /**
  *
  * @param {Buffer} data
@@ -603,6 +591,7 @@ function getFormat(data, isCompressed) {
         }
     }
 }
+
 /**
  *
  * @param {Buffer} data
@@ -678,6 +667,7 @@ function getGameYear(data, isCompressed, format) {
         }
     }
 }
+
 /**
  *
  * @param {Buffer} data
