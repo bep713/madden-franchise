@@ -483,14 +483,15 @@ class FranchiseFileTable extends EventEmitter {
                     offsetTableToUse,
                     this
                 );
-                this.emptyRecords = this._parseEmptyRecords();
-                this.records.forEach((record, index) => {
-                    if (this.isArray) {
+                // Records were just sliced from this.data, so the empty list can be read from it directly
+                this.emptyRecords = this._parseEmptyRecords(true);
+                if (this.isArray) {
+                    this.records.forEach((record, index) => {
                         record.arraySize = this.arraySizes[index];
-                    }
-                    if (this.emptyRecords.get(index)) {
-                        record.isEmpty = true;
-                    }
+                    });
+                }
+                this.emptyRecords.forEach((_entry, index) => {
+                    this.records[index].isEmpty = true;
                 });
                 if (this.header.hasSecondTable) {
                     this._parseTable2Values(
@@ -513,17 +514,30 @@ class FranchiseFileTable extends EventEmitter {
             }
         });
     }
-    /** @returns {Map<EmptyRecordEntry>} */
-    _parseEmptyRecords() {
+    /**
+     * @param {boolean} [fromTableData] read the next pointers from this.data instead of each record's buffer.
+     * Only valid when the record buffers match this.data (right after reading the records).
+     * @returns {Map<EmptyRecordEntry>}
+     */
+    _parseEmptyRecords(fromTableData = false) {
         let emptyRecords = new Map();
         const firstEmptyRecord = this.header.nextRecordToUse;
         let previousEmptyRecordIndex = null;
         let currentEmptyRecordIndex = firstEmptyRecord;
         if (firstEmptyRecord !== this.header.recordCapacity) {
             while (currentEmptyRecordIndex !== this.header.recordCapacity) {
-                // let nextEmptyRecordIndex = this.data.readUInt32BE(this.header.table1StartIndex + (currentEmptyRecordIndex * sizeOfEachRecord));
+                // Out-of-range indexes take the record path so they fail the same way
                 let nextEmptyRecordIndex =
-                    this.records[currentEmptyRecordIndex].data.readUInt32BE(0);
+                    fromTableData &&
+                    currentEmptyRecordIndex < this.records.length
+                        ? this.data.readUInt32BE(
+                              this.header.table1StartIndex +
+                                  currentEmptyRecordIndex *
+                                      this.header.record1Size
+                          )
+                        : this.records[currentEmptyRecordIndex].data.readUInt32BE(
+                              0
+                          );
                 emptyRecords.set(currentEmptyRecordIndex, {
                     previous: previousEmptyRecordIndex,
                     next: nextEmptyRecordIndex
