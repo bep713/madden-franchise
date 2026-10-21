@@ -5,6 +5,17 @@ import FranchiseFileField from './FranchiseFileField.js';
  * @typedef {import('./FranchiseFileTable.js').default} FranchiseFileTable
  * @typedef {import('./FranchiseFile.js').RecordReference} RecordReference
  */
+/** @type {WeakMap<OffsetTableEntry[], Set<string>>} */
+const fieldNameCache = new WeakMap();
+/** @param {OffsetTableEntry[]} offsetTable @returns {Set<string>} */
+function getFieldNames(offsetTable) {
+    let names = fieldNameCache.get(offsetTable);
+    if (!names) {
+        names = new Set(offsetTable.map((offset) => offset.name));
+        fieldNameCache.set(offsetTable, names);
+    }
+    return names;
+}
 class FranchiseFileRecord {
     /** @param {Buffer} data @param {number} index @param {OffsetTableEntry} offsetTable, @param {FranchiseFileTable} parent */
     constructor(data, index, offsetTable, parent) {
@@ -14,26 +25,27 @@ class FranchiseFileRecord {
         this._offsetTable = offsetTable;
         /** @type {number} */
         this.index = index;
-        /** @private @type {Array<FranchiseFileField>} */
-        this._fieldsArray = [];
-        /** @private @type {Record<string, FranchiseFileField>} */
-        this._fields = this.parseRecordFields();
+        // Fields are created lazily on first access of fields/fieldsArray
+        /** @private @type {Array<FranchiseFileField>?} */
+        this._fieldsArrayCache = null;
+        /** @private @type {Record<string, FranchiseFileField>?} */
+        this._fieldsCache = null;
         this._isChanged = false;
         /** @type {number} */
         this.arraySize = null;
         this.isEmpty = false;
         /** @type {FranchiseFileTable} */
         this._parent = parent;
+        const fieldNames = getFieldNames(offsetTable);
         return new Proxy(this, {
             get: function (target, prop) {
-                return target.fields[prop] !== undefined
-                    ? target.fields[prop].value
-                    : target[prop] !== undefined
-                      ? target[prop]
-                      : null;
+                if (fieldNames.has(prop)) {
+                    return target.fields[prop].value;
+                }
+                return target[prop] !== undefined ? target[prop] : null;
             },
             set: function (target, prop, receiver) {
-                if (target.fields[prop] !== undefined) {
+                if (fieldNames.has(prop)) {
                     target.fields[prop].value = receiver;
                 } else {
                     target[prop] = receiver;
@@ -54,6 +66,20 @@ class FranchiseFileRecord {
     get fieldsArray() {
         return this._fieldsArray;
     }
+    /** @private @returns {Record<string, FranchiseFileField>} */
+    get _fields() {
+        if (this._fieldsCache === null) {
+            this._fieldsCache = this.parseRecordFields();
+        }
+        return this._fieldsCache;
+    }
+    /** @private @returns {Array<FranchiseFileField>} */
+    get _fieldsArray() {
+        if (this._fieldsArrayCache === null) {
+            this.parseRecordFields();
+        }
+        return this._fieldsArrayCache;
+    }
     /** @returns {Buffer} */
     get data() {
         return this._data;
@@ -61,7 +87,11 @@ class FranchiseFileRecord {
     /** @param {Buffer} data */
     set data(data) {
         this._data = data;
-        this._fieldsArray.forEach((field) => {
+        // Unmaterialized fields will read from the new buffer when created
+        if (this._fieldsArrayCache === null) {
+            return;
+        }
+        this._fieldsArrayCache.forEach((field) => {
             const unformattedValue = data.slice(
                 field.offset.offset,
                 field.offset.offset + field.offset.length
@@ -75,8 +105,8 @@ class FranchiseFileRecord {
     /** @param {boolean} changed */
     set isChanged(changed) {
         this._isChanged = changed;
-        if (changed === false) {
-            this.fieldsArray.forEach((field) => {
+        if (changed === false && this._fieldsArrayCache !== null) {
+            this._fieldsArrayCache.forEach((field) => {
                 field.isChanged = false;
             });
         }
@@ -89,7 +119,7 @@ class FranchiseFileRecord {
 
     /** @param {string} key @returns {FranchiseFileField?} */
     getFieldByKey(key) {
-        return this._fields[key];
+        return this.fields[key];
     }
     /** @param {string} key @returns {*?} */
     getValueByKey(key) {
@@ -104,7 +134,9 @@ class FranchiseFileRecord {
     /** @returns {Record<string, FranchiseFileField>} */
     parseRecordFields() {
         let fields = {};
-        this._fieldsArray = [];
+        const fieldsArray = [];
+        this._fieldsArrayCache = fieldsArray;
+        this._fieldsCache = fields;
         for (let j = 0; j < this._offsetTable.length; j++) {
             const offset = this._offsetTable[j];
             // Push the entire record buffer to the field. No need to perform a calculation
@@ -115,7 +147,7 @@ class FranchiseFileRecord {
                 offset,
                 this
             );
-            this._fieldsArray.push(fields[offset.name]);
+            fieldsArray.push(fields[offset.name]);
         }
         return fields;
     }
@@ -160,7 +192,9 @@ class FranchiseFileRecord {
         }
     }
     clearCachedFieldValues() {
-        this.fieldsArray.forEach((field) => field.clearCachedValues());
+        if (this._fieldsArrayCache !== null) {
+            this._fieldsArrayCache.forEach((field) => field.clearCachedValues());
+        }
     }
 }
 export default FranchiseFileRecord;

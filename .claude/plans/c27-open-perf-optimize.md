@@ -56,3 +56,8 @@ Files: `src/FranchiseSchema.js` (`evaluateSchemaGzip` :69), `src/FranchiseEnum.j
 
 ## Delegation
 Medium size, tightly coupled files (Table, Record, Field). I implement it myself sequentially, Step 1 -> 5; no parallel subagents (steps touch the same files).
+
+## Results log
+- Step 1 (done, commit 8869aa3): read-all median 3190 -> 2675 ms (-16%), fingerprint identical, 1215 tests pass.
+- Step 2 (tried, REVERTED): per-offsetTable generated record subclass with prototype accessors replacing the per-record Proxy. Fingerprint + tests passed, but read-all regressed to ~3600 ms (without a null-on-miss prototype Proxy) / ~4400 ms (with it). Cause: one hidden class per table makes the record ctor / parseRecordFields property-store sites megamorphic across 2267 tables, and a Proxy in the prototype chain slows every store. Dropping the Proxy would also change unknown-prop reads from null to undefined. Not worth pursuing; Proxy cost (~426 ms ctor) is better attacked by Step 3 (lazy fields) or by making the Proxy cheaper (e.g. cache `target.fields` in the get trap).
+- Step 3 (done): lazy `_fields`/`_fieldsArray` in `FranchiseFileRecord` (materialized on first access; Proxy trap checks a per-offsetTable cached name Set so `index`/`data` etc. don't materialize). read-all median 2675 -> 1340 ms (-50%; 3190 baseline -> -58%), open unchanged (~382 ms), fingerprint identical, 1215 tests pass. Note: unknown-prop reads still return null; the `Object.prototype` names (`constructor`, `toString`) now resolve to the record instead of `fields.<name>.value` (previously undefined).
