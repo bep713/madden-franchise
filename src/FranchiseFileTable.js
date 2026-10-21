@@ -591,15 +591,15 @@ class FranchiseFileTable extends EventEmitter {
     _parseTable2Values(data, header, records) {
         const that = this;
         const secondTableData = data.slice(header.table2StartIndex);
-        // fieldsArray order matches loadedOffsets order, so compute the field indexes once per table
+        // Field indexes match loadedOffsets order, so compute them once per table.
+        // Only the table2 fields are created, the rest of the record stays lazy.
         const table2Indexes = this._getFieldIndexes('valueInSecondTable');
         if (table2Indexes.length === 0) {
             return;
         }
         records.forEach((record) => {
-            const fieldsArray = record.fieldsArray;
             table2Indexes.forEach((index) => {
-                const field = fieldsArray[index];
+                const field = record._getFieldAt(index);
                 if (!field) {
                     return;
                 }
@@ -632,15 +632,13 @@ class FranchiseFileTable extends EventEmitter {
             tableName: that.name
         };
         records.forEach((record) => {
-            const fieldsArray = record.fieldsArray;
-
             // Check if this record has an overflow record reference
             const overflowRecord = hasOverflow
                 ? utilService.getTable3OverflowRecord(record)
                 : null;
 
             table3Indexes.forEach((index) => {
-                const field = fieldsArray[index];
+                const field = record._getFieldAt(index);
                 if (!field) {
                     return;
                 }
@@ -649,7 +647,7 @@ class FranchiseFileTable extends EventEmitter {
                         field,
                         thirdTableData,
                         overflowRecord
-                            ? overflowRecord.fields[field.key]
+                            ? overflowRecord.getFieldByKey(field.key)
                             : null,
                         strategyContext
                     );

@@ -4,7 +4,8 @@ import { expect } from 'chai';
 import quibble from 'quibble';
 
 const RecordStub = sinon.stub().callsFake(() => ({
-    fieldsArray: []
+    fieldsArray: [],
+    _getFieldAt: () => undefined
 }));
 
 let FranchiseFileTable;
