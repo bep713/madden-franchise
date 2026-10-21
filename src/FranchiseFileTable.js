@@ -591,13 +591,18 @@ class FranchiseFileTable extends EventEmitter {
     _parseTable2Values(data, header, records) {
         const that = this;
         const secondTableData = data.slice(header.table2StartIndex);
+        // fieldsArray order matches loadedOffsets order, so compute the field indexes once per table
+        const table2Indexes = this._getFieldIndexes('valueInSecondTable');
+        if (table2Indexes.length === 0) {
+            return;
+        }
         records.forEach((record) => {
-            const fieldsReferencingSecondTable = record.fieldsArray.filter(
-                (field) => {
-                    return field.secondTableField;
+            const fieldsArray = record.fieldsArray;
+            table2Indexes.forEach((index) => {
+                const field = fieldsArray[index];
+                if (!field) {
+                    return;
                 }
-            );
-            fieldsReferencingSecondTable.forEach((field) => {
                 field.secondTableField.unformattedValue =
                     that.strategyBase.table2Field.getInitialUnformattedValue(
                         field,
@@ -613,22 +618,32 @@ class FranchiseFileTable extends EventEmitter {
     _parseTable3Values(data, header, records) {
         const that = this;
         const thirdTableData = data.slice(header.table3StartIndex);
+        const table3Indexes = this._getFieldIndexes('valueInThirdTable');
+        if (table3Indexes.length === 0) {
+            return;
+        }
+        const hasOverflow = this.loadedOffsets.some(
+            (offset) => offset.name === 'Overflow'
+        );
+        // Strategies only read the context, so one object can be shared by every field in the table
+        const strategyContext = {
+            gameYear: that._gameYear,
+            gameType: that._gameType,
+            tableName: that.name
+        };
         records.forEach((record) => {
-            const fieldsReferencingThirdTable = record.fieldsArray.filter(
-                (field) => {
-                    return field.thirdTableField;
-                }
-            );
+            const fieldsArray = record.fieldsArray;
 
             // Check if this record has an overflow record reference
-            const overflowRecord = utilService.getTable3OverflowRecord(record);
+            const overflowRecord = hasOverflow
+                ? utilService.getTable3OverflowRecord(record)
+                : null;
 
-            fieldsReferencingThirdTable.forEach((field) => {
-                const strategyContext = {
-                    gameYear: that._gameYear,
-                    gameType: that._gameType,
-                    tableName: that.name
-                };
+            table3Indexes.forEach((index) => {
+                const field = fieldsArray[index];
+                if (!field) {
+                    return;
+                }
                 field.thirdTableField.unformattedValue =
                     that.strategyBase.table3Field.getInitialUnformattedValue(
                         field,
@@ -644,6 +659,16 @@ class FranchiseFileTable extends EventEmitter {
                 field.thirdTableField.parent = that;
             });
         });
+    }
+    /** @param {'valueInSecondTable'|'valueInThirdTable'} flag @returns {Array<number>} */
+    _getFieldIndexes(flag) {
+        const indexes = [];
+        this.loadedOffsets.forEach((offset, index) => {
+            if (offset[flag]) {
+                indexes.push(index);
+            }
+        });
+        return indexes;
     }
     /** @param {number} index @param {number} emptyRecordReference */
     _changeRecordBuffers(index, emptyRecordReference) {
