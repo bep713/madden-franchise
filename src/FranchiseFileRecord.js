@@ -21,9 +21,14 @@ function getFieldIndexes(offsetTable) {
     }
     return indexes;
 }
+// Reading this key through the proxy returns the raw record, so internal code can skip the traps
+const RAW_RECORD = Symbol('rawRecord');
 // One handler shared by every record proxy, so constructing a record allocates no closures
 const recordProxyHandler = {
     get: function (target, prop) {
+        if (prop === RAW_RECORD) {
+            return target;
+        }
         const index = getFieldIndexes(target._offsetTable).get(prop);
         if (index !== undefined) {
             return target._getFieldAt(index).value;
@@ -157,16 +162,19 @@ class FranchiseFileRecord {
     }
     /** Internal (also used by FranchiseFileTable): creates the field at an offset index on first use. @param {number} index @returns {FranchiseFileField} */
     _getFieldAt(index) {
-        if (this._fieldCache === null) {
-            this._fieldCache = new Array(this._offsetTable.length);
+        // Called through the proxy, `this` is the proxy: switch to the raw record. Fields get the
+        // raw record as parent, same as fields created by the trap or by parseRecordFields.
+        const self = this[RAW_RECORD] || this;
+        if (self._fieldCache === null) {
+            self._fieldCache = new Array(self._offsetTable.length);
         }
-        let field = this._fieldCache[index];
+        let field = self._fieldCache[index];
         if (field === undefined) {
-            const offset = this._offsetTable[index];
+            const offset = self._offsetTable[index];
             // Push the entire record buffer to the field. No need to perform a calculation
             // to subarray the buffer, BitView will take care of it in the Field.
-            field = new FranchiseFileField(offset.name, this._data, offset, this);
-            this._fieldCache[index] = field;
+            field = new FranchiseFileField(offset.name, self._data, offset, self);
+            self._fieldCache[index] = field;
         }
         return field;
     }
