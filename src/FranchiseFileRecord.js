@@ -21,6 +21,25 @@ function getFieldIndexes(offsetTable) {
     }
     return indexes;
 }
+// One handler shared by every record proxy, so constructing a record allocates no closures
+const recordProxyHandler = {
+    get: function (target, prop) {
+        const index = getFieldIndexes(target._offsetTable).get(prop);
+        if (index !== undefined) {
+            return target._getFieldAt(index).value;
+        }
+        return target[prop] !== undefined ? target[prop] : null;
+    },
+    set: function (target, prop, receiver) {
+        const index = getFieldIndexes(target._offsetTable).get(prop);
+        if (index !== undefined) {
+            target._getFieldAt(index).value = receiver;
+        } else {
+            target[prop] = receiver;
+        }
+        return true;
+    }
+};
 class FranchiseFileRecord {
     /** @param {Buffer} data @param {number} index @param {OffsetTableEntry} offsetTable, @param {FranchiseFileTable} parent */
     constructor(data, index, offsetTable, parent) {
@@ -44,25 +63,7 @@ class FranchiseFileRecord {
         this.isEmpty = false;
         /** @type {FranchiseFileTable} */
         this._parent = parent;
-        const fieldIndexes = getFieldIndexes(offsetTable);
-        return new Proxy(this, {
-            get: function (target, prop) {
-                const index = fieldIndexes.get(prop);
-                if (index !== undefined) {
-                    return target._getFieldAt(index).value;
-                }
-                return target[prop] !== undefined ? target[prop] : null;
-            },
-            set: function (target, prop, receiver) {
-                const index = fieldIndexes.get(prop);
-                if (index !== undefined) {
-                    target._getFieldAt(index).value = receiver;
-                } else {
-                    target[prop] = receiver;
-                }
-                return true;
-            }
-        });
+        return new Proxy(this, recordProxyHandler);
     }
     /** @returns {Buffer} */
     get hexData() {
