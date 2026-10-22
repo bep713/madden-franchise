@@ -22,7 +22,7 @@ function getFieldIndexes(offsetTable) {
     return indexes;
 }
 // Reading this key through the proxy returns the raw record, so internal code can skip the traps
-const RAW_RECORD = Symbol('rawRecord');
+export const RAW_RECORD = Symbol('rawRecord');
 // One handler shared by every record proxy, so constructing a record allocates no closures
 const recordProxyHandler = {
     get: function (target, prop) {

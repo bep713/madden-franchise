@@ -1,7 +1,7 @@
 import events from 'events';
 import Constants from './Constants.js';
 import utilService from './services/utilService.js';
-import FranchiseFileRecord from './FranchiseFileRecord.js';
+import FranchiseFileRecord, { RAW_RECORD } from './FranchiseFileRecord.js';
 import FranchiseFileTable2Field from './FranchiseFileTable2Field.js';
 import FranchiseFileTable3Field from './FranchiseFileTable3Field.js';
 const EventEmitter = events.EventEmitter;
@@ -483,8 +483,7 @@ class FranchiseFileTable extends EventEmitter {
                     offsetTableToUse,
                     this
                 );
-                // Records were just sliced from this.data, so the empty list can be read from it directly
-                this.emptyRecords = this._parseEmptyRecords(true);
+                this.emptyRecords = this._parseEmptyRecords();
                 if (this.isArray) {
                     this.records.forEach((record, index) => {
                         record.arraySize = this.arraySizes[index];
@@ -514,30 +513,20 @@ class FranchiseFileTable extends EventEmitter {
             }
         });
     }
-    /**
-     * @param {boolean} [fromTableData] read the next pointers from this.data instead of each record's buffer.
-     * Only valid when the record buffers match this.data (right after reading the records).
-     * @returns {Map<EmptyRecordEntry>}
-     */
-    _parseEmptyRecords(fromTableData = false) {
+    /** @returns {Map<EmptyRecordEntry>} */
+    _parseEmptyRecords() {
         let emptyRecords = new Map();
         const firstEmptyRecord = this.header.nextRecordToUse;
         let previousEmptyRecordIndex = null;
         let currentEmptyRecordIndex = firstEmptyRecord;
         if (firstEmptyRecord !== this.header.recordCapacity) {
             while (currentEmptyRecordIndex !== this.header.recordCapacity) {
-                // Out-of-range indexes take the record path so they fail the same way
-                let nextEmptyRecordIndex =
-                    fromTableData &&
-                    currentEmptyRecordIndex < this.records.length
-                        ? this.data.readUInt32BE(
-                              this.header.table1StartIndex +
-                                  currentEmptyRecordIndex *
-                                      this.header.record1Size
-                          )
-                        : this.records[currentEmptyRecordIndex].data.readUInt32BE(
-                              0
-                          );
+                // Read the raw record's buffer to skip the proxy traps (stubs without one use .data).
+                // Out-of-range indexes still throw on the missing record.
+                const record = this.records[currentEmptyRecordIndex];
+                const rawRecord = record[RAW_RECORD];
+                const recordData = rawRecord ? rawRecord._data : record.data;
+                let nextEmptyRecordIndex = recordData.readUInt32BE(0);
                 emptyRecords.set(currentEmptyRecordIndex, {
                     previous: previousEmptyRecordIndex,
                     next: nextEmptyRecordIndex
@@ -614,9 +603,6 @@ class FranchiseFileTable extends EventEmitter {
         records.forEach((record) => {
             table2Indexes.forEach((index) => {
                 const field = record._getFieldAt(index);
-                if (!field) {
-                    return;
-                }
                 field.secondTableField.unformattedValue =
                     that.strategyBase.table2Field.getInitialUnformattedValue(
                         field,
@@ -653,9 +639,6 @@ class FranchiseFileTable extends EventEmitter {
 
             table3Indexes.forEach((index) => {
                 const field = record._getFieldAt(index);
-                if (!field) {
-                    return;
-                }
                 field.thirdTableField.unformattedValue =
                     that.strategyBase.table3Field.getInitialUnformattedValue(
                         field,
@@ -735,13 +718,17 @@ class FranchiseFileTable extends EventEmitter {
                         // if (referenceData.tableId !== 0 || referenceData.rowNumber > this.header.recordCapacity) {
                         // if the changed field isn't included in the first 32 bits, zero out the first 32 bits.
                         // Otherwise, it's not necessary to zero out.
-                        const changedFieldsInFirst4Bytes =
-                            object.fieldsArray.filter((field) => {
-                                return (
-                                    field.isChanged &&
-                                    field.offset.indexOffset < 32
-                                );
-                            });
+                        // Only created fields can be changed or hold cached values, so skip the rest
+                        // to keep the record's fields lazy.
+                        const changedFieldsInFirst4Bytes = [];
+                        object._forEachCreatedField((field) => {
+                            if (
+                                field.isChanged &&
+                                field.offset.indexOffset < 32
+                            ) {
+                                changedFieldsInFirst4Bytes.push(field);
+                            }
+                        });
                         if (
                             this._settings.autoUnempty &&
                             changedFieldsInFirst4Bytes.length === 0
@@ -749,12 +736,10 @@ class FranchiseFileTable extends EventEmitter {
                             // set first 4 bytes to 0
                             this._changeRecordBuffers(object.index, 0);
                             // invalidate the cached values since we set the buffer directly
-                            const fieldsInFirst4Bytes =
-                                object.fieldsArray.filter((field) => {
-                                    return field.offset.indexOffset < 32;
-                                });
-                            fieldsInFirst4Bytes.forEach((field) => {
-                                field.clearCachedValues();
+                            object._forEachCreatedField((field) => {
+                                if (field.offset.indexOffset < 32) {
+                                    field.clearCachedValues();
+                                }
                             });
                         }
                         // If autoUnempty is disabled, only un-empty the row if a field in the first 4 bytes changed.
