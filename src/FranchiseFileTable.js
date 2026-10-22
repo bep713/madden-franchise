@@ -1,7 +1,7 @@
 import events from 'events';
 import Constants from './Constants.js';
 import utilService from './services/utilService.js';
-import FranchiseFileRecord from './FranchiseFileRecord.js';
+import FranchiseFileRecord, { RAW_RECORD } from './FranchiseFileRecord.js';
 import FranchiseFileTable2Field from './FranchiseFileTable2Field.js';
 import FranchiseFileTable3Field from './FranchiseFileTable3Field.js';
 const EventEmitter = events.EventEmitter;
@@ -484,13 +484,13 @@ class FranchiseFileTable extends EventEmitter {
                     this
                 );
                 this.emptyRecords = this._parseEmptyRecords();
-                this.records.forEach((record, index) => {
-                    if (this.isArray) {
+                if (this.isArray) {
+                    this.records.forEach((record, index) => {
                         record.arraySize = this.arraySizes[index];
-                    }
-                    if (this.emptyRecords.get(index)) {
-                        record.isEmpty = true;
-                    }
+                    });
+                }
+                this.emptyRecords.forEach((_entry, index) => {
+                    this.records[index].isEmpty = true;
                 });
                 if (this.header.hasSecondTable) {
                     this._parseTable2Values(
@@ -521,9 +521,12 @@ class FranchiseFileTable extends EventEmitter {
         let currentEmptyRecordIndex = firstEmptyRecord;
         if (firstEmptyRecord !== this.header.recordCapacity) {
             while (currentEmptyRecordIndex !== this.header.recordCapacity) {
-                // let nextEmptyRecordIndex = this.data.readUInt32BE(this.header.table1StartIndex + (currentEmptyRecordIndex * sizeOfEachRecord));
-                let nextEmptyRecordIndex =
-                    this.records[currentEmptyRecordIndex].data.readUInt32BE(0);
+                // Read the raw record's buffer to skip the proxy traps (stubs without one use .data).
+                // Out-of-range indexes still throw on the missing record.
+                const record = this.records[currentEmptyRecordIndex];
+                const rawRecord = record[RAW_RECORD];
+                const recordData = rawRecord ? rawRecord._data : record.data;
+                let nextEmptyRecordIndex = recordData.readUInt32BE(0);
                 emptyRecords.set(currentEmptyRecordIndex, {
                     previous: previousEmptyRecordIndex,
                     next: nextEmptyRecordIndex
@@ -591,13 +594,15 @@ class FranchiseFileTable extends EventEmitter {
     _parseTable2Values(data, header, records) {
         const that = this;
         const secondTableData = data.slice(header.table2StartIndex);
+        // Field indexes match loadedOffsets order, so compute them once per table.
+        // Only the table2 fields are created, the rest of the record stays lazy.
+        const table2Indexes = this._getFieldIndexes('valueInSecondTable');
+        if (table2Indexes.length === 0) {
+            return;
+        }
         records.forEach((record) => {
-            const fieldsReferencingSecondTable = record.fieldsArray.filter(
-                (field) => {
-                    return field.secondTableField;
-                }
-            );
-            fieldsReferencingSecondTable.forEach((field) => {
+            table2Indexes.forEach((index) => {
+                const field = record._getFieldAt(index);
                 field.secondTableField.unformattedValue =
                     that.strategyBase.table2Field.getInitialUnformattedValue(
                         field,
@@ -613,28 +618,33 @@ class FranchiseFileTable extends EventEmitter {
     _parseTable3Values(data, header, records) {
         const that = this;
         const thirdTableData = data.slice(header.table3StartIndex);
+        const table3Indexes = this._getFieldIndexes('valueInThirdTable');
+        if (table3Indexes.length === 0) {
+            return;
+        }
+        const hasOverflow = this.loadedOffsets.some(
+            (offset) => offset.name === 'Overflow'
+        );
+        // Strategies only read the context, so one object can be shared by every field in the table
+        const strategyContext = {
+            gameYear: that._gameYear,
+            gameType: that._gameType,
+            tableName: that.name
+        };
         records.forEach((record) => {
-            const fieldsReferencingThirdTable = record.fieldsArray.filter(
-                (field) => {
-                    return field.thirdTableField;
-                }
-            );
-
             // Check if this record has an overflow record reference
-            const overflowRecord = utilService.getTable3OverflowRecord(record);
+            const overflowRecord = hasOverflow
+                ? utilService.getTable3OverflowRecord(record)
+                : null;
 
-            fieldsReferencingThirdTable.forEach((field) => {
-                const strategyContext = {
-                    gameYear: that._gameYear,
-                    gameType: that._gameType,
-                    tableName: that.name
-                };
+            table3Indexes.forEach((index) => {
+                const field = record._getFieldAt(index);
                 field.thirdTableField.unformattedValue =
                     that.strategyBase.table3Field.getInitialUnformattedValue(
                         field,
                         thirdTableData,
                         overflowRecord
-                            ? overflowRecord.fields[field.key]
+                            ? overflowRecord.getFieldByKey(field.key)
                             : null,
                         strategyContext
                     );
@@ -644,6 +654,16 @@ class FranchiseFileTable extends EventEmitter {
                 field.thirdTableField.parent = that;
             });
         });
+    }
+    /** @param {'valueInSecondTable'|'valueInThirdTable'} flag @returns {Array<number>} */
+    _getFieldIndexes(flag) {
+        const indexes = [];
+        this.loadedOffsets.forEach((offset, index) => {
+            if (offset[flag]) {
+                indexes.push(index);
+            }
+        });
+        return indexes;
     }
     /** @param {number} index @param {number} emptyRecordReference */
     _changeRecordBuffers(index, emptyRecordReference) {
@@ -698,13 +718,17 @@ class FranchiseFileTable extends EventEmitter {
                         // if (referenceData.tableId !== 0 || referenceData.rowNumber > this.header.recordCapacity) {
                         // if the changed field isn't included in the first 32 bits, zero out the first 32 bits.
                         // Otherwise, it's not necessary to zero out.
-                        const changedFieldsInFirst4Bytes =
-                            object.fieldsArray.filter((field) => {
-                                return (
-                                    field.isChanged &&
-                                    field.offset.indexOffset < 32
-                                );
-                            });
+                        // Only created fields can be changed or hold cached values, so skip the rest
+                        // to keep the record's fields lazy.
+                        const changedFieldsInFirst4Bytes = [];
+                        object._forEachCreatedField((field) => {
+                            if (
+                                field.isChanged &&
+                                field.offset.indexOffset < 32
+                            ) {
+                                changedFieldsInFirst4Bytes.push(field);
+                            }
+                        });
                         if (
                             this._settings.autoUnempty &&
                             changedFieldsInFirst4Bytes.length === 0
@@ -712,12 +736,10 @@ class FranchiseFileTable extends EventEmitter {
                             // set first 4 bytes to 0
                             this._changeRecordBuffers(object.index, 0);
                             // invalidate the cached values since we set the buffer directly
-                            const fieldsInFirst4Bytes =
-                                object.fieldsArray.filter((field) => {
-                                    return field.offset.indexOffset < 32;
-                                });
-                            fieldsInFirst4Bytes.forEach((field) => {
-                                field.clearCachedValues();
+                            object._forEachCreatedField((field) => {
+                                if (field.offset.indexOffset < 32) {
+                                    field.clearCachedValues();
+                                }
                             });
                         }
                         // If autoUnempty is disabled, only un-empty the row if a field in the first 4 bytes changed.

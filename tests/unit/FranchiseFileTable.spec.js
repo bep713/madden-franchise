@@ -3,8 +3,10 @@ import sinon from 'sinon';
 import { expect } from 'chai';
 import quibble from 'quibble';
 
+// _getFieldAt returns just what the table2/3 passes touch, the strategies are stubbed too
 const RecordStub = sinon.stub().callsFake(() => ({
-    fieldsArray: []
+    fieldsArray: [],
+    _getFieldAt: () => ({ secondTableField: {}, thirdTableField: {} })
 }));
 
 let FranchiseFileTable;
@@ -65,7 +67,11 @@ describe('FranchiseFileTable unit tests', () => {
     let playerTable, tunableDataTable;
 
     beforeEach(async () => {
-        await quibble.esm('../../src/FranchiseFileRecord.js', {}, RecordStub);
+        await quibble.esm(
+            '../../src/FranchiseFileRecord.js',
+            { RAW_RECORD: Symbol('rawRecord') },
+            RecordStub
+        );
         FranchiseFileTable = (await import('../../src/FranchiseFileTable.js'))
             .default;
 
