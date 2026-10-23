@@ -67,4 +67,4 @@ custom-scripts/
 pack/
 
 # compiled output
-dist/index*
+dist/

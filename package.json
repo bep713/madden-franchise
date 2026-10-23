@@ -1,6 +1,6 @@
 {
   "name": "madden-franchise",
-  "version": "4.4.0",
+  "version": "4.4.1",
   "description": "Tools to read and parse a madden franchise file",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
@@ -23,8 +23,9 @@
   "files": [
     "dist/index.cjs",
     "dist/index.mjs",
-    "dist/*.d.ts",
-    "dist/*.map",
+    "dist/index.*.map",
+    "dist/**/*.d.ts",
+    "dist/**/*.d.ts.map",
     "data/**/*"
   ],
   "author": "matthewpanetta",
