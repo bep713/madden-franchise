@@ -7,11 +7,11 @@ import zlib from 'zlib';
 import quibble from 'quibble';
 
 const zlibSpy = {
-    inflateSync: sinon.spy((data) => {
-        return zlib.inflateSync(data);
+    inflateSync: sinon.spy((data, opts) => {
+        return zlib.inflateSync(data, opts);
     }),
-    gunzipSync: sinon.spy((data) => {
-        return zlib.gunzipSync(data);
+    gunzipSync: sinon.spy((data, opts) => {
+        return zlib.gunzipSync(data, opts);
     })
 };
 
@@ -300,6 +300,9 @@ describe('Franchise File unit tests', () => {
             expect(zlibSpy.inflateSync.args[0][0].slice(0, 2)).to.eql(
                 Buffer.from([0x78, 0x9c])
             );
+            expect(zlibSpy.inflateSync.args[0][1]).to.eql({
+                chunkSize: 1048576
+            });
         });
 
         it('Decompressed M20', () => {

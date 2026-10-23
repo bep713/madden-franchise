@@ -490,21 +490,25 @@ function unpackFile(data, type) {
     if (type.format === Constants.FORMAT.FRANCHISE) {
         offset = COMPRESSED_DATA_OFFSET;
     }
-    return zlib.inflateSync(data.slice(offset));
+    return zlib.inflateSync(data.slice(offset), {
+        chunkSize: Constants.ZLIB_CHUNK_SIZE
+    });
 }
 
 function _packFile(data, options) {
     return new Promise((resolve, reject) => {
         if (options && options.sync) {
             const newData = zlib.deflateSync(data, {
-                windowBits: 15
+                windowBits: 15,
+                chunkSize: Constants.ZLIB_CHUNK_SIZE
             });
             resolve(newData);
         } else {
             zlib.deflate(
                 data,
                 {
-                    windowBits: 15
+                    windowBits: 15,
+                    chunkSize: Constants.ZLIB_CHUNK_SIZE
                 },
                 function (err, newData) {
                     if (err) reject(err);

@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import zlib from 'zlib';
+import { ZLIB_CHUNK_SIZE } from './Constants.js';
 import FranchiseEnum from './FranchiseEnum.js';
 import events from 'events';
 import schemaGenerator from './services/schemaGenerator.js';
@@ -68,7 +69,9 @@ class FranchiseSchema extends EventEmitter {
     }
     evaluateSchemaGzip() {
         const schemaFile = fs.readFileSync(this.path);
-        const uncompressed = zlib.gunzipSync(schemaFile);
+        const uncompressed = zlib.gunzipSync(schemaFile, {
+            chunkSize: ZLIB_CHUNK_SIZE
+        });
         this.schema = JSON.parse(uncompressed.toString());
         this.meta = this.schema.meta;
         this.schemas = this.schema.schemas;
